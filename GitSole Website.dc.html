@@ -1,0 +1,1392 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Instrument+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<script src="./image-slot.js"></script>
+<style>
+  body { margin:0; background:#DAD5CB; }
+  a { color:#8C2F23; text-decoration:none; }
+  a:hover { color:#16130F; }
+</style>
+</helmet>
+
+<div style="display:flex;flex-direction:column;gap:110px;padding:64px 64px 140px;font-family:'Instrument Sans',sans-serif;background:#DAD5CB">
+
+  <div style="display:flex;flex-direction:column;gap:14px;max-width:900px">
+    <div style="font-family:'DM Mono',monospace;font-size:12px;letter-spacing:0.16em;text-transform:uppercase;color:#6E6558">Gitsole · Website design · 12 screens · desktop + mobile</div>
+    <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:64px;line-height:0.95;letter-spacing:-0.04em;color:#16130F">We don't sell everything.<br />We select what is worth buying.</div>
+    <div style="font-size:16px;line-height:1.55;color:#4A443B;max-width:620px">Product photography is stand-in stock imagery — drag your own onto any image to replace it. Condition is shown everywhere as a score plus a worded tier. Prices in PKR, cash on delivery, WhatsApp as the backup route.</div>
+  </div>
+
+  <!-- 01 HOME -->
+  <section data-screen-label="01 Home" style="display:flex;gap:40px;align-items:flex-start">
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="font-family:'DM Mono',monospace;font-size:12px;letter-spacing:0.14em;text-transform:uppercase;color:#16130F">01 · Home — Desktop</div>
+      <div data-artboard="1" style="width:1440px;background:#F1EDE4;border:1px solid rgba(22,19,15,0.18);overflow:hidden">
+        <dc-import name="GitsoleHeader" hint-size="100%,110px"></dc-import>
+
+        <div style="display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr); min-height:560px">
+          <div style="padding:76px 56px 56px;display:flex;flex-direction:column;justify-content:space-between;border-right:1px solid rgba(22,19,15,0.14)">
+            <div style="display:flex;flex-direction:column;gap:24px">
+              <div style="display:inline-flex;align-self:flex-start;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:#8C2F23;border:1px solid #8C2F23;padding:6px 12px;border-radius:999px">Quality over quantity</div>
+              <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:88px;line-height:0.88;letter-spacing:-0.045em;color:#16130F">Branded<br />thrift shoes,<br />honestly<br />priced.</div>
+              <div style="font-size:17px;line-height:1.6;color:#4A443B;max-width:430px">Every pair on Gitsole is hand-picked, inspected and graded before it is listed. One pair, one size, one price. When it's gone, it's gone.</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:14px">
+              <div style="background:#16130F;color:#F1EDE4;padding:16px 30px;font-size:15px;font-weight:600">Shop this week's drop</div>
+              <div style="border:1px solid #16130F;color:#16130F;padding:16px 30px;font-size:15px;font-weight:600">How we grade condition</div>
+            </div>
+          </div>
+          <div style="position:relative;background:#E6E1D6;min-height:560px"><image-slot id="gs-hero-home" shape="rect" src="https://images.pexels.com/photos/11513443/pexels-photo-11513443.jpeg?auto=compress&cs=tinysrgb&w=800" placeholder="Hero photo — full-bleed pair on plain backdrop"></image-slot></div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid rgba(22,19,15,0.14);border-bottom:1px solid rgba(22,19,15,0.14)">
+          <div style="padding:26px 28px;border-right:1px solid rgba(22,19,15,0.14)">
+            <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:17px;color:#16130F">Free home delivery</div>
+            <div style="font-size:13.5px;color:#6E6558;margin-top:5px">All over Pakistan. No hidden charge at checkout.</div>
+          </div>
+          <div style="padding:26px 28px;border-right:1px solid rgba(22,19,15,0.14)">
+            <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:17px;color:#16130F">Cash on delivery</div>
+            <div style="font-size:13.5px;color:#6E6558;margin-top:5px">Pay when the parcel reaches your door.</div>
+          </div>
+          <div style="padding:26px 28px;border-right:1px solid rgba(22,19,15,0.14)">
+            <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:17px;color:#16130F">Graded condition</div>
+            <div style="font-size:13.5px;color:#6E6558;margin-top:5px">A score out of 10 and real photos of the flaws.</div>
+          </div>
+          <div style="padding:26px 28px">
+            <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:17px;color:#16130F">One pair only</div>
+            <div style="font-size:13.5px;color:#6E6558;margin-top:5px">Single-piece stock. No restock on most models.</div>
+          </div>
+        </div>
+
+        <div style="padding:56px">
+          <div style="display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:28px">
+            <div>
+              <div style="font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:#8C2F23">Just landed</div>
+              <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:38px;letter-spacing:-0.03em;color:#16130F;margin-top:6px">This week's selection</div>
+            </div>
+            <div style="font-size:14px;font-weight:600;color:#16130F;border-bottom:1px solid #16130F;padding-bottom:2px">View all 48 pairs</div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:22px">
+            <sc-for list="{{ featured }}" as="p" hint-placeholder-count="4">
+              <div data-reveal="1" style="display:flex;flex-direction:column;gap:12px;background:#FAF8F3;border:1px solid rgba(22,19,15,0.12);padding:14px;transition:border-color .3s ease,transform .3s ease" style-hover="border-color:rgba(22,19,15,0.4);transform:translateY(-3px)">
+                <div style="position:relative;aspect-ratio:1/1;background:#E6E1D6;overflow:hidden">
+                  <div style="position:absolute;inset:0"><image-slot id="gs-home-{{ $index }}" shape="rect" src="{{ p.img }}" placeholder="Product photo"></image-slot></div>
+
+                  <div style="position:absolute;inset:0;opacity:0;transition:opacity .35s ease" style-hover="opacity:1">
+                    <div style="position:absolute;inset:0;background:#E6E1D6"><image-slot id="gs-alt-home-{{ $index }}" shape="rect" src="{{ p.alt }}"></image-slot></div>
+                    <div style="position:absolute;left:0;right:0;bottom:0;background:#16130F;color:#F1EDE4;padding:13px;text-align:center;font-family:'Instrument Sans',sans-serif;font-size:13.5px;font-weight:600">Add to cart</div>
+                  </div>
+                  <div style="position:absolute;top:10px;left:10px;background:#16130F;color:#F1EDE4;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.08em;text-transform:uppercase;padding:4px 8px;pointer-events:none">{{ p.score }} · {{ p.tier }}</div>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:3px">
+                  <div style="font-family:'DM Mono',monospace;font-size:10.5px;letter-spacing:0.12em;text-transform:uppercase;color:#8C2F23">{{ p.brand }}</div>
+                  <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:600;font-size:16px;line-height:1.2;color:#16130F">{{ p.model }}</div>
+                  <div style="font-family:'DM Mono',monospace;font-size:11px;color:#6E6558">UK {{ p.size }} · 1 of 1 · {{ p.listed }}</div>
+                </div>
+                <div style="display:flex;align-items:baseline;gap:9px;margin-top:2px">
+                  <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:19px;color:#16130F">{{ p.price }}</div>
+                  <div style="font-family:'DM Mono',monospace;font-size:11.5px;color:#8B8377;text-decoration:line-through">{{ p.was }}</div>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+
+        <div style="background:#16130F;color:#F1EDE4;padding:64px 56px;display:grid;grid-template-columns:1fr 1fr;gap:60px">
+          <div>
+            <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:44px;line-height:1.02;letter-spacing:-0.035em">Quantity se zyada quality.</div>
+            <div style="font-size:16px;line-height:1.6;color:rgba(241,237,228,0.7);margin-top:18px;max-width:440px">We would rather list forty pairs we believe in than four hundred we don't. Every pair is checked for condition, cleanliness, wearability and value before it earns a place here.</div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:26px 40px;align-content:center">
+            <div style="border-top:1px solid rgba(241,237,228,0.25);padding-top:12px"><div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:15px">Condition</div><div style="font-size:13.5px;color:rgba(241,237,228,0.6);margin-top:4px">Graded and photographed, flaws included.</div></div>
+            <div style="border-top:1px solid rgba(241,237,228,0.25);padding-top:12px"><div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:15px">Cleanliness</div><div style="font-size:13.5px;color:rgba(241,237,228,0.6);margin-top:4px">Cleaned and prepared before dispatch.</div></div>
+            <div style="border-top:1px solid rgba(241,237,228,0.25);padding-top:12px"><div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:15px">Wearability</div><div style="font-size:13.5px;color:rgba(241,237,228,0.6);margin-top:4px">Sole, upper and comfort checked by hand.</div></div>
+            <div style="border-top:1px solid rgba(241,237,228,0.25);padding-top:12px"><div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:15px">Value</div><div style="font-size:13.5px;color:rgba(241,237,228,0.6);margin-top:4px">Priced against brand, model and real retail.</div></div>
+          </div>
+        </div>
+
+        <div style="padding:56px;border-bottom:1px solid rgba(22,19,15,0.14)">
+          <div style="font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:#8C2F23;margin-bottom:20px">Shop by brand</div>
+          <div style="display:flex;flex-wrap:wrap;gap:10px">
+            <sc-for list="{{ brands }}" as="b" hint-placeholder-count="12">
+              <div style="border:1px solid rgba(22,19,15,0.22);padding:11px 20px;font-size:14px;font-weight:500;color:#16130F">{{ b }}</div>
+            </sc-for>
+          </div>
+        </div>
+
+        <div style="padding:52px 56px;display:grid;grid-template-columns:1.2fr 1fr 1fr 1fr;gap:44px;background:#F1EDE4">
+          <div>
+            <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:26px;letter-spacing:-0.03em;color:#16130F">GITSOLE</div>
+            <div style="font-size:13.5px;line-height:1.6;color:#6E6558;margin-top:10px;max-width:280px">Curated branded thrift footwear. Free home delivery all over Pakistan.</div>
+            <div style="display:inline-flex;align-items:center;gap:8px;margin-top:18px;background:#16130F;color:#F1EDE4;padding:11px 18px;font-size:13.5px;font-weight:600">Order on WhatsApp</div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:9px;font-size:13.5px;color:#4A443B"><div style="font-family:'DM Mono',monospace;font-size:10.5px;letter-spacing:0.12em;text-transform:uppercase;color:#8B8377;margin-bottom:4px">Shop</div><div>All shoes</div><div>New in</div><div>Under PKR 5,000</div><div>Sneakers</div><div>Boots</div></div>
+          <div style="display:flex;flex-direction:column;gap:9px;font-size:13.5px;color:#4A443B"><div style="font-family:'DM Mono',monospace;font-size:10.5px;letter-spacing:0.12em;text-transform:uppercase;color:#8B8377;margin-bottom:4px">Help</div><div>Condition guide</div><div>Delivery</div><div>Track order</div><div>FAQ</div><div>Contact</div></div>
+          <div style="display:flex;flex-direction:column;gap:9px;font-size:13.5px;color:#4A443B"><div style="font-family:'DM Mono',monospace;font-size:10.5px;letter-spacing:0.12em;text-transform:uppercase;color:#8B8377;margin-bottom:4px">Follow</div><div>Instagram</div><div>TikTok</div><div>Facebook</div><div>WhatsApp</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="font-family:'DM Mono',monospace;font-size:12px;letter-spacing:0.14em;text-transform:uppercase;color:#16130F">01 · Home — Mobile</div>
+      <div style="width:390px;background:#F1EDE4;border:1px solid rgba(22,19,15,0.18);border-radius:26px;overflow:hidden">
+        <dc-import name="GitsoleHeader" mobile="{{ yes }}" hint-size="100%,80px"></dc-import>
+        <div style="padding:26px 18px 22px">
+          <div style="display:inline-flex;font-family:'DM Mono',monospace;font-size:9.5px;letter-spacing:0.14em;text-transform:uppercase;color:#8C2F23;border:1px solid #8C2F23;padding:5px 10px;border-radius:999px">Quality over quantity</div>
+          <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:44px;line-height:0.9;letter-spacing:-0.04em;color:#16130F;margin-top:16px">Branded thrift shoes, honestly priced.</div>
+          <div style="font-size:14.5px;line-height:1.55;color:#4A443B;margin-top:14px">Hand-picked, inspected and graded. One pair, one size. When it's gone, it's gone.</div>
+          <div style="display:flex;flex-direction:column;gap:9px;margin-top:20px">
+            <div style="background:#16130F;color:#F1EDE4;padding:15px;text-align:center;font-size:15px;font-weight:600">Shop this week's drop</div>
+            <div style="border:1px solid #16130F;color:#16130F;padding:15px;text-align:center;font-size:15px;font-weight:600">How we grade condition</div>
+          </div>
+        </div>
+        <div style="height:230px;background:#E6E1D6;position:relative"><image-slot id="gs-hero-home-m" shape="rect" src="https://images.pexels.com/photos/11324518/pexels-photo-11324518.jpeg?auto=compress&cs=tinysrgb&w=800" placeholder="Hero photo"></image-slot></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid rgba(22,19,15,0.14)">
+          <div style="padding:16px 18px;border-right:1px solid rgba(22,19,15,0.14);border-bottom:1px solid rgba(22,19,15,0.14)"><div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:14px;color:#16130F">Free delivery</div><div style="font-size:12px;color:#6E6558;margin-top:3px">All over Pakistan</div></div>
+          <div style="padding:16px 18px;border-bottom:1px solid rgba(22,19,15,0.14)"><div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:14px;color:#16130F">Cash on delivery</div><div style="font-size:12px;color:#6E6558;margin-top:3px">Pay at your door</div></div>
+          <div style="padding:16px 18px;border-right:1px solid rgba(22,19,15,0.14)"><div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:14px;color:#16130F">Graded condition</div><div style="font-size:12px;color:#6E6558;margin-top:3px">Score out of 10</div></div>
+          <div style="padding:16px 18px"><div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:14px;color:#16130F">One pair only</div><div style="font-size:12px;color:#6E6558;margin-top:3px">No restock</div></div>
+        </div>
+        <div style="padding:24px 18px">
+          <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:16px">
+            <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:24px;letter-spacing:-0.03em;color:#16130F">Just landed</div>
+            <div style="font-size:13px;font-weight:600;color:#8C2F23">View all</div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+            <sc-for list="{{ featuredMobile }}" as="p" hint-placeholder-count="4">
+              <div data-reveal="1" style="display:flex;flex-direction:column;gap:9px;background:#FAF8F3;border:1px solid rgba(22,19,15,0.12);padding:10px">
+                <div style="position:relative;aspect-ratio:1/1;background:#E6E1D6">
+                  <div style="position:absolute;inset:0"><image-slot id="gs-homem-{{ $index }}" shape="rect" src="{{ p.img }}" placeholder="Photo"></image-slot></div>
+                  <div style="position:absolute;top:7px;left:7px;background:#16130F;color:#F1EDE4;font-family:'DM Mono',monospace;font-size:9px;padding:3px 6px">{{ p.score }}</div>
+                </div>
+                <div style="font-family:'DM Mono',monospace;font-size:9.5px;letter-spacing:0.1em;text-transform:uppercase;color:#8C2F23">{{ p.brand }}</div>
+                <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:600;font-size:13.5px;line-height:1.2;color:#16130F">{{ p.model }}</div>
+                <div style="font-family:'DM Mono',monospace;font-size:10px;color:#6E6558">UK {{ p.size }}</div>
+                <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:16px;color:#16130F">{{ p.price }}</div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+        <div style="background:#16130F;color:#F1EDE4;padding:34px 18px">
+          <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:30px;line-height:1.02;letter-spacing:-0.035em">Quantity se zyada quality.</div>
+          <div style="font-size:14px;line-height:1.6;color:rgba(241,237,228,0.7);margin-top:12px">Forty pairs we believe in, not four hundred we don't.</div>
+        </div>
+        <div style="padding:22px 18px 30px;display:flex;flex-direction:column;gap:14px">
+          <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:22px;color:#16130F">GITSOLE</div>
+          <div style="font-size:13px;color:#6E6558">Curated branded thrift footwear. Free home delivery all over Pakistan.</div>
+          <div style="background:#16130F;color:#F1EDE4;padding:14px;text-align:center;font-size:14px;font-weight:600">Order on WhatsApp</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 02 SHOP -->
+  <section data-screen-label="02 Shop" style="display:flex;gap:40px;align-items:flex-start">
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="font-family:'DM Mono',monospace;font-size:12px;letter-spacing:0.14em;text-transform:uppercase;color:#16130F">02 · Shop all — Desktop</div>
+      <div data-artboard="1" style="width:1440px;background:#F1EDE4;border:1px solid rgba(22,19,15,0.18);overflow:hidden">
+        <dc-import name="GitsoleHeader" hint-size="100%,110px"></dc-import>
+        <div style="padding:40px 40px 22px;border-bottom:1px solid rgba(22,19,15,0.14);display:flex;align-items:flex-end;justify-content:space-between">
+          <div>
+            <div style="font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:#6E6558">Home / Shop all</div>
+            <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:46px;letter-spacing:-0.035em;color:#16130F;margin-top:8px">All shoes <span style="font-family:'DM Mono',monospace;font-size:16px;font-weight:400;color:#8B8377;letter-spacing:0">48 pairs available</span></div>
+          </div>
+          <div style="display:flex;gap:10px;font-size:13.5px">
+            <div style="border:1px solid rgba(22,19,15,0.22);padding:10px 16px;color:#16130F">Sort: Newest first</div>
+            <div style="border:1px solid rgba(22,19,15,0.22);padding:10px 16px;color:#16130F">Grid</div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:270px 1fr">
+          <div style="border-right:1px solid rgba(22,19,15,0.14);padding:28px 26px;display:flex;flex-direction:column;gap:26px">
+            <div>
+              <div style="font-family:'DM Mono',monospace;font-size:10.5px;letter-spacing:0.14em;text-transform:uppercase;color:#8B8377;margin-bottom:12px">Brand</div>
+              <div style="display:flex;flex-direction:column;gap:9px;font-size:14px;color:#16130F">
+                <div style="display:flex;align-items:center;gap:9px"><div style="width:14px;height:14px;border:1px solid #16130F;background:#16130F"></div>Nike <span style="color:#8B8377;font-family:'DM Mono',monospace;font-size:11px">12</span></div>
+                <div style="display:flex;align-items:center;gap:9px"><div style="width:14px;height:14px;border:1px solid rgba(22,19,15,0.35)"></div>Adidas <span style="color:#8B8377;font-family:'DM Mono',monospace;font-size:11px">9</span></div>
+                <div style="display:flex;align-items:center;gap:9px"><div style="width:14px;height:14px;border:1px solid rgba(22,19,15,0.35)"></div>New Balance <span style="color:#8B8377;font-family:'DM Mono',monospace;font-size:11px">7</span></div>
+                <div style="display:flex;align-items:center;gap:9px"><div style="width:14px;height:14px;border:1px solid rgba(22,19,15,0.35)"></div>Jordan <span style="color:#8B8377;font-family:'DM Mono',monospace;font-size:11px">5</span></div>
+                <div style="display:flex;align-items:center;gap:9px"><div style="width:14px;height:14px;border:1px solid rgba(22,19,15,0.35)"></div>Converse <span style="color:#8B8377;font-family:'DM Mono',monospace;font-size:11px">4</span></div>
+                <div style="color:#8C2F23;font-size:13px;font-weight:600;margin-top:2px">+ 8 more brands</div>
+              </div>
+            </div>
+            <div>
+              <div style="font-family:'DM Mono',monospace;font-size:10.5px;letter-spacing:0.14em;text-transform:uppercase;color:#8B8377;margin-bottom:12px">Size (UK)</div>
+              <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:7px">
+                <sc-for list="{{ sizes }}" as="s" hint-placeholder-count="12">
+                  <div style="border:1px solid rgba(22,19,15,0.22);padding:8px 0;text-align:center;font-family:'DM Mono',monospace;font-size:12px;color:#16130F">{{ s }}</div>
+                </sc-for>
+              </div>
+            </div>
+            <div>
+              <div style="font-family:'DM Mono',monospace;font-size:10.5px;letter-spacing:0.14em;text-transform:uppercase;color:#8B8377;margin-bottom:12px">Condition</div>
+              <div style="display:flex;flex-direction:column;gap:9px;font-size:14px;color:#16130F">
+                <div style="display:flex;align-items:center;gap:9px"><div style="width:14px;height:14px;border:1px solid rgba(22,19,15,0.35)"></div>Like new · 9.5–10</div>
+                <div style="display:flex;align-items:center;gap:9px"><div style="width:14px;height:14px;border:1px solid rgba(22,19,15,0.35)"></div>Excellent · 8.5–9</div>
+                <div style="display:flex;align-items:center;gap:9px"><div style="width:14px;height:14px;border:1px solid rgba(22,19,15,0.35)"></div>Great · 7.5–8</div>
+                <div style="display:flex;align-items:center;gap:9px"><div style="width:14px;height:14px;border:1px solid rgba(22,19,15,0.35)"></div>Good · 6.5–7</div>
+              </div>
+            </div>
+            <div>
+              <div style="font-family:'DM Mono',monospace;font-size:10.5px;letter-spacing:0.14em;text-transform:uppercase;color:#8B8377;margin-bottom:12px">Price (PKR)</div>
+              <div style="height:2px;background:rgba(22,19,15,0.18);position:relative;margin:14px 4px 10px">
+                <div style="position:absolute;left:8%;right:32%;height:2px;background:#8C2F23"></div>
+                <div style="position:absolute;left:8%;top:-5px;width:12px;height:12px;border-radius:6px;background:#16130F"></div>
+                <div style="position:absolute;right:32%;top:-5px;width:12px;height:12px;border-radius:6px;background:#16130F"></div>
+              </div>
+              <div style="display:flex;justify-content:space-between;font-family:'DM Mono',monospace;font-size:11.5px;color:#6E6558"><span>2,500</span><span>12,000</span></div>
+            </div>
+          </div>
+          <div style="padding:28px 40px 56px">
+            <div style="display:flex;gap:8px;margin-bottom:22px;align-items:center">
+              <span style="font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:#8B8377">Filters</span>
+              <div style="display:flex;align-items:center;gap:7px;background:#16130F;color:#F1EDE4;padding:6px 12px;font-size:12.5px">Nike ✕</div>
+              <div style="display:flex;align-items:center;gap:7px;background:#16130F;color:#F1EDE4;padding:6px 12px;font-size:12.5px">UK 9 ✕</div>
+              <div style="font-size:12.5px;color:#8C2F23;font-weight:600;margin-left:4px">Clear all</div>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:22px">
+              <sc-for list="{{ shopItems }}" as="p" hint-placeholder-count="9">
+                <div data-reveal="1" style="display:flex;flex-direction:column;gap:12px;background:#FAF8F3;border:1px solid rgba(22,19,15,0.12);padding:14px;transition:border-color .3s ease,transform .3s ease" style-hover="border-color:rgba(22,19,15,0.4);transform:translateY(-3px)">
+                  <div style="position:relative;aspect-ratio:1/1;background:#E6E1D6;overflow:hidden">
+                    <div style="position:absolute;inset:0"><image-slot id="gs-shop-{{ $index }}" shape="rect" src="{{ p.img }}" placeholder="Product photo"></image-slot></div>
+
+                  <div style="position:absolute;inset:0;opacity:0;transition:opacity .35s ease" style-hover="opacity:1">
+                    <div style="position:absolute;inset:0;background:#E6E1D6"><image-slot id="gs-alt-shop-{{ $index }}" shape="rect" src="{{ p.alt }}"></image-slot></div>
+                    <div style="position:absolute;left:0;right:0;bottom:0;background:#16130F;color:#F1EDE4;padding:13px;text-align:center;font-family:'Instrument Sans',sans-serif;font-size:13.5px;font-weight:600">Add to cart</div>
+                  </div>
+                    <div style="position:absolute;top:10px;left:10px;background:#16130F;color:#F1EDE4;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.08em;text-transform:uppercase;padding:4px 8px;pointer-events:none">{{ p.score }} · {{ p.tier }}</div>
+                    <div style="position:absolute;top:10px;right:10px;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:#8C2F23;background:#F1EDE4;padding:4px 8px;pointer-events:none">{{ p.flag }}</div>
+                  </div>
+                  <div style="display:flex;flex-direction:column;gap:3px">
+                    <div style="font-family:'DM Mono',monospace;font-size:10.5px;letter-spacing:0.12em;text-transform:uppercase;color:#8C2F23">{{ p.brand }}</div>
+                    <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:600;font-size:17px;line-height:1.2;color:#16130F">{{ p.model }}</div>
+                    <div style="font-family:'DM Mono',monospace;font-size:11px;color:#6E6558">UK {{ p.size }} · 1 of 1 · {{ p.listed }}</div>
+                  </div>
+                  <div style="display:flex;align-items:baseline;gap:9px">
+                    <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:20px;color:#16130F">{{ p.price }}</div>
+                    <div style="font-family:'DM Mono',monospace;font-size:11.5px;color:#8B8377;text-decoration:line-through">{{ p.was }}</div>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+            <div style="display:flex;justify-content:center;margin-top:40px"><div style="border:1px solid #16130F;padding:15px 40px;font-size:14.5px;font-weight:600;color:#16130F">Load more pairs</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="font-family:'DM Mono',monospace;font-size:12px;letter-spacing:0.14em;text-transform:uppercase;color:#16130F">02 · Shop — Mobile (filter sheet)</div>
+      <div style="width:390px;background:#F1EDE4;border:1px solid rgba(22,19,15,0.18);border-radius:26px;overflow:hidden;position:relative">
+        <dc-import name="GitsoleHeader" mobile="{{ yes }}" hint-size="100%,80px"></dc-import>
+        <div style="padding:18px;border-bottom:1px solid rgba(22,19,15,0.14)">
+          <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:30px;letter-spacing:-0.035em;color:#16130F">All shoes</div>
+          <div style="font-family:'DM Mono',monospace;font-size:11px;color:#8B8377;margin-top:4px">48 pairs available</div>
+        </div>
+        <div style="display:flex;gap:8px;padding:12px 18px;border-bottom:1px solid rgba(22,19,15,0.14);overflow:hidden">
+          <div onClick="{{ toggleSheet }}" style="background:#16130F;color:#F1EDE4;padding:9px 14px;font-size:12.5px;white-space:nowrap;cursor:pointer">Filter · 2</div>
+          <div style="border:1px solid rgba(22,19,15,0.22);padding:9px 14px;font-size:12.5px;white-space:nowrap">Newest</div>
+          <div style="border:1px solid rgba(22,19,15,0.22);padding:9px 14px;font-size:12.5px;white-space:nowrap">Under 5k</div>
+        </div>
+        <div style="padding:16px 18px;display:grid;grid-template-columns:1fr 1fr;gap:14px">
+          <sc-for list="{{ shopMobile }}" as="p" hint-placeholder-count="6">
+            <div data-reveal="1" style="display:flex;flex-direction:column;gap:8px;background:#FAF8F3;border:1px solid rgba(22,19,15,0.12);padding:10px">
+              <div style="position:relative;aspect-ratio:1/1;background:#E6E1D6">
+                <div style="position:absolute;inset:0"><image-slot id="gs-shopm-{{ $index }}" shape="rect" src="{{ p.img }}" placeholder="Photo"></image-slot></div>
+                <div style="position:absolute;top:7px;left:7px;background:#16130F;color:#F1EDE4;font-family:'DM Mono',monospace;font-size:9px;padding:3px 6px">{{ p.score }}</div>
+              </div>
+              <div style="font-family:'DM Mono',monospace;font-size:9.5px;letter-spacing:0.1em;text-transform:uppercase;color:#8C2F23">{{ p.brand }}</div>
+              <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:600;font-size:13.5px;line-height:1.2;color:#16130F">{{ p.model }}</div>
+              <div style="font-family:'DM Mono',monospace;font-size:10px;color:#6E6558">UK {{ p.size }}</div>
+              <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:16px;color:#16130F">{{ p.price }}</div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="background:{{ sheetBg }};padding-top:70px;overflow:hidden;transition:background .45s ease">
+          <div style="background:#F1EDE4;border-radius:22px 22px 0 0;padding:20px 18px 26px;transform:{{ sheetT }};transition:transform .6s cubic-bezier(.22,1.15,.36,1)">
+            <div style="width:38px;height:4px;border-radius:2px;background:rgba(22,19,15,0.25);margin:0 auto 18px"></div>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
+              <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:22px;color:#16130F">Filter</div>
+              <div style="font-size:13px;color:#8C2F23;font-weight:600">Clear all</div>
+            </div>
+            <div style="font-family:'DM Mono',monospace;font-size:10.5px;letter-spacing:0.14em;text-transform:uppercase;color:#8B8377;margin-bottom:10px">Size (UK)</div>
+            <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:7px;margin-bottom:20px">
+              <sc-for list="{{ sizes }}" as="s" hint-placeholder-count="10">
+                <div style="border:1px solid rgba(22,19,15,0.22);padding:10px 0;text-align:center;font-family:'DM Mono',monospace;font-size:12px;color:#16130F">{{ s }}</div>
+              </sc-for>
+            </div>
+            <div style="font-family:'DM Mono',monospace;font-size:10.5px;letter-spacing:0.14em;text-transform:uppercase;color:#8B8377;margin-bottom:10px">Condition</div>
+            <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px">
+              <div style="background:#16130F;color:#F1EDE4;padding:9px 14px;font-size:12.5px">Like new</div>
+              <div style="border:1px solid rgba(22,19,15,0.22);padding:9px 14px;font-size:12.5px;color:#16130F">Excellent</div>
+              <div style="border:1px solid rgba(22,19,15,0.22);padding:9px 14px;font-size:12.5px;color:#16130F">Great</div>
+              <div style="border:1px solid rgba(22,19,15,0.22);padding:9px 14px;font-size:12.5px;color:#16130F">Good</div>
+            </div>
+            <div style="background:#16130F;color:#F1EDE4;padding:16px;text-align:center;font-size:15px;font-weight:600">Show 22 pairs</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 03 SEARCH -->
+  <section data-screen-label="03 Search results" style="display:flex;gap:40px;align-items:flex-start">
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="font-family:'DM Mono',monospace;font-size:12px;letter-spacing:0.14em;text-transform:uppercase;color:#16130F">03 · Search + filter results — Desktop</div>
+      <div data-artboard="1" style="width:1440px;background:#F1EDE4;border:1px solid rgba(22,19,15,0.18);overflow:hidden">
+        <dc-import name="GitsoleHeader" hint-size="100%,110px"></dc-import>
+        <div style="padding:36px 40px;border-bottom:1px solid rgba(22,19,15,0.14)">
+          <div style="display:flex;align-items:center;gap:12px;border:1.5px solid #16130F;padding:16px 20px;max-width:720px">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16130F" stroke-width="2"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-4-4"></path></svg>
+            <span style="font-family:'Instrument Sans',sans-serif;font-size:17px;color:#16130F">air max uk 9</span>
+            <span style="width:1.5px;height:20px;background:#8C2F23;margin-left:-2px"></span>
+          </div>
+          <div style="display:flex;gap:10px;margin-top:16px">
+            <span style="font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:#8B8377;align-self:center">Try</span>
+            <div style="border:1px solid rgba(22,19,15,0.22);padding:7px 13px;font-size:12.5px;color:#16130F">jordan 1</div>
+            <div style="border:1px solid rgba(22,19,15,0.22);padding:7px 13px;font-size:12.5px;color:#16130F">new balance 550</div>
+            <div style="border:1px solid rgba(22,19,15,0.22);padding:7px 13px;font-size:12.5px;color:#16130F">under 5000</div>
+            <div style="border:1px solid rgba(22,19,15,0.22);padding:7px 13px;font-size:12.5px;color:#16130F">boots</div>
+          </div>
+        </div>
+        <div style="padding:30px 40px 56px">
+          <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:22px">
+            <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:28px;letter-spacing:-0.03em;color:#16130F">6 results for “air max uk 9”</div>
+            <div style="font-size:13.5px;color:#6E6558">Showing available pairs only</div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:22px">
+            <sc-for list="{{ searchItems }}" as="p" hint-placeholder-count="6">
+              <div data-reveal="1" style="display:flex;gap:14px;background:#FAF8F3;border:1px solid rgba(22,19,15,0.12);padding:14px">
+                <div style="position:relative;width:120px;height:120px;flex:none;background:#E6E1D6"><image-slot id="gs-search-{{ $index }}" shape="rect" src="{{ p.img }}"></image-slot></div>
+                <div style="display:flex;flex-direction:column;justify-content:space-between;padding:2px 0">
+                  <div style="display:flex;flex-direction:column;gap:3px">
+                    <div style="font-family:'DM Mono',monospace;font-size:10.5px;letter-spacing:0.12em;text-transform:uppercase;color:#8C2F23">{{ p.brand }}</div>
+                    <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:600;font-size:16px;line-height:1.2;color:#16130F">{{ p.model }}</div>
+                    <div style="font-family:'DM Mono',monospace;font-size:11px;color:#6E6558">UK {{ p.size }} · {{ p.score }} {{ p.tier }}</div>
+                  </div>
+                  <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:19px;color:#16130F">{{ p.price }}</div>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="font-family:'DM Mono',monospace;font-size:12px;letter-spacing:0.14em;text-transform:uppercase;color:#16130F">03 · Search — Mobile</div>
+      <div style="width:390px;background:#F1EDE4;border:1px solid rgba(22,19,15,0.18);border-radius:26px;overflow:hidden">
+        <div style="padding:14px 18px;background:#F1EDE4;border-bottom:1px solid rgba(22,19,15,0.14);display:flex;align-items:center;gap:12px">
+          <div style="font-size:20px;color:#16130F">←</div>
+          <div style="flex:1;display:flex;align-items:center;gap:9px;border:1.5px solid #16130F;padding:11px 14px">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#16130F" stroke-width="2"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-4-4"></path></svg>
+            <span style="font-size:14.5px;color:#16130F">air max uk 9</span>
+          </div>
+        </div>
+        <div style="padding:14px 18px;border-bottom:1px solid rgba(22,19,15,0.14);display:flex;gap:8px;overflow:hidden">
+          <div style="border:1px solid rgba(22,19,15,0.22);padding:8px 13px;font-size:12px;white-space:nowrap;color:#16130F">jordan 1</div>
+          <div style="border:1px solid rgba(22,19,15,0.22);padding:8px 13px;font-size:12px;white-space:nowrap;color:#16130F">new balance</div>
+          <div style="border:1px solid rgba(22,19,15,0.22);padding:8px 13px;font-size:12px;white-space:nowrap;color:#16130F">under 5000</div>
+        </div>
+        <div style="padding:16px 18px 26px">
+          <div style="font-family:'DM Mono',monospace;font-size:11px;color:#6E6558;margin-bottom:14px">6 results</div>
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <sc-for list="{{ searchMobile }}" as="p" hint-placeholder-count="4">
+              <div style="display:flex;gap:12px;background:#FAF8F3;border:1px solid rgba(22,19,15,0.12);padding:10px">
+                <div style="position:relative;width:92px;height:92px;flex:none;background:#E6E1D6"><image-slot id="gs-searchm-{{ $index }}" shape="rect" src="{{ p.img }}"></image-slot></div>
+                <div style="display:flex;flex-direction:column;justify-content:space-between;padding:2px 0">
+                  <div style="display:flex;flex-direction:column;gap:2px">
+                    <div style="font-family:'DM Mono',monospace;font-size:9.5px;letter-spacing:0.1em;text-transform:uppercase;color:#8C2F23">{{ p.brand }}</div>
+                    <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:600;font-size:14.5px;line-height:1.2;color:#16130F">{{ p.model }}</div>
+                    <div style="font-family:'DM Mono',monospace;font-size:10px;color:#6E6558">UK {{ p.size }} · {{ p.score }}</div>
+                  </div>
+                  <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:17px;color:#16130F">{{ p.price }}</div>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 04 PRODUCT -->
+  <section data-screen-label="04 Product detail" style="display:flex;gap:40px;align-items:flex-start">
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="font-family:'DM Mono',monospace;font-size:12px;letter-spacing:0.14em;text-transform:uppercase;color:#16130F">04 · Product detail — Desktop</div>
+      <div data-artboard="1" style="width:1440px;background:#F1EDE4;border:1px solid rgba(22,19,15,0.18);overflow:hidden">
+        <dc-import name="GitsoleHeader" hint-size="100%,110px"></dc-import>
+        <div style="padding:18px 40px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:#6E6558;border-bottom:1px solid rgba(22,19,15,0.14)">Home / Shop all / Nike / Air Max 90 Infrared</div>
+        <div style="display:grid;grid-template-columns:minmax(0,1fr) 560px">
+          <div style="padding:32px 40px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px;border-right:1px solid rgba(22,19,15,0.14)">
+            <div style="grid-column:1 / -1;position:relative;aspect-ratio:4/3;background:#E6E1D6"><image-slot id="gs-pdp-main" shape="rect" src="https://images.pexels.com/photos/2529148/pexels-photo-2529148.jpeg?auto=compress&cs=tinysrgb&w=800" placeholder="Main photo — side profile"></image-slot></div>
+            <div style="position:relative;aspect-ratio:1/1;background:#E6E1D6"><image-slot id="gs-pdp-sole" shape="rect" src="https://images.pexels.com/photos/2529147/pexels-photo-2529147.jpeg?auto=compress&cs=tinysrgb&w=800" placeholder="Sole"></image-slot></div>
+            <div style="position:relative;aspect-ratio:1/1;background:#E6E1D6"><image-slot id="gs-pdp-heel" shape="rect" src="https://images.pexels.com/photos/5172731/pexels-photo-5172731.jpeg?auto=compress&cs=tinysrgb&w=800" placeholder="Heel + insole"></image-slot></div>
+            <div style="grid-column:1 / -1;position:relative;aspect-ratio:16/7;background:#E6E1D6;border:1.5px solid #8C2F23"><image-slot id="gs-pdp-flaw" shape="rect" src="https://images.pexels.com/photos/6833597/pexels-photo-6833597.jpeg?auto=compress&cs=tinysrgb&w=800" placeholder="Flaw close-up — scuff on toe box"></image-slot></div>
+          </div>
+          <div style="padding:36px 40px 44px;display:flex;flex-direction:column;gap:22px;position:sticky;top:0;align-self:start">
+            <div>
+              <div style="font-family:'DM Mono',monospace;font-size:11.5px;letter-spacing:0.14em;text-transform:uppercase;color:#8C2F23">Nike</div>
+              <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:44px;line-height:1;letter-spacing:-0.035em;color:#16130F;margin-top:6px">Air Max 90 Infrared</div>
+              <div style="display:flex;align-items:baseline;gap:12px;margin-top:16px">
+                <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:34px;color:#16130F">PKR 8,900</div>
+                <div style="font-family:'DM Mono',monospace;font-size:14px;color:#8B8377;text-decoration:line-through">PKR 24,000</div>
+                <div style="font-family:'DM Mono',monospace;font-size:12px;color:#8C2F23;border:1px solid #8C2F23;padding:4px 9px">63% below retail</div>
+              </div>
+            </div>
+            <div style="background:#16130F;color:#F1EDE4;padding:20px 22px">
+              <div style="display:flex;align-items:center;justify-content:space-between">
+                <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:22px">Condition 9 / 10 · Excellent</div>
+                <div style="font-family:'DM Mono',monospace;font-size:11px;color:rgba(241,237,228,0.6);text-decoration:underline">Grading guide</div>
+              </div>
+              <div style="height:5px;background:rgba(241,237,228,0.25);margin-top:16px">
+                <div data-fill="90" style="height:5px;width:0;background:#8C2F23"></div>
+              </div>
+              <div style="font-size:14px;line-height:1.6;color:rgba(241,237,228,0.75);margin-top:14px">Upper clean with no cracking. Midsole slightly yellowed on the right shoe. Small scuff on the left toe box, photographed above. Outsole tread roughly 85% remaining. Insoles original, laces replaced.</div>
+            </div>
+            <div>
+              <div style="font-family:'DM Mono',monospace;font-size:10.5px;letter-spacing:0.14em;text-transform:uppercase;color:#8B8377;margin-bottom:10px">Size — one pair only</div>
+              <div style="display:flex;gap:9px;align-items:center">
+                <div style="background:#16130F;color:#F1EDE4;padding:14px 26px;font-family:'DM Mono',monospace;font-size:15px">UK 9</div>
+                <div style="border:1px solid rgba(22,19,15,0.2);color:#B5AC9E;padding:14px 26px;font-family:'DM Mono',monospace;font-size:15px;text-decoration:line-through">UK 8</div>
+                <div style="border:1px solid rgba(22,19,15,0.2);color:#B5AC9E;padding:14px 26px;font-family:'DM Mono',monospace;font-size:15px;text-decoration:line-through">UK 10</div>
+                <div style="font-size:13px;color:#6E6558;margin-left:6px">Other sizes are separate pairs</div>
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <div onClick="{{ addToCart }}" style="background:#8C2F23;color:#fff;padding:19px;text-align:center;font-size:16px;font-weight:600;cursor:pointer">Add to cart · PKR 8,900</div>
+              <div style="border:1.5px solid #16130F;color:#16130F;padding:18px;text-align:center;font-size:16px;font-weight:600">Order on WhatsApp instead</div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:10px;border-top:1px solid rgba(22,19,15,0.14);padding-top:20px">
+              <div style="display:flex;gap:10px;font-size:14px;color:#16130F"><span style="color:#8C2F23">✓</span> Free home delivery all over Pakistan</div>
+              <div style="display:flex;gap:10px;font-size:14px;color:#16130F"><span style="color:#8C2F23">✓</span> Cash on delivery available</div>
+              <div style="display:flex;gap:10px;font-size:14px;color:#16130F"><span style="color:#8C2F23">✓</span> Dispatched in 24–48 hours</div>
+              <div style="display:flex;gap:10px;font-size:14px;color:#16130F"><span style="color:#8C2F23">✓</span> Not as described? We take it back.</div>
+            </div>
+            <div style="border-top:1px solid rgba(22,19,15,0.14);padding-top:20px">
+              <div style="font-family:'DM Mono',monospace;font-size:10.5px;letter-spacing:0.14em;text-transform:uppercase;color:#8B8377;margin-bottom:12px">Details</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px 24px;font-size:14px;color:#4A443B">
+                <div style="display:flex;justify-content:space-between;border-bottom:1px solid rgba(22,19,15,0.1);padding-bottom:7px"><span style="color:#8B8377">Colourway</span><span>White / Infrared</span></div>
+                <div style="display:flex;justify-content:space-between;border-bottom:1px solid rgba(22,19,15,0.1);padding-bottom:7px"><span style="color:#8B8377">Size (US)</span><span>10</span></div>
+                <div style="display:flex;justify-content:space-between;border-bottom:1px solid rgba(22,19,15,0.1);padding-bottom:7px"><span style="color:#8B8377">Insole length</span><span>28.0 cm</span></div>
+                <div style="display:flex;justify-content:space-between;border-bottom:1px solid rgba(22,19,15,0.1);padding-bottom:7px"><span style="color:#8B8377">Box</span><span>Not included</span></div>
+                <div style="display:flex;justify-content:space-between;border-bottom:1px solid rgba(22,19,15,0.1);padding-bottom:7px"><span style="color:#8B8377">Cleaned</span><span>Yes, before dispatch</span></div>
+                <div style="display:flex;justify-content:space-between;border-bottom:1px solid rgba(22,19,15,0.1);padding-bottom:7px"><span style="color:#8B8377">Item code</span><span style="font-family:'DM Mono',monospace">GS-0428</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div style="padding:48px 40px 56px;border-top:1px solid rgba(22,19,15,0.14)">
+          <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:28px;letter-spacing:-0.03em;color:#16130F;margin-bottom:22px">Similar pairs in stock</div>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:22px">
+            <sc-for list="{{ featured }}" as="p" hint-placeholder-count="4">
+              <div data-reveal="1" style="display:flex;flex-direction:column;gap:11px">
+                <div style="position:relative;aspect-ratio:1/1;background:#E6E1D6"><image-slot id="gs-pdpsim-{{ $index }}" shape="rect" src="{{ p.img }}"></image-slot></div>
+                <div style="font-family:'DM Mono',monospace;font-size:10.5px;letter-spacing:0.12em;text-transform:uppercase;color:#8C2F23">{{ p.brand }}</div>
+                <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:600;font-size:16px;color:#16130F">{{ p.model }}</div>
+                <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:18px;color:#16130F">{{ p.price }}</div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="font-family:'DM Mono',monospace;font-size:12px;letter-spacing:0.14em;text-transform:uppercase;color:#16130F">04 · Product — Mobile</div>
+      <div style="width:390px;background:#F1EDE4;border:1px solid rgba(22,19,15,0.18);border-radius:26px;overflow:hidden">
+        <div style="padding:14px 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(22,19,15,0.14)">
+          <div style="font-size:20px;color:#16130F">←</div>
+          <div style="font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:#6E6558">GS-0428</div>
+          <div style="font-size:16px;color:#16130F">⌄</div>
+        </div>
+        <div style="height:300px;background:#E6E1D6;position:relative">
+          <div style="position:absolute;inset:0"><image-slot id="gs-pdpm-main" shape="rect" src="https://images.pexels.com/photos/2529148/pexels-photo-2529148.jpeg?auto=compress&cs=tinysrgb&w=800" placeholder="Main photo · swipe for 5 more"></image-slot></div>
+          <div style="position:absolute;bottom:14px;right:14px;display:flex;gap:5px"><div style="width:6px;height:6px;border-radius:3px;background:#16130F"></div><div style="width:6px;height:6px;border-radius:3px;background:rgba(22,19,15,0.25)"></div><div style="width:6px;height:6px;border-radius:3px;background:rgba(22,19,15,0.25)"></div><div style="width:6px;height:6px;border-radius:3px;background:rgba(22,19,15,0.25)"></div></div>
+        </div>
+        <div style="padding:20px 18px 16px">
+          <div style="font-family:'DM Mono',monospace;font-size:10.5px;letter-spacing:0.14em;text-transform:uppercase;color:#8C2F23">Nike</div>
+          <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:30px;line-height:1;letter-spacing:-0.035em;color:#16130F;margin-top:5px">Air Max 90 Infrared</div>
+          <div style="display:flex;align-items:baseline;gap:10px;margin-top:12px">
+            <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:26px;color:#16130F">PKR 8,900</div>
+            <div style="font-family:'DM Mono',monospace;font-size:12.5px;color:#8B8377;text-decoration:line-through">PKR 24,000</div>
+          </div>
+        </div>
+        <div style="margin:0 18px;background:#16130F;color:#F1EDE4;padding:16px 18px">
+          <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:18px">Condition 9 / 10 · Excellent</div>
+          <div style="height:4px;background:rgba(241,237,228,0.25);margin-top:12px"><div data-fill="90" style="height:4px;width:0;background:#8C2F23"></div></div>
+          <div style="font-size:13px;line-height:1.55;color:rgba(241,237,228,0.75);margin-top:11px">Clean upper, slight midsole yellowing, small scuff on left toe box (photographed). 85% tread left.</div>
+        </div>
+        <div style="padding:18px">
+          <div style="font-family:'DM Mono',monospace;font-size:10.5px;letter-spacing:0.14em;text-transform:uppercase;color:#8B8377;margin-bottom:9px">Size — one pair only</div>
+          <div style="display:flex;gap:8px"><div style="background:#16130F;color:#F1EDE4;padding:14px 24px;font-family:'DM Mono',monospace;font-size:14px">UK 9</div><div style="border:1px solid rgba(22,19,15,0.2);color:#B5AC9E;padding:14px 24px;font-family:'DM Mono',monospace;font-size:14px;text-decoration:line-through">UK 8</div></div>
+          <div style="display:flex;flex-direction:column;gap:9px;margin-top:18px;font-size:13.5px;color:#16130F">
+            <div><span style="color:#8C2F23">✓</span> Free home delivery all over Pakistan</div>
+            <div><span style="color:#8C2F23">✓</span> Cash on delivery available</div>
+            <div><span style="color:#8C2F23">✓</span> Dispatched in 24–48 hours</div>
+          </div>
+        </div>
+        <div style="border-top:1px solid rgba(22,19,15,0.14);padding:14px 18px 20px;background:#FAF8F3;display:flex;gap:10px;align-items:center">
+          <div style="flex:1;background:#8C2F23;color:#fff;padding:16px;text-align:center;font-size:15px;font-weight:600">Add to cart</div>
+          <div style="width:56px;height:52px;border:1.5px solid #16130F;display:flex;align-items:center;justify-content:center">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#16130F" stroke-width="1.8"><path d="M21 11.5a8.4 8.4 0 01-12.3 7.5L3 20.5l1.6-5.5A8.4 8.4 0 1121 11.5z"></path></svg>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 05 SOLD OUT / EMPTY -->
+  <section data-screen-label="05 Sold out and empty states" style="display:flex;gap:40px;align-items:flex-start">
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="font-family:'DM Mono',monospace;font-size:12px;letter-spacing:0.14em;text-transform:uppercase;color:#16130F">05 · Sold out product — Desktop</div>
+      <div data-artboard="1" style="width:1440px;background:#F1EDE4;border:1px solid rgba(22,19,15,0.18);overflow:hidden">
+        <dc-import name="GitsoleHeader" hint-size="100%,110px"></dc-import>
+        <div style="display:grid;grid-template-columns:minmax(0,1fr) 560px">
+          <div style="padding:40px;border-right:1px solid rgba(22,19,15,0.14)">
+            <div style="position:relative;aspect-ratio:4/3;background:#E6E1D6;display:flex;align-items:center;justify-content:center">
+              <div style="position:absolute;inset:0"><image-slot id="gs-sold-main" shape="rect" src="https://images.pexels.com/photos/27575462/pexels-photo-27575462.jpeg?auto=compress&cs=tinysrgb&w=800" placeholder="Sold pair photo"></image-slot></div>
+              <div style="background:#16130F;color:#F1EDE4;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:28px;letter-spacing:0.02em;padding:14px 34px">SOLD</div>
+            </div>
+          </div>
+          <div style="padding:44px 40px;display:flex;flex-direction:column;gap:22px">
+            <div>
+              <div style="font-family:'DM Mono',monospace;font-size:11.5px;letter-spacing:0.14em;text-transform:uppercase;color:#8B8377">Adidas</div>
+              <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:42px;line-height:1;letter-spacing:-0.035em;color:#8B8377;margin-top:6px">Samba OG</div>
+              <div style="font-family:'DM Mono',monospace;font-size:16px;color:#8B8377;margin-top:14px">PKR 11,500 · UK 10 · 9.5/10</div>
+            </div>
+            <div style="border:1px solid rgba(22,19,15,0.2);padding:22px">
+              <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:20px;color:#16130F">This pair has been sold</div>
+              <div style="font-size:14.5px;line-height:1.6;color:#4A443B;margin-top:8px">Thrift stock is single-piece. This exact pair, in this exact size and condition, is not coming back. We can tell you when something close arrives.</div>
+              <div style="display:flex;gap:10px;margin-top:18px">
+                <div style="flex:1;border:1px solid rgba(22,19,15,0.25);padding:14px 16px;font-size:14px;color:#8B8377">Your WhatsApp number</div>
+                <div style="background:#16130F;color:#F1EDE4;padding:14px 24px;font-size:14.5px;font-weight:600">Notify me</div>
+              </div>
+            </div>
+            <div style="background:#16130F;color:#F1EDE4;padding:19px;text-align:center;font-size:16px;font-weight:600">Browse similar pairs in stock</div>
+          </div>
+        </div>
+        <div style="padding:48px 40px 56px;border-top:1px solid rgba(22,19,15,0.14)">
+          <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:28px;letter-spacing:-0.03em;color:#16130F;margin-bottom:22px">Close to this pair</div>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:22px">
+            <sc-for list="{{ featured }}" as="p" hint-placeholder-count="4">
+              <div data-reveal="1" style="display:flex;flex-direction:column;gap:11px">
+                <div style="position:relative;aspect-ratio:1/1;background:#E6E1D6"><image-slot id="gs-soldsim-{{ $index }}" shape="rect" src="{{ p.img }}"></image-slot></div>
+                <div style="font-family:'DM Mono',monospace;font-size:10.5px;letter-spacing:0.12em;text-transform:uppercase;color:#8C2F23">{{ p.brand }}</div>
+                <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:600;font-size:16px;color:#16130F">{{ p.model }}</div>
+                <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:18px;color:#16130F">{{ p.price }}</div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="font-family:'DM Mono',monospace;font-size:12px;letter-spacing:0.14em;text-transform:uppercase;color:#16130F">05 · Empty results — Mobile</div>
+      <div style="width:390px;background:#F1EDE4;border:1px solid rgba(22,19,15,0.18);border-radius:26px;overflow:hidden">
+        <dc-import name="GitsoleHeader" mobile="{{ yes }}" hint-size="100%,80px"></dc-import>
+        <div style="padding:14px 18px;border-bottom:1px solid rgba(22,19,15,0.14);display:flex;gap:8px">
+          <div style="background:#16130F;color:#F1EDE4;padding:9px 14px;font-size:12.5px">Timberland ✕</div>
+          <div style="background:#16130F;color:#F1EDE4;padding:9px 14px;font-size:12.5px">UK 6 ✕</div>
+        </div>
+        <div style="padding:56px 22px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:14px">
+          <div style="width:74px;height:74px;border:1.5px solid rgba(22,19,15,0.25);display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:24px;color:#8B8377">0</div>
+          <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:24px;line-height:1.1;letter-spacing:-0.03em;color:#16130F">Nothing in UK 6 from Timberland right now</div>
+          <div style="font-size:14px;line-height:1.55;color:#4A443B">Thrift stock changes every week. Drop your size and we'll message you on WhatsApp when a pair lands.</div>
+          <div style="width:100%;border:1px solid rgba(22,19,15,0.25);padding:15px;font-size:14px;color:#8B8377;text-align:left;margin-top:6px">03XX XXXXXXX</div>
+          <div style="width:100%;background:#16130F;color:#F1EDE4;padding:15px;font-size:15px;font-weight:600">Alert me for UK 6</div>
+          <div style="font-size:13.5px;color:#8C2F23;font-weight:600;margin-top:4px">Clear filters and browse all 48 pairs</div>
+        </div>
+        <div style="padding:0 18px 26px">
+          <div style="font-family:'DM Mono',monospace;font-size:10.5px;letter-spacing:0.14em;text-transform:uppercase;color:#8B8377;margin-bottom:12px">In stock near your size</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+            <sc-for list="{{ featuredMobile }}" as="p" hint-placeholder-count="2">
+              <div style="display:flex;flex-direction:column;gap:8px">
+                <div style="position:relative;aspect-ratio:1/1;background:#E6E1D6"><image-slot id="gs-emptysug-{{ $index }}" shape="rect" src="{{ p.img }}"></image-slot></div>
+                <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:600;font-size:13.5px;color:#16130F">{{ p.model }}</div>
+                <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:15px;color:#16130F">{{ p.price }}</div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 06 CART -->
+  <section data-screen-label="06 Cart" style="display:flex;gap:40px;align-items:flex-start">
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="font-family:'DM Mono',monospace;font-size:12px;letter-spacing:0.14em;text-transform:uppercase;color:#16130F">06 · Cart — Desktop</div>
+      <div data-artboard="1" style="width:1440px;background:#F1EDE4;border:1px solid rgba(22,19,15,0.18);overflow:hidden">
+        <dc-import name="GitsoleHeader" hint-size="100%,110px"></dc-import>
+        <div style="padding:40px 40px 56px">
+          <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:44px;letter-spacing:-0.035em;color:#16130F;margin-bottom:6px">Your cart</div>
+          <div style="font-family:'DM Mono',monospace;font-size:12px;color:#8B8377;margin-bottom:28px">2 pairs · reserved for 30 minutes</div>
+          <div style="display:grid;grid-template-columns:1fr 400px;gap:40px;align-items:start">
+            <div style="display:flex;flex-direction:column;gap:16px">
+              <sc-for list="{{ cartItems }}" as="c" hint-placeholder-count="2">
+                <div style="display:flex;gap:20px;background:#FAF8F3;border:1px solid rgba(22,19,15,0.12);padding:18px">
+                  <div style="position:relative;width:150px;height:150px;flex:none;background:#E6E1D6"><image-slot id="gs-cart-{{ $index }}" shape="rect" src="{{ c.img }}"></image-slot></div>
+                  <div style="flex:1;display:flex;flex-direction:column;justify-content:space-between">
+                    <div>
+                      <div style="font-family:'DM Mono',monospace;font-size:10.5px;letter-spacing:0.12em;text-transform:uppercase;color:#8C2F23">{{ c.brand }}</div>
+                      <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:22px;letter-spacing:-0.02em;color:#16130F;margin-top:4px">{{ c.model }}</div>
+                      <div style="font-family:'DM Mono',monospace;font-size:12px;color:#6E6558;margin-top:7px">UK {{ c.size }} · {{ c.score }} {{ c.tier }} · {{ c.code }}</div>
+                      <div style="font-size:13.5px;color:#6E6558;margin-top:9px">Single pair — cannot increase quantity</div>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:18px">
+                      <div style="font-size:13.5px;color:#8C2F23;font-weight:600">Remove</div>
+                      <div style="font-size:13.5px;color:#6E6558">Save for later</div>
+                    </div>
+                  </div>
+                  <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:24px;color:#16130F">{{ c.price }}</div>
+                </div>
+              </sc-for>
+              <div style="border:1px dashed rgba(22,19,15,0.3);padding:20px;display:flex;align-items:center;justify-content:space-between">
+                <div style="font-size:14.5px;color:#4A443B">Both pairs ship together, free, anywhere in Pakistan.</div>
+                <div style="font-size:14px;font-weight:600;color:#16130F;border-bottom:1px solid #16130F">Keep browsing</div>
+              </div>
+            </div>
+            <div style="background:#16130F;color:#F1EDE4;padding:28px">
+              <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:22px;margin-bottom:20px">Order summary</div>
+              <div style="display:flex;flex-direction:column;gap:12px;font-size:14.5px">
+                <div style="display:flex;justify-content:space-between"><span style="color:rgba(241,237,228,0.65)">Subtotal</span><span style="font-family:'DM Mono',monospace">PKR 15,300</span></div>
+                <div style="display:flex;justify-content:space-between"><span style="color:rgba(241,237,228,0.65)">Delivery</span><span style="font-family:'DM Mono',monospace;color:#E8B4AB">Free</span></div>
+                <div style="display:flex;justify-content:space-between"><span style="color:rgba(241,237,228,0.65)">COD charge</span><span style="font-family:'DM Mono',monospace;color:#E8B4AB">None</span></div>
+                <div style="height:1px;background:rgba(241,237,228,0.2);margin:6px 0"></div>
+                <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:18px">Total</span><span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:26px">PKR 15,300</span></div>
+              </div>
+              <div style="background:#8C2F23;color:#fff;padding:18px;text-align:center;font-size:16px;font-weight:600;margin-top:24px">Checkout · Cash on delivery</div>
+              <div style="border:1px solid rgba(241,237,228,0.4);padding:16px;text-align:center;font-size:15px;font-weight:600;margin-top:10px">Send this cart to WhatsApp</div>
+              <div style="font-size:12.5px;line-height:1.55;color:rgba(241,237,228,0.55);margin-top:16px">You pay the courier when the parcel arrives. No advance payment required.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="font-family:'DM Mono',monospace;font-size:12px;letter-spacing:0.14em;text-transform:uppercase;color:#16130F">06 · Cart — Mobile</div>
+      <div style="width:390px;background:#F1EDE4;border:1px solid rgba(22,19,15,0.18);border-radius:26px;overflow:hidden">
+        <div style="padding:14px 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(22,19,15,0.14)">
+          <div style="font-size:20px;color:#16130F">←</div>
+          <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:17px;color:#16130F">Your cart</div>
+          <div style="width:20px"></div>
+        </div>
+        <div style="padding:14px 18px;font-family:'DM Mono',monospace;font-size:11px;color:#8B8377;border-bottom:1px solid rgba(22,19,15,0.14)">2 pairs · reserved for 30 minutes</div>
+        <div style="padding:16px 18px;display:flex;flex-direction:column;gap:12px">
+          <sc-for list="{{ cartItems }}" as="c" hint-placeholder-count="2">
+            <div style="display:flex;gap:12px;background:#FAF8F3;border:1px solid rgba(22,19,15,0.12);padding:12px">
+              <div style="position:relative;width:88px;height:88px;flex:none;background:#E6E1D6"><image-slot id="gs-cartm-{{ $index }}" shape="rect" src="{{ c.img }}"></image-slot></div>
+              <div style="flex:1;display:flex;flex-direction:column;gap:3px">
+                <div style="font-family:'DM Mono',monospace;font-size:9.5px;letter-spacing:0.1em;text-transform:uppercase;color:#8C2F23">{{ c.brand }}</div>
+                <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:15px;line-height:1.15;color:#16130F">{{ c.model }}</div>
+                <div style="font-family:'DM Mono',monospace;font-size:10px;color:#6E6558">UK {{ c.size }} · {{ c.score }}</div>
+                <div style="display:flex;align-items:baseline;justify-content:space-between;margin-top:6px">
+                  <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:17px;color:#16130F">{{ c.price }}</div>
+                  <div style="font-size:12.5px;color:#8C2F23;font-weight:600">Remove</div>
+                </div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="margin:6px 18px 18px;border:1px solid rgba(22,19,15,0.14);padding:16px;display:flex;flex-direction:column;gap:10px;font-size:14px">
+          <div style="display:flex;justify-content:space-between;color:#4A443B"><span>Subtotal</span><span style="font-family:'DM Mono',monospace">PKR 15,300</span></div>
+          <div style="display:flex;justify-content:space-between;color:#4A443B"><span>Delivery</span><span style="font-family:'DM Mono',monospace;color:#8C2F23">Free</span></div>
+          <div style="height:1px;background:rgba(22,19,15,0.12)"></div>
+          <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:16px;color:#16130F">Total</span><span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:22px;color:#16130F">PKR 15,300</span></div>
+        </div>
+        <div style="border-top:1px solid rgba(22,19,15,0.14);background:#FAF8F3;padding:14px 18px 20px;display:flex;flex-direction:column;gap:9px">
+          <div style="background:#8C2F23;color:#fff;padding:16px;text-align:center;font-size:15px;font-weight:600">Checkout · Cash on delivery</div>
+          <div style="border:1.5px solid #16130F;color:#16130F;padding:15px;text-align:center;font-size:14.5px;font-weight:600">Send cart to WhatsApp</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 07 CHECKOUT -->
+  <section data-screen-label="07 Checkout" style="display:flex;gap:40px;align-items:flex-start">
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="font-family:'DM Mono',monospace;font-size:12px;letter-spacing:0.14em;text-transform:uppercase;color:#16130F">07 · Checkout — Desktop</div>
+      <div data-artboard="1" style="width:1440px;background:#F1EDE4;border:1px solid rgba(22,19,15,0.18);overflow:hidden">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:20px 40px;border-bottom:1px solid rgba(22,19,15,0.14)">
+          <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:24px;letter-spacing:-0.035em;color:#16130F">GITSOLE</div>
+          <div style="font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:#6E6558">Secure checkout · cash on delivery</div>
+          <div style="font-size:13.5px;color:#8C2F23;font-weight:600">Need help? WhatsApp us</div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 440px">
+          <div style="padding:44px 56px 60px;border-right:1px solid rgba(22,19,15,0.14);display:flex;flex-direction:column;gap:34px">
+            <div>
+              <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:38px;letter-spacing:-0.035em;color:#16130F">Delivery details</div>
+              <div style="font-size:15px;color:#4A443B;margin-top:8px">We only need enough to get the parcel to your door and confirm the order on WhatsApp.</div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px">
+              <div><div style="font-family:'DM Mono',monospace;font-size:10.5px;letter-spacing:0.14em;text-transform:uppercase;color:#8B8377;margin-bottom:8px">Full name</div><div style="border:1px solid #16130F;padding:15px 16px;font-size:15px;color:#16130F">Ahmed Raza</div></div>
+              <div><div style="font-family:'DM Mono',monospace;font-size:10.5px;letter-spacing:0.14em;text-transform:uppercase;color:#8B8377;margin-bottom:8px">WhatsApp number</div><div style="border:1px solid #16130F;padding:15px 16px;font-size:15px;color:#16130F">0301 2345678</div></div>
+              <div style="grid-column:1 / -1"><div style="font-family:'DM Mono',monospace;font-size:10.5px;letter-spacing:0.14em;text-transform:uppercase;color:#8B8377;margin-bottom:8px">Complete address</div><div style="border:1px solid rgba(22,19,15,0.25);padding:15px 16px;font-size:15px;color:#8B8377;height:56px">House / flat number, street, area, nearest landmark</div></div>
+              <div><div style="font-family:'DM Mono',monospace;font-size:10.5px;letter-spacing:0.14em;text-transform:uppercase;color:#8B8377;margin-bottom:8px">City</div><div style="border:1px solid rgba(22,19,15,0.25);padding:15px 16px;font-size:15px;color:#16130F;display:flex;justify-content:space-between">Lahore <span style="color:#8B8377">⌄</span></div></div>
+              <div><div style="font-family:'DM Mono',monospace;font-size:10.5px;letter-spacing:0.14em;text-transform:uppercase;color:#8B8377;margin-bottom:8px">Province</div><div style="border:1px solid rgba(22,19,15,0.25);padding:15px 16px;font-size:15px;color:#16130F;display:flex;justify-content:space-between">Punjab <span style="color:#8B8377">⌄</span></div></div>
+            </div>
+            <div>
+              <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:24px;letter-spacing:-0.03em;color:#16130F;margin-bottom:14px">Payment</div>
+              <div style="border:1.5px solid #16130F;padding:20px;display:flex;align-items:flex-start;gap:14px;background:#FAF8F3">
+                <div style="width:18px;height:18px;border-radius:9px;border:1.5px solid #16130F;display:flex;align-items:center;justify-content:center;margin-top:2px"><div style="width:9px;height:9px;border-radius:5px;background:#8C2F23"></div></div>
+                <div>
+                  <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:17px;color:#16130F">Cash on delivery</div>
+                  <div style="font-size:14px;color:#4A443B;margin-top:4px">Pay the courier in cash when the parcel reaches you. Nothing is charged now.</div>
+                </div>
+              </div>
+              <div style="border:1px solid rgba(22,19,15,0.2);padding:20px;display:flex;align-items:flex-start;gap:14px;margin-top:10px">
+                <div style="width:18px;height:18px;border-radius:9px;border:1.5px solid rgba(22,19,15,0.3);margin-top:2px"></div>
+                <div>
+                  <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:17px;color:#16130F">Bank transfer / Easypaisa <span style="font-family:'DM Mono',monospace;font-size:11px;font-weight:400;color:#8C2F23">Save 3%</span></div>
+                  <div style="font-size:14px;color:#4A443B;margin-top:4px">We send account details on WhatsApp after you place the order.</div>
+                </div>
+              </div>
+            </div>
+            <div style="display:flex;gap:12px;align-items:flex-start">
+              <div style="width:17px;height:17px;border:1.5px solid #16130F;background:#16130F;color:#F1EDE4;font-size:11px;display:flex;align-items:center;justify-content:center;margin-top:2px">✓</div>
+              <div style="font-size:14px;line-height:1.55;color:#4A443B;max-width:520px">I understand these are pre-owned shoes and I have read the condition notes for each pair in my order.</div>
+            </div>
+          </div>
+          <div style="padding:44px 40px;background:#FAF8F3">
+            <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:22px;color:#16130F;margin-bottom:20px">Your order</div>
+            <div style="display:flex;flex-direction:column;gap:14px">
+              <sc-for list="{{ cartItems }}" as="c" hint-placeholder-count="2">
+                <div style="display:flex;gap:14px;align-items:center">
+                  <div style="position:relative;width:72px;height:72px;flex:none;background:#E6E1D6"><image-slot id="gs-co-{{ $index }}" shape="rect" src="{{ c.img }}"></image-slot></div>
+                  <div style="flex:1">
+                    <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:600;font-size:15px;color:#16130F">{{ c.model }}</div>
+                    <div style="font-family:'DM Mono',monospace;font-size:11px;color:#6E6558;margin-top:3px">UK {{ c.size }} · {{ c.score }} · {{ c.code }}</div>
+                  </div>
+                  <div style="font-family:'DM Mono',monospace;font-size:14px;color:#16130F">{{ c.price }}</div>
+                </div>
+              </sc-for>
+            </div>
+            <div style="height:1px;background:rgba(22,19,15,0.14);margin:22px 0"></div>
+            <div style="display:flex;flex-direction:column;gap:11px;font-size:14.5px;color:#4A443B">
+              <div style="display:flex;justify-content:space-between"><span>Subtotal</span><span style="font-family:'DM Mono',monospace">PKR 15,300</span></div>
+              <div style="display:flex;justify-content:space-between"><span>Delivery to Lahore</span><span style="font-family:'DM Mono',monospace;color:#8C2F23">Free</span></div>
+              <div style="display:flex;justify-content:space-between"><span>COD charge</span><span style="font-family:'DM Mono',monospace;color:#8C2F23">None</span></div>
+            </div>
+            <div style="height:1px;background:rgba(22,19,15,0.14);margin:18px 0"></div>
+            <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:19px;color:#16130F">Pay on delivery</span><span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:30px;color:#16130F">PKR 15,300</span></div>
+            <div style="background:#8C2F23;color:#fff;padding:19px;text-align:center;font-size:16px;font-weight:600;margin-top:22px">Place order</div>
+            <div style="font-size:12.5px;line-height:1.55;color:#6E6558;margin-top:14px">We confirm every order on WhatsApp before dispatch. Expect a message within a few hours.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="font-family:'DM Mono',monospace;font-size:12px;letter-spacing:0.14em;text-transform:uppercase;color:#16130F">07 · Checkout — Mobile</div>
+      <div style="width:390px;background:#F1EDE4;border:1px solid rgba(22,19,15,0.18);border-radius:26px;overflow:hidden">
+        <div style="padding:14px 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(22,19,15,0.14)">
+          <div style="font-size:20px;color:#16130F">←</div>
+          <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:17px;color:#16130F">Checkout</div>
+          <div style="width:20px"></div>
+        </div>
+        <div style="display:flex;padding:14px 18px;gap:6px;border-bottom:1px solid rgba(22,19,15,0.14);font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.1em;text-transform:uppercase">
+          <div style="flex:1;color:#16130F;border-bottom:2px solid #8C2F23;padding-bottom:6px">1 Details</div>
+          <div style="flex:1;color:#B5AC9E;border-bottom:2px solid rgba(22,19,15,0.15);padding-bottom:6px">2 Payment</div>
+          <div style="flex:1;color:#B5AC9E;border-bottom:2px solid rgba(22,19,15,0.15);padding-bottom:6px">3 Confirm</div>
+        </div>
+        <div style="padding:20px 18px;display:flex;flex-direction:column;gap:16px">
+          <div><div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:#8B8377;margin-bottom:7px">Full name</div><div style="border:1px solid #16130F;padding:15px;font-size:15px;color:#16130F">Ahmed Raza</div></div>
+          <div><div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:#8B8377;margin-bottom:7px">WhatsApp number</div><div style="border:1px solid #16130F;padding:15px;font-size:15px;color:#16130F">0301 2345678</div></div>
+          <div><div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:#8B8377;margin-bottom:7px">Complete address</div><div style="border:1px solid rgba(22,19,15,0.25);padding:15px;font-size:14.5px;color:#8B8377;height:52px">House, street, area, landmark</div></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <div><div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:#8B8377;margin-bottom:7px">City</div><div style="border:1px solid rgba(22,19,15,0.25);padding:15px;font-size:15px;color:#16130F">Lahore</div></div>
+            <div><div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:#8B8377;margin-bottom:7px">Province</div><div style="border:1px solid rgba(22,19,15,0.25);padding:15px;font-size:15px;color:#16130F">Punjab</div></div>
+          </div>
+          <div style="border:1.5px solid #16130F;background:#FAF8F3;padding:16px;display:flex;gap:12px;align-items:flex-start">
+            <div style="width:17px;height:17px;border-radius:9px;border:1.5px solid #16130F;display:flex;align-items:center;justify-content:center;margin-top:2px"><div style="width:8px;height:8px;border-radius:4px;background:#8C2F23"></div></div>
+            <div><div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:15px;color:#16130F">Cash on delivery</div><div style="font-size:13px;color:#4A443B;margin-top:3px">Pay the courier at your door.</div></div>
+          </div>
+        </div>
+        <div style="border-top:1px solid rgba(22,19,15,0.14);background:#FAF8F3;padding:16px 18px 20px">
+          <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px">
+            <div><div style="font-size:13px;color:#6E6558">2 pairs · free delivery</div><div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:22px;color:#16130F">PKR 15,300</div></div>
+            <div style="font-size:13px;color:#8C2F23;font-weight:600">View order</div>
+          </div>
+          <div style="background:#8C2F23;color:#fff;padding:16px;text-align:center;font-size:15px;font-weight:600">Place order</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 08 CONFIRMATION -->
+  <section data-screen-label="08 Order confirmation" style="display:flex;gap:40px;align-items:flex-start">
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="font-family:'DM Mono',monospace;font-size:12px;letter-spacing:0.14em;text-transform:uppercase;color:#16130F">08 · Order confirmed — Desktop</div>
+      <div data-artboard="1" style="width:1440px;background:#F1EDE4;border:1px solid rgba(22,19,15,0.18);overflow:hidden">
+        <dc-import name="GitsoleHeader" hint-size="100%,110px"></dc-import>
+        <div style="background:#16130F;color:#F1EDE4;padding:70px 56px">
+          <div style="font-family:'DM Mono',monospace;font-size:12px;letter-spacing:0.16em;text-transform:uppercase;color:#E8B4AB">Order GS-24817 · placed 23 Aug</div>
+          <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:64px;line-height:0.95;letter-spacing:-0.04em;margin-top:14px">Order placed.<br />We'll message you on WhatsApp.</div>
+          <div style="font-size:17px;line-height:1.6;color:rgba(241,237,228,0.7);margin-top:18px;max-width:620px">Ahmed, we're confirming your two pairs now. You'll get a WhatsApp message on 0301 2345678 within a few hours with dispatch details. Pay the courier in cash when it arrives.</div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 440px">
+          <div style="padding:48px 56px;border-right:1px solid rgba(22,19,15,0.14)">
+            <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:26px;letter-spacing:-0.03em;color:#16130F;margin-bottom:26px">What happens next</div>
+            <div style="display:flex;flex-direction:column;gap:0">
+              <sc-for list="{{ steps }}" as="s" hint-placeholder-count="4">
+                <div style="display:flex;gap:20px;padding:18px 0;border-bottom:1px solid rgba(22,19,15,0.12)">
+                  <div style="font-family:'DM Mono',monospace;font-size:12px;color:#8C2F23;width:26px;flex:none;padding-top:3px">{{ s.n }}</div>
+                  <div>
+                    <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:17px;color:#16130F">{{ s.title }}</div>
+                    <div style="font-size:14px;line-height:1.55;color:#4A443B;margin-top:4px">{{ s.body }}</div>
+                  </div>
+                  <div style="margin-left:auto;font-family:'DM Mono',monospace;font-size:11px;color:#8B8377;white-space:nowrap;padding-top:4px">{{ s.when }}</div>
+                </div>
+              </sc-for>
+            </div>
+            <div style="display:flex;gap:12px;margin-top:32px">
+              <div style="background:#16130F;color:#F1EDE4;padding:16px 28px;font-size:15px;font-weight:600">Track this order</div>
+              <div style="border:1.5px solid #16130F;color:#16130F;padding:16px 28px;font-size:15px;font-weight:600">Message us on WhatsApp</div>
+            </div>
+          </div>
+          <div style="padding:48px 40px;background:#FAF8F3">
+            <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:20px;color:#16130F;margin-bottom:18px">Order GS-24817</div>
+            <div style="display:flex;flex-direction:column;gap:14px">
+              <sc-for list="{{ cartItems }}" as="c" hint-placeholder-count="2">
+                <div style="display:flex;gap:14px;align-items:center">
+                  <div style="position:relative;width:72px;height:72px;flex:none;background:#E6E1D6"><image-slot id="gs-conf-{{ $index }}" shape="rect" src="{{ c.img }}"></image-slot></div>
+                  <div style="flex:1"><div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:600;font-size:15px;color:#16130F">{{ c.model }}</div><div style="font-family:'DM Mono',monospace;font-size:11px;color:#6E6558;margin-top:3px">UK {{ c.size }} · {{ c.code }}</div></div>
+                  <div style="font-family:'DM Mono',monospace;font-size:14px;color:#16130F">{{ c.price }}</div>
+                </div>
+              </sc-for>
+            </div>
+            <div style="height:1px;background:rgba(22,19,15,0.14);margin:22px 0"></div>
+            <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:17px;color:#16130F">Pay on delivery</span><span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:26px;color:#16130F">PKR 15,300</span></div>
+            <div style="border-top:1px solid rgba(22,19,15,0.14);margin-top:24px;padding-top:20px">
+              <div style="font-family:'DM Mono',monospace;font-size:10.5px;letter-spacing:0.14em;text-transform:uppercase;color:#8B8377;margin-bottom:10px">Delivering to</div>
+              <div style="font-size:14.5px;line-height:1.6;color:#4A443B">Ahmed Raza<br />House 12, Street 4, Model Town<br />Lahore, Punjab<br />0301 2345678</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="font-family:'DM Mono',monospace;font-size:12px;letter-spacing:0.14em;text-transform:uppercase;color:#16130F">08 · Confirmed — Mobile</div>
+      <div style="width:390px;background:#F1EDE4;border:1px solid rgba(22,19,15,0.18);border-radius:26px;overflow:hidden">
+        <div style="background:#16130F;color:#F1EDE4;padding:40px 20px 34px">
+          <div style="font-family:'DM Mono',monospace;font-size:10.5px;letter-spacing:0.16em;text-transform:uppercase;color:#E8B4AB">Order GS-24817</div>
+          <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:36px;line-height:0.95;letter-spacing:-0.04em;margin-top:12px">Order placed.</div>
+          <div style="font-size:14.5px;line-height:1.6;color:rgba(241,237,228,0.7);margin-top:12px">We'll message you on WhatsApp at 0301 2345678 within a few hours. Pay cash when it arrives.</div>
+          <div style="background:#8C2F23;color:#fff;padding:15px;text-align:center;font-size:15px;font-weight:600;margin-top:20px">Open WhatsApp chat</div>
+        </div>
+        <div style="padding:22px 18px">
+          <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:20px;color:#16130F;margin-bottom:14px">What happens next</div>
+          <sc-for list="{{ steps }}" as="s" hint-placeholder-count="4">
+            <div style="display:flex;gap:14px;padding:13px 0;border-bottom:1px solid rgba(22,19,15,0.12)">
+              <div style="font-family:'DM Mono',monospace;font-size:11px;color:#8C2F23;width:20px;flex:none;padding-top:2px">{{ s.n }}</div>
+              <div style="flex:1"><div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:15px;color:#16130F">{{ s.title }}</div><div style="font-size:13px;line-height:1.5;color:#4A443B;margin-top:3px">{{ s.body }}</div></div>
+              <div style="font-family:'DM Mono',monospace;font-size:10px;color:#8B8377;white-space:nowrap;padding-top:3px">{{ s.when }}</div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="padding:0 18px 24px">
+          <div style="border:1px solid rgba(22,19,15,0.14);padding:16px">
+            <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:#8B8377;margin-bottom:8px">Delivering to</div>
+            <div style="font-size:13.5px;line-height:1.6;color:#4A443B">Ahmed Raza · House 12, Street 4, Model Town, Lahore</div>
+            <div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:14px;border-top:1px solid rgba(22,19,15,0.12);padding-top:12px"><span style="font-size:14px;color:#16130F">Pay on delivery</span><span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:20px;color:#16130F">PKR 15,300</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 09 TRACK ORDER -->
+  <section data-screen-label="09 Track order" style="display:flex;gap:40px;align-items:flex-start">
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="font-family:'DM Mono',monospace;font-size:12px;letter-spacing:0.14em;text-transform:uppercase;color:#16130F">09 · Track order — Desktop</div>
+      <div data-artboard="1" style="width:1440px;background:#F1EDE4;border:1px solid rgba(22,19,15,0.18);overflow:hidden">
+        <dc-import name="GitsoleHeader" hint-size="100%,110px"></dc-import>
+        <div style="padding:52px 56px 64px;display:grid;grid-template-columns:1fr 420px;gap:56px;align-items:start">
+          <div>
+            <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:44px;letter-spacing:-0.035em;color:#16130F">Track your order</div>
+            <div style="display:flex;gap:12px;margin-top:20px;max-width:560px">
+              <div style="flex:1;border:1px solid #16130F;padding:16px;font-size:15px;color:#16130F">GS-24817</div>
+              <div style="background:#16130F;color:#F1EDE4;padding:16px 30px;font-size:15px;font-weight:600">Track</div>
+            </div>
+            <div style="font-size:13.5px;color:#6E6558;margin-top:10px">Order number is in your confirmation message. Or just reply to our WhatsApp chat.</div>
+
+            <div style="margin-top:44px;border-top:1px solid rgba(22,19,15,0.14);padding-top:32px">
+              <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:28px">
+                <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:26px;color:#16130F">Order GS-24817</div>
+                <div style="font-family:'DM Mono',monospace;font-size:12px;color:#8C2F23;border:1px solid #8C2F23;padding:5px 12px">Out for delivery</div>
+              </div>
+              <div style="display:flex;flex-direction:column">
+                <sc-for list="{{ track }}" as="t" hint-placeholder-count="5">
+                  <div style="display:flex;gap:22px">
+                    <div style="display:flex;flex-direction:column;align-items:center;width:16px;flex:none">
+                      <div style="width:12px;height:12px;border-radius:6px;background:{{ t.dot }};border:2px solid #F1EDE4;outline:1px solid rgba(22,19,15,0.2)"></div>
+                      <div style="flex:1;width:1px;background:rgba(22,19,15,0.18);min-height:44px"></div>
+                    </div>
+                    <div style="padding-bottom:26px">
+                      <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:17px;color:{{ t.color }}">{{ t.title }}</div>
+                      <div style="font-size:14px;color:#4A443B;margin-top:4px">{{ t.body }}</div>
+                      <div style="font-family:'DM Mono',monospace;font-size:11px;color:#8B8377;margin-top:6px">{{ t.when }}</div>
+                    </div>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </div>
+          <div style="background:#16130F;color:#F1EDE4;padding:32px">
+            <div style="font-family:'DM Mono',monospace;font-size:10.5px;letter-spacing:0.14em;text-transform:uppercase;color:rgba(241,237,228,0.55)">Courier</div>
+            <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:22px;margin-top:6px">TCS · 8842 1190 3374</div>
+            <div style="font-size:14px;line-height:1.6;color:rgba(241,237,228,0.65);margin-top:10px">The rider will call 0301 2345678 before arriving. Keep PKR 15,300 in cash ready.</div>
+            <div style="height:1px;background:rgba(241,237,228,0.2);margin:24px 0"></div>
+            <div style="display:flex;flex-direction:column;gap:14px">
+              <sc-for list="{{ cartItems }}" as="c" hint-placeholder-count="2">
+                <div style="display:flex;gap:14px;align-items:center">
+                  <div style="width:60px;height:60px;flex:none;background:rgba(241,237,228,0.15)"></div>
+                  <div style="flex:1"><div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:600;font-size:14.5px">{{ c.model }}</div><div style="font-family:'DM Mono',monospace;font-size:11px;color:rgba(241,237,228,0.55);margin-top:3px">UK {{ c.size }}</div></div>
+                </div>
+              </sc-for>
+            </div>
+            <div style="border:1px solid rgba(241,237,228,0.4);padding:15px;text-align:center;font-size:14.5px;font-weight:600;margin-top:26px">Problem with this order?</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="font-family:'DM Mono',monospace;font-size:12px;letter-spacing:0.14em;text-transform:uppercase;color:#16130F">09 · Track — Mobile</div>
+      <div style="width:390px;background:#F1EDE4;border:1px solid rgba(22,19,15,0.18);border-radius:26px;overflow:hidden">
+        <dc-import name="GitsoleHeader" mobile="{{ yes }}" hint-size="100%,80px"></dc-import>
+        <div style="padding:22px 18px">
+          <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:28px;letter-spacing:-0.035em;color:#16130F">Track your order</div>
+          <div style="display:flex;gap:9px;margin-top:14px">
+            <div style="flex:1;border:1px solid #16130F;padding:14px;font-size:14.5px;color:#16130F">GS-24817</div>
+            <div style="background:#16130F;color:#F1EDE4;padding:14px 22px;font-size:14.5px;font-weight:600">Track</div>
+          </div>
+        </div>
+        <div style="margin:0 18px;background:#16130F;color:#F1EDE4;padding:18px">
+          <div style="display:flex;justify-content:space-between;align-items:center"><div style="font-family:'DM Mono',monospace;font-size:10.5px;letter-spacing:0.14em;text-transform:uppercase;color:rgba(241,237,228,0.55)">Status</div><div style="font-family:'DM Mono',monospace;font-size:10.5px;color:#E8B4AB">TCS 8842 1190</div></div>
+          <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:24px;margin-top:6px">Out for delivery</div>
+          <div style="font-size:13.5px;color:rgba(241,237,228,0.65);margin-top:6px">Keep PKR 15,300 cash ready. Rider will call first.</div>
+        </div>
+        <div style="padding:22px 18px 26px">
+          <sc-for list="{{ track }}" as="t" hint-placeholder-count="5">
+            <div style="display:flex;gap:16px">
+              <div style="display:flex;flex-direction:column;align-items:center;width:12px;flex:none">
+                <div style="width:10px;height:10px;border-radius:5px;background:{{ t.dot }};outline:1px solid rgba(22,19,15,0.2)"></div>
+                <div style="flex:1;width:1px;background:rgba(22,19,15,0.18);min-height:34px"></div>
+              </div>
+              <div style="padding-bottom:20px">
+                <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:15px;color:{{ t.color }}">{{ t.title }}</div>
+                <div style="font-size:13px;color:#4A443B;margin-top:3px">{{ t.body }}</div>
+                <div style="font-family:'DM Mono',monospace;font-size:10px;color:#8B8377;margin-top:5px">{{ t.when }}</div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 10 CONDITION GUIDE -->
+  <section data-screen-label="10 Condition guide" style="display:flex;gap:40px;align-items:flex-start">
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="font-family:'DM Mono',monospace;font-size:12px;letter-spacing:0.14em;text-transform:uppercase;color:#16130F">10 · Condition guide — Desktop</div>
+      <div data-artboard="1" style="width:1440px;background:#F1EDE4;border:1px solid rgba(22,19,15,0.18);overflow:hidden">
+        <dc-import name="GitsoleHeader" hint-size="100%,110px"></dc-import>
+        <div style="padding:72px 56px 48px;border-bottom:1px solid rgba(22,19,15,0.14);max-width:900px">
+          <div style="font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:#8C2F23">Condition guide</div>
+          <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:66px;line-height:0.95;letter-spacing:-0.04em;color:#16130F;margin-top:12px">Every pair is graded before it is listed.</div>
+          <div style="font-size:17px;line-height:1.6;color:#4A443B;margin-top:18px">These are pre-owned shoes and we don't pretend otherwise. Each pair gets a score out of 10, a worded tier, written notes on the flaws, and a close-up photo of anything visible. If you would be surprised by it when you open the parcel, it goes in the listing.</div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);border-bottom:1px solid rgba(22,19,15,0.14)">
+          <sc-for list="{{ tiers }}" as="t" hint-placeholder-count="4">
+            <div data-reveal="1" style="padding:34px 30px;border-right:1px solid rgba(22,19,15,0.14);display:flex;flex-direction:column;gap:14px">
+              <div style="position:relative;aspect-ratio:4/3;background:#E6E1D6"><image-slot id="gs-tier-{{ $index }}" shape="rect" src="{{ t.img }}" placeholder="Example pair"></image-slot></div>
+              <div style="font-family:'DM Mono',monospace;font-size:12px;color:#8C2F23">{{ t.range }}</div>
+              <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:26px;letter-spacing:-0.03em;color:#16130F">{{ t.name }}</div>
+              <div style="font-size:14.5px;line-height:1.6;color:#4A443B">{{ t.body }}</div>
+              <div style="font-family:'DM Mono',monospace;font-size:11px;color:#6E6558;border-top:1px solid rgba(22,19,15,0.14);padding-top:12px">Typical price {{ t.price }}</div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="padding:56px;display:grid;grid-template-columns:1fr 1fr;gap:56px">
+          <div>
+            <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:30px;letter-spacing:-0.03em;color:#16130F">What we check on every pair</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-top:24px">
+              <div><div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:16px;color:#16130F">Upper</div><div style="font-size:14px;color:#4A443B;margin-top:4px">Creasing, cracking, stains, colour fade.</div></div>
+              <div><div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:16px;color:#16130F">Midsole</div><div style="font-size:14px;color:#4A443B;margin-top:4px">Yellowing, separation, compression.</div></div>
+              <div><div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:16px;color:#16130F">Outsole</div><div style="font-size:14px;color:#4A443B;margin-top:4px">Tread remaining, uneven wear.</div></div>
+              <div><div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:16px;color:#16130F">Inside</div><div style="font-size:14px;color:#4A443B;margin-top:4px">Insole condition, heel lining, smell.</div></div>
+              <div><div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:16px;color:#16130F">Structure</div><div style="font-size:14px;color:#4A443B;margin-top:4px">Glue, stitching, shape retention.</div></div>
+              <div><div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:16px;color:#16130F">Authenticity</div><div style="font-size:14px;color:#4A443B;margin-top:4px">Branding, stitching and shape checked.</div></div>
+            </div>
+          </div>
+          <div style="background:#16130F;color:#F1EDE4;padding:36px">
+            <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:30px;line-height:1.05;letter-spacing:-0.03em">If it isn't as described, send it back.</div>
+            <div style="font-size:15px;line-height:1.6;color:rgba(241,237,228,0.7);margin-top:14px">Message us within 48 hours of delivery with photos. If the pair doesn't match its listing, we arrange the return and refund it. We would rather lose one sale than one customer.</div>
+            <div style="border:1px solid rgba(241,237,228,0.4);padding:15px;text-align:center;font-size:15px;font-weight:600;margin-top:24px">Read the return policy</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="font-family:'DM Mono',monospace;font-size:12px;letter-spacing:0.14em;text-transform:uppercase;color:#16130F">10 · Condition guide — Mobile</div>
+      <div style="width:390px;background:#F1EDE4;border:1px solid rgba(22,19,15,0.18);border-radius:26px;overflow:hidden">
+        <dc-import name="GitsoleHeader" mobile="{{ yes }}" hint-size="100%,80px"></dc-import>
+        <div style="padding:26px 18px 22px">
+          <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.16em;text-transform:uppercase;color:#8C2F23">Condition guide</div>
+          <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:36px;line-height:0.95;letter-spacing:-0.04em;color:#16130F;margin-top:10px">Every pair is graded before it is listed.</div>
+          <div style="font-size:14.5px;line-height:1.6;color:#4A443B;margin-top:12px">A score out of 10, a worded tier, written notes and a close-up of every visible flaw.</div>
+        </div>
+        <sc-for list="{{ tiers }}" as="t" hint-placeholder-count="4">
+          <div style="padding:20px 18px;border-top:1px solid rgba(22,19,15,0.14);display:flex;gap:14px">
+            <div style="position:relative;width:96px;height:96px;flex:none;background:#E6E1D6"><image-slot id="gs-tierm-{{ $index }}" shape="rect" src="{{ t.img }}"></image-slot></div>
+            <div>
+              <div style="font-family:'DM Mono',monospace;font-size:11px;color:#8C2F23">{{ t.range }}</div>
+              <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:20px;letter-spacing:-0.02em;color:#16130F;margin-top:2px">{{ t.name }}</div>
+              <div style="font-size:13px;line-height:1.5;color:#4A443B;margin-top:5px">{{ t.body }}</div>
+            </div>
+          </div>
+        </sc-for>
+        <div style="background:#16130F;color:#F1EDE4;padding:28px 18px;margin-top:8px">
+          <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:24px;line-height:1.05;letter-spacing:-0.03em">If it isn't as described, send it back.</div>
+          <div style="font-size:13.5px;line-height:1.6;color:rgba(241,237,228,0.7);margin-top:10px">Message us within 48 hours with photos and we arrange the return.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 11 ABOUT -->
+  <section data-screen-label="11 About" style="display:flex;gap:40px;align-items:flex-start">
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="font-family:'DM Mono',monospace;font-size:12px;letter-spacing:0.14em;text-transform:uppercase;color:#16130F">11 · About — Desktop</div>
+      <div data-artboard="1" style="width:1440px;background:#F1EDE4;border:1px solid rgba(22,19,15,0.18);overflow:hidden">
+        <dc-import name="GitsoleHeader" hint-size="100%,110px"></dc-import>
+        <div style="padding:80px 56px 56px;max-width:960px">
+          <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:76px;line-height:0.92;letter-spacing:-0.045em;color:#16130F">We don't sell everything. We select what is worth buying.</div>
+          <div style="font-size:18px;line-height:1.65;color:#4A443B;margin-top:24px;max-width:720px">Gitsole is a Pakistani thrift footwear brand. We buy branded pre-owned shoes, inspect them by hand, and list only the pairs we would be happy to wear ourselves. Everything else gets left behind.</div>
+        </div>
+        <div style="height:420px;background:#E6E1D6;position:relative"><image-slot id="gs-about" shape="rect" src="https://images.pexels.com/photos/34003822/pexels-photo-34003822.jpeg?auto=compress&cs=tinysrgb&w=800" placeholder="Wide photo — inspection table / stock shelf"></image-slot></div>
+        <div style="padding:64px 56px;display:grid;grid-template-columns:1fr 1fr;gap:64px;border-bottom:1px solid rgba(22,19,15,0.14)">
+          <div>
+            <div style="font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:#8C2F23">The problem</div>
+            <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:34px;line-height:1.05;letter-spacing:-0.03em;color:#16130F;margin-top:10px">Thrift shopping in Pakistan is a gamble.</div>
+            <div style="font-size:16px;line-height:1.65;color:#4A443B;margin-top:14px">Bulk sellers upload hundreds of pairs with one blurry photo and no honest description. Prices jump because of a logo. Delivery charges appear at the last step. You find out what you actually bought when the parcel opens.</div>
+          </div>
+          <div>
+            <div style="font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:#8C2F23">What we do instead</div>
+            <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:34px;line-height:1.05;letter-spacing:-0.03em;color:#16130F;margin-top:10px">We do the hard part before you see the shoe.</div>
+            <div style="font-size:16px;line-height:1.65;color:#4A443B;margin-top:14px">Sourcing, inspecting, cleaning, grading, photographing and pricing against real retail value. By the time a pair reaches the site, the decision left for you is whether you like it.</div>
+          </div>
+        </div>
+        <div style="background:#16130F;color:#F1EDE4;padding:64px 56px">
+          <div style="font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:#E8B4AB">What we stand for</div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:44px 48px;margin-top:32px">
+            <div><div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:24px">Quality over quantity</div><div style="font-size:15px;line-height:1.6;color:rgba(241,237,228,0.65);margin-top:8px">Fewer pairs, each one selected for a reason.</div></div>
+            <div><div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:24px">Best value</div><div style="font-size:15px;line-height:1.6;color:rgba(241,237,228,0.65);margin-top:8px">Competitive prices without dropping standards.</div></div>
+            <div><div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:24px">Honest listings</div><div style="font-size:15px;line-height:1.6;color:rgba(241,237,228,0.65);margin-top:8px">Flaws shown, condition graded, nothing hidden.</div></div>
+            <div><div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:24px">Nationwide access</div><div style="font-size:15px;line-height:1.6;color:rgba(241,237,228,0.65);margin-top:8px">Free home delivery to every city in Pakistan.</div></div>
+            <div><div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:24px">Wide variety</div><div style="font-size:15px;line-height:1.6;color:rgba(241,237,228,0.65);margin-top:8px">Nike, Adidas, New Balance, Jordan and more.</div></div>
+            <div><div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:24px">Customer first</div><div style="font-size:15px;line-height:1.6;color:rgba(241,237,228,0.65);margin-top:8px">A repeat customer beats a quick sale.</div></div>
+          </div>
+        </div>
+        <div style="padding:64px 56px;text-align:center">
+          <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:46px;line-height:1.05;letter-spacing:-0.035em;color:#16130F;max-width:820px;margin:0 auto">Quality over quantity. Every pair should be worth your money.</div>
+          <div style="display:flex;gap:12px;justify-content:center;margin-top:28px">
+            <div style="background:#16130F;color:#F1EDE4;padding:17px 34px;font-size:15px;font-weight:600">See what's in stock</div>
+            <div style="border:1.5px solid #16130F;color:#16130F;padding:17px 34px;font-size:15px;font-weight:600">Talk to us on WhatsApp</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="font-family:'DM Mono',monospace;font-size:12px;letter-spacing:0.14em;text-transform:uppercase;color:#16130F">11 · About — Mobile</div>
+      <div style="width:390px;background:#F1EDE4;border:1px solid rgba(22,19,15,0.18);border-radius:26px;overflow:hidden">
+        <dc-import name="GitsoleHeader" mobile="{{ yes }}" hint-size="100%,80px"></dc-import>
+        <div style="padding:28px 18px 22px">
+          <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:40px;line-height:0.92;letter-spacing:-0.045em;color:#16130F">We don't sell everything. We select what is worth buying.</div>
+          <div style="font-size:14.5px;line-height:1.6;color:#4A443B;margin-top:14px">A Pakistani thrift footwear brand. We buy branded pre-owned shoes, inspect them by hand, and list only the pairs we'd wear ourselves.</div>
+        </div>
+        <div style="height:220px;background:#E6E1D6;position:relative"><image-slot id="gs-aboutm" shape="rect" src="https://images.pexels.com/photos/34003822/pexels-photo-34003822.jpeg?auto=compress&cs=tinysrgb&w=800" placeholder="Photo"></image-slot></div>
+        <div style="padding:26px 18px;border-bottom:1px solid rgba(22,19,15,0.14)">
+          <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.16em;text-transform:uppercase;color:#8C2F23">The problem</div>
+          <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:26px;line-height:1.05;letter-spacing:-0.03em;color:#16130F;margin-top:8px">Thrift shopping in Pakistan is a gamble.</div>
+          <div style="font-size:14px;line-height:1.6;color:#4A443B;margin-top:10px">Blurry photos, no honest description, prices that jump for a logo, delivery charges at the last step.</div>
+        </div>
+        <div style="background:#16130F;color:#F1EDE4;padding:28px 18px">
+          <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.16em;text-transform:uppercase;color:#E8B4AB">What we stand for</div>
+          <div style="display:flex;flex-direction:column;gap:18px;margin-top:18px">
+            <div><div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:18px">Quality over quantity</div><div style="font-size:13.5px;color:rgba(241,237,228,0.65);margin-top:4px">Fewer pairs, each selected for a reason.</div></div>
+            <div><div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:18px">Honest listings</div><div style="font-size:13.5px;color:rgba(241,237,228,0.65);margin-top:4px">Flaws shown, condition graded.</div></div>
+            <div><div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:18px">Nationwide access</div><div style="font-size:13.5px;color:rgba(241,237,228,0.65);margin-top:4px">Free home delivery across Pakistan.</div></div>
+            <div><div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:18px">Customer first</div><div style="font-size:13.5px;color:rgba(241,237,228,0.65);margin-top:4px">A repeat customer beats a quick sale.</div></div>
+          </div>
+        </div>
+        <div style="padding:30px 18px">
+          <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:28px;line-height:1.05;letter-spacing:-0.035em;color:#16130F">Quality over quantity. Every pair should be worth your money.</div>
+          <div style="background:#16130F;color:#F1EDE4;padding:15px;text-align:center;font-size:15px;font-weight:600;margin-top:18px">See what's in stock</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 12 CONTACT + FAQ -->
+  <section data-screen-label="12 Contact and FAQ" style="display:flex;gap:40px;align-items:flex-start">
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="font-family:'DM Mono',monospace;font-size:12px;letter-spacing:0.14em;text-transform:uppercase;color:#16130F">12 · Contact &amp; FAQ — Desktop</div>
+      <div data-artboard="1" style="width:1440px;background:#F1EDE4;border:1px solid rgba(22,19,15,0.18);overflow:hidden">
+        <dc-import name="GitsoleHeader" hint-size="100%,110px"></dc-import>
+        <div style="display:grid;grid-template-columns:1fr 480px">
+          <div style="padding:64px 56px;border-right:1px solid rgba(22,19,15,0.14)">
+            <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:52px;line-height:0.98;letter-spacing:-0.04em;color:#16130F">Questions before you buy?</div>
+            <div style="font-size:16.5px;line-height:1.6;color:#4A443B;margin-top:14px;max-width:520px">WhatsApp is the fastest way to reach us. Send the item code and we'll answer with real details, extra photos, or a size check.</div>
+            <div style="display:flex;flex-direction:column;gap:14px;margin-top:32px;max-width:520px">
+              <div style="background:#16130F;color:#F1EDE4;padding:20px 24px;display:flex;align-items:center;justify-content:space-between">
+                <div><div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:19px">WhatsApp</div><div style="font-family:'DM Mono',monospace;font-size:13px;color:rgba(241,237,228,0.65);margin-top:3px">0300 1234567 · replies within an hour</div></div>
+                <div style="font-size:20px">→</div>
+              </div>
+              <div style="border:1px solid rgba(22,19,15,0.2);padding:20px 24px;display:flex;align-items:center;justify-content:space-between">
+                <div><div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:19px;color:#16130F">Instagram</div><div style="font-family:'DM Mono',monospace;font-size:13px;color:#6E6558;margin-top:3px">@gitsole · new drops posted first</div></div>
+                <div style="font-size:20px;color:#16130F">→</div>
+              </div>
+              <div style="border:1px solid rgba(22,19,15,0.2);padding:20px 24px;display:flex;align-items:center;justify-content:space-between">
+                <div><div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:19px;color:#16130F">Email</div><div style="font-family:'DM Mono',monospace;font-size:13px;color:#6E6558;margin-top:3px">hello@gitsole.pk · within 24 hours</div></div>
+                <div style="font-size:20px;color:#16130F">→</div>
+              </div>
+            </div>
+            <div style="margin-top:44px;border-top:1px solid rgba(22,19,15,0.14);padding-top:28px;max-width:520px">
+              <div style="font-family:'DM Mono',monospace;font-size:10.5px;letter-spacing:0.14em;text-transform:uppercase;color:#8B8377;margin-bottom:14px">Or send a message</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+                <div style="border:1px solid rgba(22,19,15,0.25);padding:14px;font-size:14.5px;color:#8B8377">Your name</div>
+                <div style="border:1px solid rgba(22,19,15,0.25);padding:14px;font-size:14.5px;color:#8B8377">WhatsApp number</div>
+                <div style="grid-column:1 / -1;border:1px solid rgba(22,19,15,0.25);padding:14px;font-size:14.5px;color:#8B8377;height:90px">Item code and your question</div>
+              </div>
+              <div style="background:#8C2F23;color:#fff;padding:16px;text-align:center;font-size:15px;font-weight:600;margin-top:12px">Send message</div>
+            </div>
+          </div>
+          <div style="padding:64px 40px;background:#FAF8F3">
+            <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:30px;letter-spacing:-0.03em;color:#16130F;margin-bottom:8px">Common questions</div>
+            <sc-for list="{{ faqs }}" as="f" hint-placeholder-count="6">
+              <div style="border-bottom:1px solid rgba(22,19,15,0.14);padding:20px 0">
+                <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px">
+                  <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:17px;line-height:1.3;color:#16130F">{{ f.q }}</div>
+                  <div style="font-size:18px;color:#8C2F23;line-height:1">+</div>
+                </div>
+                <div style="font-size:14.5px;line-height:1.6;color:#4A443B;margin-top:8px;max-width:380px">{{ f.a }}</div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="font-family:'DM Mono',monospace;font-size:12px;letter-spacing:0.14em;text-transform:uppercase;color:#16130F">12 · Contact &amp; FAQ — Mobile</div>
+      <div style="width:390px;background:#F1EDE4;border:1px solid rgba(22,19,15,0.18);border-radius:26px;overflow:hidden">
+        <dc-import name="GitsoleHeader" mobile="{{ yes }}" hint-size="100%,80px"></dc-import>
+        <div style="padding:26px 18px 20px">
+          <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:34px;line-height:0.98;letter-spacing:-0.04em;color:#16130F">Questions before you buy?</div>
+          <div style="font-size:14.5px;line-height:1.6;color:#4A443B;margin-top:12px">Send the item code on WhatsApp and we'll reply with real details or extra photos.</div>
+          <div style="display:flex;flex-direction:column;gap:10px;margin-top:18px">
+            <div style="background:#16130F;color:#F1EDE4;padding:16px 18px;display:flex;align-items:center;justify-content:space-between"><div><div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:16px">WhatsApp</div><div style="font-family:'DM Mono',monospace;font-size:11.5px;color:rgba(241,237,228,0.65);margin-top:2px">0300 1234567</div></div><div>→</div></div>
+            <div style="border:1px solid rgba(22,19,15,0.2);padding:16px 18px;display:flex;align-items:center;justify-content:space-between"><div><div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:16px;color:#16130F">Instagram</div><div style="font-family:'DM Mono',monospace;font-size:11.5px;color:#6E6558;margin-top:2px">@gitsole</div></div><div style="color:#16130F">→</div></div>
+          </div>
+        </div>
+        <div style="padding:6px 18px 26px">
+          <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:22px;letter-spacing:-0.03em;color:#16130F;margin-bottom:4px">Common questions</div>
+          <sc-for list="{{ faqs }}" as="f" hint-placeholder-count="6">
+            <div style="border-bottom:1px solid rgba(22,19,15,0.14);padding:16px 0;display:flex;align-items:flex-start;justify-content:space-between;gap:14px">
+              <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:15px;line-height:1.3;color:#16130F">{{ f.q }}</div>
+              <div style="font-size:17px;color:#8C2F23;line-height:1">+</div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="background:#16130F;color:#F1EDE4;padding:26px 18px;text-align:center">
+          <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:22px;letter-spacing:-0.03em">Free home delivery, all over Pakistan.</div>
+          <div style="font-size:13.5px;color:rgba(241,237,228,0.65);margin-top:8px">Cash on delivery. No hidden charges.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{}">
+class Component extends DCLogic {
+  state = { sheetOpen: true, cart: 2 };
+
+  componentDidMount() {
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduce) return;
+    const groups = new Map();
+    document.querySelectorAll("[data-reveal]").forEach(function (el) {
+      const key = el.parentElement;
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key).push(el);
+      el.style.opacity = "0";
+    });
+    const io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (!e.isIntersecting) return;
+        io.unobserve(e.target);
+        const sibs = groups.get(e.target.parentElement) || [e.target];
+        const i = sibs.indexOf(e.target);
+        e.target.animate(
+          [{ opacity: 0, transform: "translateY(18px)" }, { opacity: 1, transform: "none" }],
+          { duration: 560, delay: i * 45, easing: "cubic-bezier(.2,.7,.2,1)", fill: "both" }
+        );
+      });
+    }, { threshold: 0.15 });
+    groups.forEach(function (list) { list.forEach(function (el) { io.observe(el); }); });
+
+    const fio = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (!e.isIntersecting) return;
+        fio.unobserve(e.target);
+        const bar = e.target.querySelector("[data-fill]");
+        if (!bar) return;
+        bar.animate([{ width: "0%" }, { width: bar.getAttribute("data-fill") + "%" }], { duration: 900, delay: 180, easing: "cubic-bezier(.22,1,.36,1)", fill: "both" });
+      });
+    }, { threshold: 0.5 });
+    document.querySelectorAll("[data-fill]").forEach(function (el) { if (el.parentElement) fio.observe(el.parentElement); });
+
+    const revealAll = function () {
+      document.querySelectorAll("[data-reveal]").forEach(function (el) { el.style.opacity = "1"; });
+      document.querySelectorAll("[data-fill]").forEach(function (el) { el.style.width = el.getAttribute("data-fill") + "%"; });
+    };
+    window.addEventListener("beforeprint", revealAll);
+    window.setTimeout(revealAll, 12000);
+  }
+
+  flyToCart(e) {
+    const board = e.currentTarget.closest("[data-artboard]");
+    if (!board) return;
+    const badge = board.querySelector("[data-cart-badge]");
+    const source = board.querySelector("image-slot");
+    if (!badge || !source) return;
+    const a = source.getBoundingClientRect();
+    const b = badge.getBoundingClientRect();
+    const ghost = document.createElement("div");
+    ghost.style.cssText = "position:fixed;z-index:9999;left:" + a.left + "px;top:" + a.top + "px;width:" + a.width + "px;height:" + a.height + "px;background:#16130F;opacity:.9;pointer-events:none";
+    document.body.appendChild(ghost);
+    const scale = 26 / Math.max(a.width, 1);
+    ghost.animate(
+      [
+        { transform: "translate(0,0) scale(1)", opacity: 0.85 },
+        { transform: "translate(" + (b.left - a.left) + "px," + (b.top - a.top) + "px) scale(" + scale + ")", opacity: 0.15 }
+      ],
+      { duration: 720, easing: "cubic-bezier(.5,0,.2,1)", fill: "both" }
+    ).onfinish = function () {
+      ghost.remove();
+      badge.animate([{ transform: "scale(1)" }, { transform: "scale(1.5)" }, { transform: "scale(1)" }], { duration: 420, easing: "cubic-bezier(.2,.8,.2,1)" });
+    };
+    const next = this.state.cart + 1;
+    this.setState({ cart: next });
+    window.setTimeout(function () { badge.textContent = String(next); }, 660);
+  }
+
+  renderVals() {
+    const featured = [
+      { brand: "Nike", model: "Air Max 90 Infrared", size: "9", score: "9/10", tier: "Excellent", price: "PKR 8,900", was: "PKR 24,000" },
+      { brand: "New Balance", model: "574 Grey Day", size: "8", score: "8.5/10", tier: "Excellent", price: "PKR 6,400", was: "PKR 18,500" },
+      { brand: "Adidas", model: "Samba OG", size: "10", score: "9.5/10", tier: "Like new", price: "PKR 11,500", was: "PKR 27,000" },
+      { brand: "Converse", model: "Chuck 70 Black", size: "7", score: "8/10", tier: "Great", price: "PKR 4,200", was: "PKR 12,900" }
+    ];
+    const shopItems = [
+      { brand: "Nike", model: "Air Max 90 Infrared", size: "9", score: "9/10", tier: "Excellent", price: "PKR 8,900", was: "PKR 24,000", flag: "New in" },
+      { brand: "Jordan", model: "1 Mid Shadow", size: "8.5", score: "8.5/10", tier: "Excellent", price: "PKR 14,500", was: "PKR 38,000", flag: "One pair" },
+      { brand: "Asics", model: "Gel-Kayano 14", size: "9.5", score: "9/10", tier: "Excellent", price: "PKR 9,800", was: "PKR 26,500", flag: "New in" },
+      { brand: "New Balance", model: "574 Grey Day", size: "8", score: "8.5/10", tier: "Excellent", price: "PKR 6,400", was: "PKR 18,500", flag: "One pair" },
+      { brand: "Vans", model: "Old Skool Black", size: "10", score: "8/10", tier: "Great", price: "PKR 4,900", was: "PKR 13,500", flag: "One pair" },
+      { brand: "Timberland", model: "6\" Premium Wheat", size: "9", score: "9/10", tier: "Excellent", price: "PKR 12,900", was: "PKR 34,000", flag: "New in" },
+      { brand: "Puma", model: "Suede Classic XXI", size: "9", score: "7.5/10", tier: "Great", price: "PKR 3,600", was: "PKR 11,000", flag: "Best value" },
+      { brand: "Reebok", model: "Club C 85", size: "8", score: "8.5/10", tier: "Excellent", price: "PKR 5,200", was: "PKR 15,000", flag: "One pair" },
+      { brand: "Adidas", model: "Ultraboost 21", size: "10", score: "8/10", tier: "Great", price: "PKR 10,400", was: "PKR 32,000", flag: "One pair" }
+    ];
+    const searchItems = [
+      { brand: "Nike", model: "Air Max 90 Infrared", size: "9", score: "9/10", tier: "Excellent", price: "PKR 8,900" },
+      { brand: "Nike", model: "Air Max 95 Neon", size: "9", score: "8/10", tier: "Great", price: "PKR 11,200" },
+      { brand: "Nike", model: "Air Max 97 Silver", size: "9", score: "8.5/10", tier: "Excellent", price: "PKR 12,800" },
+      { brand: "Nike", model: "Air Max 1 Patta", size: "9", score: "7.5/10", tier: "Good", price: "PKR 9,400" },
+      { brand: "Nike", model: "Air Max Plus TN", size: "9", score: "9/10", tier: "Excellent", price: "PKR 13,600" },
+      { brand: "Nike", model: "Air Max Excee", size: "9", score: "8/10", tier: "Great", price: "PKR 5,800" }
+    ];
+    const px = function(id){ return 'https://images.pexels.com/photos/'+id+'/pexels-photo-'+id+'.jpeg?auto=compress&cs=tinysrgb&w=800'; };
+    [2529148,11946030,27575462,533442].forEach(function(id,i){ featured[i].img = px(id); });
+    [2529148,2456362,2529147,11946030,12739976,18110858,13536939,11324518,33231313].forEach(function(id,i){ shopItems[i].img = px(id); });
+    [2529148,2529147,11324518,33231313,13536939,39120537].forEach(function(id,i){ searchItems[i].img = px(id); });
+    const alts = [39120537, 12739976, 13536939, 33231313, 11324518, 2456362, 18110858, 11946030, 5172731];
+    const listedTxt = ["listed today", "listed 2 days ago", "listed 3 days ago", "listed this week", "listed 5 days ago"];
+    [featured, shopItems, searchItems].forEach(function (list) {
+      list.forEach(function (p, i) {
+        p.alt = px(alts[(i + 3) % alts.length]);
+        p.listed = listedTxt[i % listedTxt.length];
+      });
+    });
+    const self = this;
+    return {
+      yes: true,
+      addToCart: function (e) { self.flyToCart(e); },
+      toggleSheet: function () { self.setState({ sheetOpen: !self.state.sheetOpen }); },
+      sheetT: this.state.sheetOpen ? "translateY(0)" : "translateY(100%)",
+      sheetBg: this.state.sheetOpen ? "rgba(22,19,15,0.45)" : "rgba(22,19,15,0)",
+      featured,
+      featuredMobile: featured.slice(0, 4),
+      shopItems,
+      shopMobile: shopItems.slice(0, 6),
+      searchItems,
+      searchMobile: searchItems.slice(0, 4),
+      brands: ["Nike", "Adidas", "New Balance", "Jordan", "Puma", "Reebok", "Converse", "Vans", "ASICS", "Skechers", "Under Armour", "Fila", "Timberland"],
+      sizes: ["6", "6.5", "7", "7.5", "8", "8.5", "9", "9.5", "10", "10.5", "11", "12"],
+      cartItems: [
+        { brand: "Nike", model: "Air Max 90 Infrared", size: "9", score: "9/10", tier: "Excellent", price: "PKR 8,900", code: "GS-0428", img: px(2529148) },
+        { brand: "New Balance", model: "574 Grey Day", size: "8", score: "8.5/10", tier: "Excellent", price: "PKR 6,400", code: "GS-0391", img: px(11946030) }
+      ],
+      steps: [
+        { n: "01", title: "We confirm on WhatsApp", body: "Product, size, price, name, phone number, address and city.", when: "Within a few hours" },
+        { n: "02", title: "Pair is checked and prepared", body: "Final inspection and cleaning before it leaves us.", when: "Same day" },
+        { n: "03", title: "Packed and handed to the courier", body: "You get the tracking number on WhatsApp.", when: "24–48 hours" },
+        { n: "04", title: "Delivered to your door", body: "Pay the rider in cash. Free delivery, anywhere in Pakistan.", when: "2–4 days" }
+      ],
+      track: [
+        { title: "Order placed", body: "GS-24817 received on the website.", when: "23 Aug, 2:14 PM", dot: "#8C2F23", color: "#16130F" },
+        { title: "Confirmed on WhatsApp", body: "Size, address and cash amount confirmed with you.", when: "23 Aug, 4:02 PM", dot: "#8C2F23", color: "#16130F" },
+        { title: "Packed and dispatched", body: "Handed to TCS, tracking 8842 1190 3374.", when: "24 Aug, 11:30 AM", dot: "#8C2F23", color: "#16130F" },
+        { title: "Out for delivery", body: "Rider will call 0301 2345678 before arriving.", when: "26 Aug, 9:05 AM", dot: "#16130F", color: "#16130F" },
+        { title: "Delivered", body: "Pay PKR 15,300 in cash to the rider.", when: "Expected today", dot: "#DAD5CB", color: "#8B8377" }
+      ],
+      tiers: [
+        { range: "9.5 – 10", name: "Like new", body: "Barely worn. No visible flaws beyond the faintest sole marks. Often deadstock or tried on once.", price: "45–60% of retail", img: px(533442) },
+        { range: "8.5 – 9", name: "Excellent", body: "Light wear only. Clean upper, minor creasing, small marks that photograph honestly.", price: "30–45% of retail", img: px(2529148) },
+        { range: "7.5 – 8", name: "Great", body: "Clearly worn but strong. Visible creasing or scuffs, sole tread well above half.", price: "25–35% of retail", img: px(11946030) },
+        { range: "6.5 – 7", name: "Good", body: "Honest wear at an honest price. Everything is functional and every flaw is photographed.", price: "15–25% of retail", img: px(12739976) }
+      ],
+      faqs: [
+        { q: "Are these shoes original?", a: "Yes. We only buy branded pairs and check branding, stitching and shape before listing. If we are not sure, we do not list it." },
+        { q: "Is delivery really free?", a: "Yes, anywhere in Pakistan. The price you see on the product page is the price you pay the rider." },
+        { q: "Can I pay cash on delivery?", a: "Yes, cash on delivery is our default. Bank transfer and Easypaisa are also available with a small discount." },
+        { q: "What if the size doesn't fit?", a: "Every listing shows insole length in cm. Message us before ordering and we will help you check against a shoe you already own." },
+        { q: "Can I get more photos before ordering?", a: "Send the item code on WhatsApp and we will send extra photos or a short video of the actual pair." },
+        { q: "Will a sold pair come back in stock?", a: "Usually not. Thrift stock is single-piece, so most models never repeat in the same size and condition." }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

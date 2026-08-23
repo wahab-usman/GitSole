@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Instrument+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>@keyframes gsMarquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }</style>
+</helmet>
+<div style="width:100%">
+  <sc-if value="{{ isMobile }}" hint-placeholder-val="{{ false }}">
+    <div style="width:100%;background:#16130F">
+      <div style="padding:7px 14px;text-align:center;font-family:'DM Mono',monospace;font-size:9.5px;letter-spacing:0.14em;color:#F1EDE4;text-transform:uppercase">Free home delivery · all over pakistan</div>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;background:#F1EDE4;border-bottom:1px solid rgba(22,19,15,0.14)">
+      <div style="display:flex;flex-direction:column;gap:4px;width:20px">
+        <div style="height:1.5px;background:#16130F"></div>
+        <div style="height:1.5px;background:#16130F"></div>
+        <div style="height:1.5px;background:#16130F;width:13px"></div>
+      </div>
+      <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:21px;letter-spacing:-0.03em;color:#16130F">GITSOLE</div>
+      <div style="display:flex;align-items:center;gap:14px">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#16130F" stroke-width="2"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-4-4"></path></svg>
+        <div style="position:relative">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#16130F" stroke-width="2"><path d="M6 8h12l-1.2 12H7.2L6 8z"></path><path d="M9 8V6a3 3 0 016 0v2"></path></svg>
+          <div style="position:absolute;top:-5px;right:-6px;min-width:14px;height:14px;border-radius:7px;background:#8C2F23;color:#fff;font-family:'DM Mono',monospace;font-size:9px;display:flex;align-items:center;justify-content:center;padding:0 3px">2</div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+  <sc-if value="{{ isDesktop }}" hint-placeholder-val="{{ true }}">
+    <div style="width:100%;background:#16130F">
+      <div style="padding:9px 0;overflow:hidden">
+        <div style="display:flex;width:max-content;animation:gsMarquee 46s linear infinite" style-hover="animation-play-state:paused">
+          <div style="display:flex;align-items:center;gap:36px;padding-right:36px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.16em;color:#F1EDE4;text-transform:uppercase">
+            <span>Free home delivery · all over pakistan</span><span style="opacity:0.35">/</span><span>Cash on delivery</span><span style="opacity:0.35">/</span><span>Every pair inspected by hand</span><span style="opacity:0.35">/</span><span>One pair, one size, one price</span><span style="opacity:0.35">/</span><span>Not as described? We take it back</span><span style="opacity:0.35">/</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:36px;padding-right:36px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.16em;color:#F1EDE4;text-transform:uppercase">
+            <span>Free home delivery · all over pakistan</span><span style="opacity:0.35">/</span><span>Cash on delivery</span><span style="opacity:0.35">/</span><span>Every pair inspected by hand</span><span style="opacity:0.35">/</span><span>One pair, one size, one price</span><span style="opacity:0.35">/</span><span>Not as described? We take it back</span><span style="opacity:0.35">/</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:32px;padding:18px 40px;background:#F1EDE4;border-bottom:1px solid rgba(22,19,15,0.14)">
+      <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:26px;letter-spacing:-0.035em;color:#16130F">GITSOLE</div>
+      <div style="display:flex;align-items:center;gap:30px;font-family:'Instrument Sans',sans-serif;font-size:14px;font-weight:500;color:#16130F">
+        <a href="#" style="color:#16130F;text-decoration:none">Shop All</a>
+        <a href="#" style="color:#16130F;text-decoration:none">Brands</a>
+        <a href="#" style="color:#16130F;text-decoration:none">New In</a>
+        <a href="#" style="color:#16130F;text-decoration:none">Condition Guide</a>
+        <a href="#" style="color:#16130F;text-decoration:none">About</a>
+      </div>
+      <div style="display:flex;align-items:center;gap:18px">
+        <div style="display:flex;align-items:center;gap:8px;padding:8px 14px;border:1px solid rgba(22,19,15,0.2);border-radius:999px;width:190px">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6E6558" stroke-width="2"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-4-4"></path></svg>
+          <span style="font-family:'Instrument Sans',sans-serif;font-size:12.5px;color:#6E6558">Search brand or size</span>
+        </div>
+        <div style="position:relative">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#16130F" stroke-width="1.8"><path d="M6 8h12l-1.2 12H7.2L6 8z"></path><path d="M9 8V6a3 3 0 016 0v2"></path></svg>
+          <div data-cart-badge="1" style="position:absolute;top:-6px;right:-7px;min-width:16px;height:16px;border-radius:8px;background:#8C2F23;color:#fff;font-family:'DM Mono',monospace;font-size:10px;display:flex;align-items:center;justify-content:center;padding:0 4px">2</div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:110},&quot;mobile&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const m = !!this.props.mobile;
+    return { isMobile: m, isDesktop: !m };
+  }
+}
+</script>
+</body>
+</html>

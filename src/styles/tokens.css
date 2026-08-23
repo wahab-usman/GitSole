@@ -1,0 +1,32 @@
+:root {
+  /* Brand Color Tokens */
+  --color-ink: #16130F;
+  --color-paper: #F1EDE4;
+  --color-card: #FAF8F3;
+  --color-oxblood: #8C2F23;
+  --color-oxblood-hover: #73261C;
+  --color-rose: #E8B4AB;
+  --color-body: #4A443B;
+  --color-muted: #6E6558;
+  --color-faint: #8B8377;
+  --color-disabled: #B5AC9E;
+  --color-image-bg: #E6E1D6;
+  --color-line: rgba(22, 19, 15, 0.14);
+  --color-line-strong: rgba(22, 19, 15, 0.22);
+  --color-on-ink: rgba(241, 237, 228, 0.72);
+  --color-on-ink-line: rgba(241, 237, 228, 0.25);
+
+  /* Typography */
+  --font-display: 'Bricolage Grotesque', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-body: 'Instrument Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'DM Mono', monospace;
+
+  /* Spacing */
+  --gutter-mobile: 18px;
+  --gutter-desktop: 40px;
+  --gutter-editorial: 56px;
+
+  /* Breakpoints (reference) */
+  --bp-md: 768px;
+  --bp-lg: 1280px;
+}
