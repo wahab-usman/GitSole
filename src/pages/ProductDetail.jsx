@@ -557,9 +557,7 @@ export default function ProductDetail() {
         @media (min-width: 1024px) {
           .pdp-buy-col {
             position: sticky;
-            top: 60px;
-            max-height: calc(100vh - 60px);
-            overflow-y: auto;
+            top: 90px;
           }
           .mobile-gallery-wrapper { display: none !important; }
           .desktop-gallery-main { display: block !important; }

@@ -24,11 +24,21 @@ import FAQ from './pages/FAQ';
 import AdminLogin from './pages/AdminLogin';
 import AdminDashboard from './pages/AdminDashboard';
 
+import SmoothScroll, { useLenis } from './components/SmoothScroll';
+import ScrollToTopButton from './components/ScrollToTopButton';
+
 function ScrollToTop() {
   const { pathname } = useLocation();
+  const lenis = useLenis();
+
   React.useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [pathname]);
+    if (lenis) {
+      lenis.scrollTo(0, { immediate: true });
+    } else {
+      window.scrollTo(0, 0);
+    }
+  }, [pathname, lenis]);
+
   return null;
 }
 
@@ -41,6 +51,7 @@ function Layout({ children }) {
       {!isBarePage && <Header />}
       <main style={{ flex: 1 }}>{children}</main>
       {!isBarePage && <Footer />}
+      <ScrollToTopButton />
     </div>
   );
 }
@@ -51,32 +62,34 @@ export default function App() {
       <OrderProvider>
         <CartProvider>
           <AdminAuthProvider>
-            <BrowserRouter>
-              <ScrollToTop />
-              <Layout>
-                <Routes>
-                  <Route path="/" element={<Home />} />
-                  <Route path="/shop" element={<Shop />} />
-                  <Route path="/search" element={<Search />} />
-                  <Route path="/product/:code" element={<ProductDetail />} />
-                  <Route path="/cart" element={<Cart />} />
-                  <Route path="/checkout" element={<Checkout />} />
-                  <Route path="/order/:id" element={<OrderConfirmation />} />
-                  <Route path="/track" element={<TrackOrder />} />
-                  <Route path="/condition-guide" element={<ConditionGuide />} />
-                  <Route path="/about" element={<About />} />
-                  <Route path="/contact" element={<Contact />} />
-                  <Route path="/returns" element={<ReturnsGuarantee />} />
-                  <Route path="/returns-guarantee" element={<ReturnsGuarantee />} />
-                  <Route path="/guarantee" element={<ReturnsGuarantee />} />
-                  <Route path="/faq" element={<FAQ />} />
-                  <Route path="/faqs" element={<FAQ />} />
-                  <Route path="/admin/login" element={<AdminLogin />} />
-                  <Route path="/admin" element={<AdminDashboard />} />
-                  <Route path="*" element={<Home />} />
-                </Routes>
-              </Layout>
-            </BrowserRouter>
+            <SmoothScroll>
+              <BrowserRouter>
+                <ScrollToTop />
+                <Layout>
+                  <Routes>
+                    <Route path="/" element={<Home />} />
+                    <Route path="/shop" element={<Shop />} />
+                    <Route path="/search" element={<Search />} />
+                    <Route path="/product/:code" element={<ProductDetail />} />
+                    <Route path="/cart" element={<Cart />} />
+                    <Route path="/checkout" element={<Checkout />} />
+                    <Route path="/order/:id" element={<OrderConfirmation />} />
+                    <Route path="/track" element={<TrackOrder />} />
+                    <Route path="/condition-guide" element={<ConditionGuide />} />
+                    <Route path="/about" element={<About />} />
+                    <Route path="/contact" element={<Contact />} />
+                    <Route path="/returns" element={<ReturnsGuarantee />} />
+                    <Route path="/returns-guarantee" element={<ReturnsGuarantee />} />
+                    <Route path="/guarantee" element={<ReturnsGuarantee />} />
+                    <Route path="/faq" element={<FAQ />} />
+                    <Route path="/faqs" element={<FAQ />} />
+                    <Route path="/admin/login" element={<AdminLogin />} />
+                    <Route path="/admin" element={<AdminDashboard />} />
+                    <Route path="*" element={<Home />} />
+                  </Routes>
+                </Layout>
+              </BrowserRouter>
+            </SmoothScroll>
           </AdminAuthProvider>
         </CartProvider>
       </OrderProvider>

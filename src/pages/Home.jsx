@@ -6,7 +6,7 @@ import ProductCard from '../components/ProductCard';
 
 export default function Home() {
   const { products } = useProducts();
-  const featuredProducts = products.filter(p => p.featured || p.status === 'available').slice(0, 4);
+  const featuredProducts = products.filter(p => p.featured || p.status === 'available').slice(0, 8);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', backgroundColor: 'var(--color-paper)' }}>
@@ -16,8 +16,7 @@ export default function Home() {
         <div className="hero-copy-box" style={{
           display: 'flex',
           flexDirection: 'column',
-          justifyContent: 'space-between',
-          borderRight: '1px solid var(--color-line)'
+          justifyContent: 'space-between'
         }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <div style={{
@@ -63,18 +62,20 @@ export default function Home() {
         {/* Hero Photo Column */}
         <div className="hero-photo-box" style={{
           position: 'relative',
-          backgroundColor: 'var(--color-image-bg)',
+          backgroundColor: 'var(--color-paper)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
           overflow: 'hidden'
         }}>
           <img
-            src="https://images.unsplash.com/photo-1552346154-21d32810aba3?auto=format&fit=crop&w=1200&q=85"
-            alt="Gitsole hand-picked thrift sneaker"
+            src="/hero-banner.jpg"
+            alt="Gitsole hand-picked vintage branded thrift sneaker"
             style={{
-              position: 'absolute',
-              inset: 0,
               width: '100%',
               height: '100%',
-              objectFit: 'cover'
+              objectFit: 'contain',
+              mixBlendMode: 'multiply'
             }}
           />
         </div>
@@ -218,7 +219,6 @@ export default function Home() {
           }
           .hero-copy-box {
             padding: clamp(32px, 4vw, 56px) clamp(24px, 3vw, 40px);
-            border-right: 1px solid var(--color-line);
           }
           .hero-title {
             font-size: clamp(38px, 4.2vw, 60px);

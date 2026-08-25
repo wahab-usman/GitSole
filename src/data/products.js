@@ -378,13 +378,18 @@ export const TIERS = [
   { name: "Good", range: "6.5–7", meaning: "Honest wear at an honest price, every flaw photographed", priceBand: "15–25% of retail" }
 ];
 
-export const WHATSAPP_NUMBER = "+923001234567";
-export const WHATSAPP_DISPLAY = "0300 1234567";
+export const WHATSAPP_NUMBER = "+923211123474";
+export const WHATSAPP_DISPLAY = "0321 1123474";
+export const INSTAGRAM_HANDLE = "@gitsolepk";
+export const INSTAGRAM_URL = "https://instagram.com/gitsolepk";
+export const TIKTOK_HANDLE = "@gitsolepk";
+export const TIKTOK_URL = "https://tiktok.com/@gitsolepk";
+export const EMAIL_ADDRESS = "gitsolepk@gmail.com";
 
 export function formatPrice(amount) {
   return `PKR ${Number(amount).toLocaleString('en-US')}`;
 }
 
 export function buildWhatsAppUrl(message) {
-  return `https://wa.me/923001234567?text=${encodeURIComponent(message)}`;
+  return `https://wa.me/923211123474?text=${encodeURIComponent(message)}`;
 }

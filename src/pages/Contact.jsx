@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { buildWhatsAppUrl, WHATSAPP_DISPLAY } from '../data/products';
+import { buildWhatsAppUrl, WHATSAPP_DISPLAY, INSTAGRAM_HANDLE, INSTAGRAM_URL, EMAIL_ADDRESS } from '../data/products';
 import { MessageSquare, Mail, ChevronDown, ChevronUp, CheckCircle, Camera } from 'lucide-react';
 
 export default function Contact() {
@@ -114,14 +114,14 @@ export default function Contact() {
               <span>Drop Previews & Stories</span>
             </div>
             <div style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '22px', color: 'var(--color-ink)', marginTop: '10px' }}>
-              @gitsole.pk
+              {INSTAGRAM_HANDLE}
             </div>
             <div style={{ fontSize: '13.5px', color: 'var(--color-muted)', marginTop: '4px' }}>
               Follow for weekly drop announcements and detailed video walk-arounds.
             </div>
           </div>
           <a
-            href="https://instagram.com"
+            href={INSTAGRAM_URL}
             target="_blank"
             rel="noopener noreferrer"
             className="btn btn-outline"
@@ -147,14 +147,14 @@ export default function Contact() {
               <span>Business & Partnerships</span>
             </div>
             <div style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '22px', color: 'var(--color-ink)', marginTop: '10px' }}>
-              support@gitsole.pk
+              {EMAIL_ADDRESS}
             </div>
             <div style={{ fontSize: '13.5px', color: 'var(--color-muted)', marginTop: '4px' }}>
               General questions, supplier sourcing proposals, and business queries.
             </div>
           </div>
           <a
-            href="mailto:support@gitsole.pk"
+            href={`mailto:${EMAIL_ADDRESS}`}
             className="btn btn-outline"
             style={{ padding: '12px 20px', fontSize: '14px' }}
           >
@@ -197,7 +197,7 @@ export default function Contact() {
                 <input
                   type="tel"
                   required
-                  placeholder="0300 1234567"
+                  placeholder="0321 1123474"
                   value={formData.phone}
                   onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                   style={{ width: '100%', padding: '12px 14px', border: '1px solid var(--color-line-strong)', fontSize: '14px', backgroundColor: '#FFF' }}

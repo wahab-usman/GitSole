@@ -573,24 +573,32 @@ export default function AdminDashboard() {
 
       {/* Change Credentials Modal */}
       {isCredsModalOpen && (
-        <div style={{
-          position: 'fixed',
-          inset: 0,
-          zIndex: 2050,
-          backgroundColor: 'rgba(0, 0, 0, 0.6)',
-          backdropFilter: 'blur(3px)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: '20px'
-        }}>
-          <div style={{
-            backgroundColor: '#FFFFFF',
-            width: '100%',
-            maxWidth: '420px',
-            border: '2px solid var(--color-ink)',
-            boxShadow: '0 20px 50px rgba(0, 0, 0, 0.2)'
-          }}>
+        <div
+          onClick={() => setIsCredsModalOpen(false)}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 2050,
+            backgroundColor: 'rgba(0, 0, 0, 0.6)',
+            backdropFilter: 'blur(3px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '20px'
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            onWheel={(e) => e.stopPropagation()}
+            data-lenis-prevent="true"
+            style={{
+              backgroundColor: '#FFFFFF',
+              width: '100%',
+              maxWidth: '420px',
+              border: '2px solid var(--color-ink)',
+              boxShadow: '0 20px 50px rgba(0, 0, 0, 0.2)'
+            }}
+          >
             <div style={{
               backgroundColor: 'var(--color-ink)',
               color: 'var(--color-paper)',

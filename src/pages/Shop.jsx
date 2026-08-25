@@ -26,7 +26,7 @@ export default function Shop() {
   const [selectedTiers, setSelectedTiers] = useState([]);
   const [priceRange, setPriceRange] = useState(() => {
     const p = searchParams.get('maxPrice');
-    return p ? Number(p) : 20000;
+    return p ? Number(p) : 100000;
   });
   const [sortBy, setSortBy] = useState(() => {
     return searchParams.get('sort') || 'newest';
@@ -64,7 +64,7 @@ export default function Shop() {
     setSelectedBrands([]);
     setSelectedSizes([]);
     setSelectedTiers([]);
-    setPriceRange(20000);
+    setPriceRange(100000);
     if (isNewInMode) {
       setSearchParams({ filter: 'newin' });
     } else {
@@ -92,7 +92,7 @@ export default function Shop() {
     });
   }, [products, isNewInMode, selectedBrands, selectedSizes, selectedTiers, priceRange, sortBy]);
 
-  const activeFilterCount = selectedBrands.length + selectedSizes.length + selectedTiers.length + (priceRange < 20000 ? 1 : 0) + (isNewInMode ? 1 : 0);
+  const activeFilterCount = selectedBrands.length + selectedSizes.length + selectedTiers.length + (priceRange < 100000 ? 1 : 0) + (isNewInMode ? 1 : 0);
 
   const handleSizeAlertSubmit = (e) => {
     e.preventDefault();

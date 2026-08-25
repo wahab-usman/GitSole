@@ -139,7 +139,7 @@ export default function Checkout() {
                   <input
                     type="tel"
                     required
-                    placeholder="0300 1234567"
+                    placeholder="0321 1123474"
                     value={formData.whatsapp}
                     onChange={(e) => setFormData({ ...formData, whatsapp: e.target.value })}
                     style={{ width: '100%', padding: '12px 14px', border: '1px solid var(--color-line-strong)', fontSize: '14px', backgroundColor: '#FFF' }}

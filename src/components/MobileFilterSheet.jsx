@@ -161,8 +161,8 @@ export default function MobileFilterSheet({
           <input
             type="range"
             min="3000"
-            max="20000"
-            step="500"
+            max="100000"
+            step="1000"
             value={priceRange}
             onChange={(e) => setPriceRange(Number(e.target.value))}
             style={{ width: '100%', accentColor: 'var(--color-oxblood)' }}

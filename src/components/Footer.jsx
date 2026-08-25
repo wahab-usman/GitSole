@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { WHATSAPP_DISPLAY, buildWhatsAppUrl } from '../data/products';
+import { WHATSAPP_DISPLAY, buildWhatsAppUrl, INSTAGRAM_HANDLE, INSTAGRAM_URL, TIKTOK_HANDLE, TIKTOK_URL } from '../data/products';
 
 export default function Footer() {
   return (
@@ -89,8 +89,8 @@ export default function Footer() {
           <div style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--color-faint)', marginBottom: '4px' }}>
             Connect
           </div>
-          <a href="https://instagram.com" target="_blank" rel="noopener noreferrer">Instagram (@gitsole.pk)</a>
-          <a href="https://tiktok.com" target="_blank" rel="noopener noreferrer">TikTok (@gitsole)</a>
+          <a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer">Instagram ({INSTAGRAM_HANDLE})</a>
+          <a href={TIKTOK_URL} target="_blank" rel="noopener noreferrer">TikTok ({TIKTOK_HANDLE})</a>
           <a href={buildWhatsAppUrl("Hello")} target="_blank" rel="noopener noreferrer">WhatsApp ({WHATSAPP_DISPLAY})</a>
           <span style={{ fontSize: '12px', color: 'var(--color-muted)', marginTop: '8px' }}>
             Support Hours: 10:00 AM – 10:00 PM (PKT)
