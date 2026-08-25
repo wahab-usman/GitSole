@@ -23,7 +23,10 @@ export default function OrderConfirmation() {
     trackingNumber: "TRX-994821-PK"
   };
 
-  const whatsAppConfirmationText = `Hello Gitsole! I placed order ${order.id}. My name is ${order.customer?.name} and my delivery address is ${order.customer?.address}, ${order.customer?.city}. Please confirm my order!`;
+  const isCOD = order.paymentMethod === 'cod';
+  const whatsAppConfirmationText = isCOD
+    ? `Hello Gitsole! I placed order ${order.id}. My name is ${order.customer?.name}. Please send me the payment details for the PKR 300 advance so I can confirm my order!`
+    : `Hello Gitsole! I placed order ${order.id}. My name is ${order.customer?.name}. Please send me the payment details so I can transfer the full amount!`;
 
   return (
     <div style={{ minHeight: '80vh', backgroundColor: 'var(--color-paper)' }}>
@@ -55,10 +58,13 @@ export default function OrderConfirmation() {
             letterSpacing: '-0.035em',
             lineHeight: 1.05
           }}>
-            Order placed. We'll message you on WhatsApp.
+            {isCOD ? 'Order placed! Send PKR 300 advance to confirm.' : 'Order placed! Send payment to confirm.'}
           </h1>
           <p style={{ fontSize: '16px', color: 'var(--color-on-ink)', maxWidth: '580px', lineHeight: 1.6 }}>
-            Your 1-of-1 shoes are now marked sold and reserved for you. Our dispatch team will send a verification message to <strong>{order.customer?.whatsapp}</strong> within 30 minutes.
+            {isCOD
+              ? <>Your 1-of-1 shoes are reserved. A WhatsApp chat has been opened with your order details. Please send the <strong>PKR 300 advance</strong> via JazzCash/EasyPaisa/Bank Transfer to confirm dispatch.</>
+              : <>Your 1-of-1 shoes are reserved. A WhatsApp chat has been opened with your order details. Please complete the full payment to confirm dispatch.</>
+            }
           </p>
 
           <a
@@ -69,7 +75,7 @@ export default function OrderConfirmation() {
             style={{ marginTop: '12px', padding: '14px 28px', fontSize: '14.5px' }}
           >
             <MessageSquare size={17} />
-            <span>Open WhatsApp to Confirm Instantly</span>
+            <span>{isCOD ? 'Send PKR 300 Advance via WhatsApp' : 'Complete Payment via WhatsApp'}</span>
           </a>
         </div>
       </div>
@@ -101,9 +107,12 @@ export default function OrderConfirmation() {
                 1
               </div>
               <div>
-                <div style={{ fontWeight: 600, fontSize: '15px', color: 'var(--color-ink)' }}>WhatsApp Verification (30 mins)</div>
+                <div style={{ fontWeight: 600, fontSize: '15px', color: 'var(--color-ink)' }}>{isCOD ? 'Pay PKR 300 Advance & Verify' : 'Complete Payment & Verify'}</div>
                 <div style={{ fontSize: '13.5px', color: 'var(--color-muted)', marginTop: '4px', lineHeight: 1.5 }}>
-                  We send you the shoe photos and confirm your landmark address on WhatsApp before booking the courier.
+                  {isCOD
+                    ? 'Send PKR 300 advance via JazzCash/EasyPaisa/Bank Transfer. We verify your address and confirm the order on WhatsApp.'
+                    : 'Transfer the full amount. We verify your payment and confirm the order on WhatsApp.'
+                  }
                 </div>
               </div>
             </div>
@@ -176,9 +185,12 @@ export default function OrderConfirmation() {
                 4
               </div>
               <div>
-                <div style={{ fontWeight: 600, fontSize: '15px', color: 'var(--color-ink)' }}>Doorstep Delivery & Cash Payment (Day 2–4)</div>
+                <div style={{ fontWeight: 600, fontSize: '15px', color: 'var(--color-ink)' }}>{isCOD ? 'Doorstep Delivery & Remaining Payment (Day 2–4)' : 'Doorstep Delivery (Day 2–4)'}</div>
                 <div style={{ fontSize: '13.5px', color: 'var(--color-muted)', marginTop: '4px', lineHeight: 1.5 }}>
-                  Rider delivers to your door. Keep exact cash of <strong>{formatPrice(order.total)}</strong> ready.
+                  {isCOD
+                    ? <>Rider delivers to your door. Keep exact cash of <strong>{formatPrice(order.total - 300)}</strong> ready (PKR 300 already paid as advance).</>
+                    : <>Rider delivers to your door. No payment needed — you've already paid in full!</>
+                  }
                 </div>
               </div>
             </div>
@@ -209,12 +221,25 @@ export default function OrderConfirmation() {
             <div><strong>Customer:</strong> {order.customer?.name}</div>
             <div><strong>WhatsApp:</strong> {order.customer?.whatsapp}</div>
             <div><strong>Address:</strong> {order.customer?.address}, {order.customer?.city}</div>
-            <div><strong>Payment:</strong> {order.paymentMethod === 'cod' ? 'Cash on Delivery (COD)' : 'Bank Transfer / Easypaisa (3% Saved)'}</div>
+            <div><strong>Payment:</strong> {isCOD ? 'Cash on Delivery (COD)' : 'Bank Transfer / Easypaisa (3% Saved)'}</div>
             <div><strong>Tracking Code:</strong> <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-oxblood)' }}>{order.trackingNumber}</span></div>
           </div>
 
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginTop: '16px' }}>
-            <span style={{ fontWeight: 600 }}>Total Amount Due</span>
+          {isCOD && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '16px', paddingTop: '14px', borderTop: '1px solid var(--color-line)', fontSize: '13.5px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span style={{ color: 'var(--color-oxblood)', fontWeight: 600 }}>Advance (JazzCash/EasyPaisa/Bank)</span>
+                <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-oxblood)', fontWeight: 600 }}>PKR 300</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span style={{ color: 'var(--color-muted)' }}>Due at Doorstep (COD)</span>
+                <span style={{ fontFamily: 'var(--font-mono)' }}>{formatPrice(order.total - 300)}</span>
+              </div>
+            </div>
+          )}
+
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginTop: '16px', paddingTop: isCOD ? '0' : '14px', borderTop: isCOD ? 'none' : '1px solid var(--color-line)' }}>
+            <span style={{ fontWeight: 600 }}>Total Amount</span>
             <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '22px' }}>{formatPrice(order.total)}</span>
           </div>
         </div>

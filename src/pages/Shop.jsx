@@ -43,7 +43,7 @@ export default function Shop() {
     const s = searchParams.get('size');
     setSelectedSizes(s ? [s] : []);
     const p = searchParams.get('maxPrice');
-    setPriceRange(p ? Number(p) : 20000);
+    setPriceRange(p ? Number(p) : 100000);
     const srt = searchParams.get('sort');
     if (srt) setSortBy(srt);
   }, [searchParams]);

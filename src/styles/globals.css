@@ -18,6 +18,11 @@ html {
   overflow-x: hidden;
 }
 
+img, video {
+  max-width: 100%;
+  height: auto;
+}
+
 body {
   scroll-behavior: smooth;
   font-family: var(--font-body);

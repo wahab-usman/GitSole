@@ -118,11 +118,55 @@ export function OrderProvider({ children }) {
     return true;
   };
 
+  const updateOrderStatus = (orderId, newStatus) => {
+    setOrders(prev => prev.map(order => {
+      if (order.id !== orderId) return order;
+
+      const statusLabels = {
+        placed: 'Order Placed',
+        advance_paid: 'Advance Received (PKR 300)',
+        confirmed: 'Confirmed on WhatsApp',
+        preparing: 'Prepared & Inspected',
+        shipped: 'Dispatched with Courier',
+        delivered: 'Delivered',
+        cancelled: 'Cancelled'
+      };
+
+      const now = new Date().toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+
+      // Update timeline
+      const updatedTimeline = order.timeline.map(t => ({ ...t, done: true }));
+      
+      // Add new step if not already there
+      const stepExists = updatedTimeline.some(t => t.step === statusLabels[newStatus]);
+      if (!stepExists) {
+        updatedTimeline.push({
+          step: statusLabels[newStatus],
+          time: now,
+          done: true,
+          desc: `Status updated to "${statusLabels[newStatus]}".`
+        });
+      }
+
+      return {
+        ...order,
+        status: newStatus,
+        timeline: updatedTimeline
+      };
+    }));
+  };
+
+  const deleteOrder = (orderId) => {
+    setOrders(prev => prev.filter(order => order.id !== orderId));
+  };
+
   return (
     <OrderContext.Provider value={{
       orders,
       placeOrder,
       getOrderById,
+      updateOrderStatus,
+      deleteOrder,
       registerSizeAlert,
       sizeAlerts
     }}>

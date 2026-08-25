@@ -22,6 +22,7 @@ export default function Checkout() {
 
   const [paymentMethod, setPaymentMethod] = useState('cod'); // 'cod' or 'bank_transfer'
   const [conditionAcknowledged, setConditionAcknowledged] = useState(false);
+  const [advanceAcknowledged, setAdvanceAcknowledged] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
   if (cart.length === 0) {
@@ -53,6 +54,11 @@ export default function Checkout() {
       return;
     }
 
+    if (paymentMethod === 'cod' && !advanceAcknowledged) {
+      setErrorMessage('Please confirm that you agree to pay the PKR 300 advance to proceed with your COD order.');
+      return;
+    }
+
     // Place order
     const newOrder = placeOrder({
       customer: {
@@ -63,6 +69,34 @@ export default function Checkout() {
       items: cart,
       subtotal
     });
+
+    // Build WhatsApp message with full order details
+    const itemLines = cart.map(item =>
+      `• ${item.model} (UK ${item.sizeUK}) — ${formatPrice(item.price)} [${item.score}/10 ${item.tier}]`
+    ).join('\n');
+
+    const whatsAppMsg = paymentMethod === 'cod'
+      ? `🛒 *New Gitsole Order #${newOrder.id}*\n\n` +
+        `👤 *Customer:* ${formData.name}\n` +
+        `📱 *WhatsApp:* ${formData.whatsapp}\n` +
+        `📍 *Address:* ${formData.address}${formData.landmark ? `, Near ${formData.landmark}` : ''}, ${formData.city}, ${formData.province}\n\n` +
+        `👟 *Items:*\n${itemLines}\n\n` +
+        `💰 *Total:* ${formatPrice(finalTotal)}\n` +
+        `💳 *Payment:* Cash on Delivery\n` +
+        `🔒 *Advance Required:* PKR 300\n` +
+        `📦 *Remaining COD:* ${formatPrice(finalTotal - 300)}\n\n` +
+        `Please send me the payment details for the PKR 300 advance (JazzCash / EasyPaisa / Bank Transfer) so I can confirm my order. ✅`
+      : `🛒 *New Gitsole Order #${newOrder.id}*\n\n` +
+        `👤 *Customer:* ${formData.name}\n` +
+        `📱 *WhatsApp:* ${formData.whatsapp}\n` +
+        `📍 *Address:* ${formData.address}${formData.landmark ? `, Near ${formData.landmark}` : ''}, ${formData.city}, ${formData.province}\n\n` +
+        `👟 *Items:*\n${itemLines}\n\n` +
+        `💰 *Total:* ${formatPrice(finalTotal)} (3% discount applied)\n` +
+        `💳 *Payment:* Bank Transfer / EasyPaisa / JazzCash (Full Prepaid)\n\n` +
+        `Please send me the payment details so I can transfer the full amount. ✅`;
+
+    // Auto-open WhatsApp with the order message
+    window.open(buildWhatsAppUrl(whatsAppMsg), '_blank');
 
     clearCart();
     navigate(`/order/${newOrder.id}`);
@@ -203,7 +237,7 @@ export default function Checkout() {
                 {/* Cash on delivery */}
                 <label style={{
                   display: 'flex',
-                  alignItems: 'center',
+                  alignItems: 'flex-start',
                   gap: '14px',
                   padding: '16px',
                   backgroundColor: paymentMethod === 'cod' ? 'var(--color-card)' : '#FFF',
@@ -216,11 +250,34 @@ export default function Checkout() {
                     value="cod"
                     checked={paymentMethod === 'cod'}
                     onChange={() => setPaymentMethod('cod')}
-                    style={{ accentColor: 'var(--color-oxblood)' }}
+                    style={{ accentColor: 'var(--color-oxblood)', marginTop: '3px' }}
                   />
                   <div style={{ flex: 1 }}>
                     <div style={{ fontWeight: 600, color: 'var(--color-ink)', fontSize: '15px' }}>Cash on Delivery (COD)</div>
-                    <div style={{ fontSize: '12.5px', color: 'var(--color-muted)', marginTop: '2px' }}>Pay cash to the courier rider upon receiving and inspecting parcel at your doorstep.</div>
+                    <div style={{ fontSize: '12.5px', color: 'var(--color-muted)', marginTop: '2px' }}>Pay remaining amount to the courier upon receiving parcel at your doorstep.</div>
+                    {paymentMethod === 'cod' && (
+                      <div style={{
+                        marginTop: '12px',
+                        padding: '12px 14px',
+                        backgroundColor: '#FFF8F0',
+                        border: '1px solid #E8D5BF',
+                        borderRadius: '4px',
+                        fontSize: '13px',
+                        lineHeight: 1.6,
+                        color: 'var(--color-ink)'
+                      }}>
+                        <div style={{ fontWeight: 700, color: 'var(--color-oxblood)', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          ⚠️ PKR 300 Advance Payment Required
+                        </div>
+                        <p style={{ margin: 0 }}>
+                          To confirm your order, a <strong>non-refundable advance of PKR 300</strong> is required via <strong>JazzCash, EasyPaisa, or Bank Transfer</strong>. 
+                          Payment details will be sent to your <strong>WhatsApp</strong> after placing the order.
+                        </p>
+                        <p style={{ margin: '8px 0 0', fontSize: '12px', color: 'var(--color-muted)' }}>
+                          The remaining balance of <strong>{formatPrice(finalTotal - 300)}</strong> will be collected as Cash on Delivery.
+                        </p>
+                      </div>
+                    )}
                   </div>
                 </label>
 
@@ -247,7 +304,7 @@ export default function Checkout() {
                       <span style={{ fontWeight: 600, color: 'var(--color-ink)', fontSize: '15px' }}>Bank Transfer / Easypaisa / JazzCash</span>
                       <span style={{ backgroundColor: 'var(--color-oxblood)', color: '#FFF', fontFamily: 'var(--font-mono)', fontSize: '10px', padding: '2px 6px' }}>SAVE 3%</span>
                     </div>
-                    <div style={{ fontSize: '12.5px', color: 'var(--color-muted)', marginTop: '2px' }}>Instant transfer details provided on order placement. Instant dispatch prioritization.</div>
+                    <div style={{ fontSize: '12.5px', color: 'var(--color-muted)', marginTop: '2px' }}>Full payment upfront. Transfer details provided on order placement. Instant dispatch prioritization.</div>
                   </div>
                 </label>
               </div>
@@ -273,6 +330,28 @@ export default function Checkout() {
               </label>
             </div>
 
+            {/* Step 4: Advance Payment Acknowledgement for COD */}
+            {paymentMethod === 'cod' && (
+              <div style={{
+                backgroundColor: '#FFF8F0',
+                border: '1px solid #E8D5BF',
+                padding: '18px'
+              }}>
+                <label style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', cursor: 'pointer' }}>
+                  <input
+                    type="checkbox"
+                    required
+                    checked={advanceAcknowledged}
+                    onChange={(e) => setAdvanceAcknowledged(e.target.checked)}
+                    style={{ accentColor: 'var(--color-oxblood)', marginTop: '3px', width: '16px', height: '16px' }}
+                  />
+                  <span style={{ fontSize: '13px', lineHeight: 1.5, color: 'var(--color-body)' }}>
+                    I agree to pay <strong>PKR 300 advance</strong> via JazzCash / EasyPaisa / Bank Transfer. I understand that payment details will be sent to my WhatsApp and my order will only be dispatched after the advance is confirmed.
+                  </span>
+                </label>
+              </div>
+            )}
+
             {errorMessage && (
               <div style={{ backgroundColor: '#FFECEB', border: '1px solid var(--color-oxblood)', color: 'var(--color-oxblood)', padding: '12px 16px', fontSize: '13.5px' }}>
                 {errorMessage}
@@ -284,7 +363,10 @@ export default function Checkout() {
               className="btn btn-oxblood"
               style={{ padding: '18px', fontSize: '16px', fontWeight: 600 }}
             >
-              Place Order ({formatPrice(finalTotal)}) · Free Delivery
+              {paymentMethod === 'cod'
+                ? `Place Order · PKR 300 Advance + ${formatPrice(finalTotal - 300)} COD`
+                : `Place Order (${formatPrice(finalTotal)}) · Free Delivery`
+              }
             </button>
           </div>
 
@@ -330,6 +412,18 @@ export default function Checkout() {
                   <span>Online Payment Discount (3%)</span>
                   <span style={{ fontFamily: 'var(--font-mono)' }}>-{formatPrice(subtotal * 0.03)}</span>
                 </div>
+              )}
+              {paymentMethod === 'cod' && (
+                <>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <span style={{ color: 'var(--color-oxblood)', fontWeight: 600 }}>Advance (via WhatsApp)</span>
+                    <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-oxblood)', fontWeight: 600 }}>PKR 300</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <span style={{ color: 'var(--color-muted)' }}>Due at Doorstep (COD)</span>
+                    <span style={{ fontFamily: 'var(--font-mono)' }}>{formatPrice(finalTotal - 300)}</span>
+                  </div>
+                </>
               )}
               <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid var(--color-line)', paddingTop: '10px', marginTop: '6px', fontSize: '16px' }}>
                 <span style={{ fontWeight: 700 }}>Total Due</span>

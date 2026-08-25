@@ -11,7 +11,7 @@ export default function Home() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', backgroundColor: 'var(--color-paper)' }}>
       {/* Hero Section */}
-      <section className="hero-section" style={{ borderBottom: '1px solid var(--color-line)' }}>
+      <section className="hero-section">
         {/* Copy Column */}
         <div className="hero-copy-box" style={{
           display: 'flex',
@@ -65,17 +65,16 @@ export default function Home() {
           backgroundColor: 'var(--color-paper)',
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'center',
-          overflow: 'hidden'
+          justifyContent: 'center'
         }}>
           <img
+            className="hero-shoe-img"
             src="/hero-banner.jpg"
             alt="Gitsole hand-picked vintage branded thrift sneaker"
             style={{
               width: '100%',
-              height: '100%',
-              objectFit: 'contain',
-              mixBlendMode: 'multiply'
+              height: 'auto',
+              objectFit: 'contain'
             }}
           />
         </div>
@@ -177,6 +176,7 @@ export default function Home() {
         .hero-section {
           display: flex;
           flex-direction: column;
+          overflow: hidden;
         }
         .hero-copy-box {
           padding: 26px 18px 24px;
@@ -199,8 +199,12 @@ export default function Home() {
           font-size: 15px;
         }
         .hero-photo-box {
-          height: 230px;
           width: 100%;
+          padding: 24px 20px 36px;
+        }
+        .hero-shoe-img {
+          max-width: 440px;
+          max-height: 320px;
         }
         .value-strip-grid {
           display: grid;
@@ -235,8 +239,12 @@ export default function Home() {
             padding: 16px 28px;
           }
           .hero-photo-box {
-            height: 100%;
-            min-height: 520px;
+            padding: 24px clamp(20px, 3vw, 40px);
+            align-self: center;
+          }
+          .hero-shoe-img {
+            max-width: 680px;
+            max-height: 540px;
           }
           .value-strip-grid {
             grid-template-columns: repeat(4, 1fr);

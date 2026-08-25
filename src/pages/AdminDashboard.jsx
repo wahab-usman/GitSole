@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useProducts } from '../context/ProductContext';
 import { useAdminAuth } from '../context/AdminAuthContext';
+import { useOrder } from '../context/OrderContext';
 import ProductFormModal from '../components/ProductFormModal';
-import { formatPrice, BRANDS } from '../data/products';
+import { formatPrice, BRANDS, buildWhatsAppUrl } from '../data/products';
 import {
   Plus,
   Search,
@@ -22,13 +23,23 @@ import {
   Key,
   X,
   Lock,
-  User
+  User,
+  ClipboardList,
+  Truck,
+  Package,
+  MessageSquare,
+  Ban,
+  Clock
 } from 'lucide-react';
 
 export default function AdminDashboard() {
   const { products, addProduct, updateProduct, deleteProduct, toggleSoldStatus, resetToDefault } = useProducts();
   const { isAdminLoggedIn, logout, credentials, updateCredentials } = useAdminAuth();
+  const { orders, updateOrderStatus, deleteOrder } = useOrder();
   const navigate = useNavigate();
+
+  const [activeTab, setActiveTab] = useState('products');
+  const [orderStatusFilter, setOrderStatusFilter] = useState('ALL');
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedBrand, setSelectedBrand] = useState('ALL');
@@ -280,7 +291,78 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* Filter and Search Bar */}
+        {/* Tab Navigation */}
+        <div style={{
+          display: 'flex',
+          gap: '0',
+          marginBottom: '24px',
+          borderBottom: '2px solid var(--color-line)'
+        }}>
+          <button
+            onClick={() => setActiveTab('products')}
+            style={{
+              padding: '12px 24px',
+              fontSize: '14px',
+              fontWeight: 700,
+              fontFamily: 'var(--font-mono)',
+              letterSpacing: '0.05em',
+              textTransform: 'uppercase',
+              border: 'none',
+              borderBottom: activeTab === 'products' ? '3px solid var(--color-oxblood)' : '3px solid transparent',
+              backgroundColor: 'transparent',
+              color: activeTab === 'products' ? 'var(--color-ink)' : 'var(--color-muted)',
+              cursor: 'pointer'
+            }}
+          >
+            <ShoppingBag size={15} style={{ marginRight: '8px', verticalAlign: 'middle' }} />
+            Products ({products.length})
+          </button>
+          <button
+            onClick={() => setActiveTab('orders')}
+            style={{
+              padding: '12px 24px',
+              fontSize: '14px',
+              fontWeight: 700,
+              fontFamily: 'var(--font-mono)',
+              letterSpacing: '0.05em',
+              textTransform: 'uppercase',
+              border: 'none',
+              borderBottom: activeTab === 'orders' ? '3px solid var(--color-oxblood)' : '3px solid transparent',
+              backgroundColor: 'transparent',
+              color: activeTab === 'orders' ? 'var(--color-ink)' : 'var(--color-muted)',
+              cursor: 'pointer',
+              position: 'relative'
+            }}
+          >
+            <ClipboardList size={15} style={{ marginRight: '8px', verticalAlign: 'middle' }} />
+            Orders ({orders.length})
+            {orders.filter(o => o.status === 'placed').length > 0 && (
+              <span style={{
+                position: 'absolute',
+                top: '6px',
+                right: '6px',
+                width: '18px',
+                height: '18px',
+                borderRadius: '50%',
+                backgroundColor: 'var(--color-oxblood)',
+                color: '#FFF',
+                fontSize: '10px',
+                fontWeight: 700,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>
+                {orders.filter(o => o.status === 'placed').length}
+              </span>
+            )}
+          </button>
+        </div>
+      </div>
+
+      {/* PRODUCTS TAB CONTENT */}
+      {activeTab === 'products' && (
+        <div style={{ maxWidth: '1360px', margin: '0 auto', padding: '0 clamp(16px, 4vw, 40px)' }}>
+          {/* Filter and Search Bar */}
         <div style={{
           backgroundColor: '#FFFFFF',
           border: '1px solid var(--color-line-strong)',
@@ -562,6 +644,7 @@ export default function AdminDashboard() {
           </table>
         </div>
       </div>
+      )}
 
       {/* Product Form Modal */}
       <ProductFormModal
@@ -673,6 +756,217 @@ export default function AdminDashboard() {
           </div>
         </div>
       )}
+
+      {/* ORDERS TAB CONTENT */}
+      {activeTab === 'orders' && (
+        <div style={{ maxWidth: '1360px', margin: '0 auto', padding: '0 clamp(16px, 4vw, 40px) 60px' }}>
+          {/* Order Status Filters */}
+          <div style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: '8px',
+            marginBottom: '20px'
+          }}>
+            {[
+              { val: 'ALL', label: 'All Orders', count: orders.length },
+              { val: 'placed', label: 'New / Pending', count: orders.filter(o => o.status === 'placed').length },
+              { val: 'advance_paid', label: 'Advance Paid', count: orders.filter(o => o.status === 'advance_paid').length },
+              { val: 'confirmed', label: 'Confirmed', count: orders.filter(o => o.status === 'confirmed').length },
+              { val: 'shipped', label: 'Shipped', count: orders.filter(o => o.status === 'shipped').length },
+              { val: 'delivered', label: 'Delivered', count: orders.filter(o => o.status === 'delivered').length },
+              { val: 'cancelled', label: 'Cancelled', count: orders.filter(o => o.status === 'cancelled').length },
+            ].map(f => (
+              <button
+                key={f.val}
+                onClick={() => setOrderStatusFilter(f.val)}
+                style={{
+                  padding: '8px 14px',
+                  fontSize: '12px',
+                  fontFamily: 'var(--font-mono)',
+                  fontWeight: 600,
+                  border: orderStatusFilter === f.val ? '2px solid var(--color-ink)' : '1px solid var(--color-line-strong)',
+                  backgroundColor: orderStatusFilter === f.val ? 'var(--color-ink)' : '#FFF',
+                  color: orderStatusFilter === f.val ? '#FFF' : 'var(--color-ink)',
+                  cursor: 'pointer'
+                }}
+              >
+                {f.label} ({f.count})
+              </button>
+            ))}
+          </div>
+
+          {/* Orders List */}
+          {orders.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--color-muted)' }}>
+              <ClipboardList size={48} strokeWidth={1} />
+              <p style={{ marginTop: '12px', fontSize: '16px' }}>No orders yet. Orders from customers will appear here.</p>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              {orders
+                .filter(o => orderStatusFilter === 'ALL' || o.status === orderStatusFilter)
+                .map(order => {
+                  const statusConfig = {
+                    placed: { label: 'New Order', color: '#E65100', bg: '#FFF3E0', icon: <Clock size={14} /> },
+                    advance_paid: { label: 'Advance Paid', color: '#1565C0', bg: '#E3F2FD', icon: <DollarSign size={14} /> },
+                    confirmed: { label: 'Confirmed', color: '#2E7D32', bg: '#E8F5E9', icon: <CheckCircle size={14} /> },
+                    preparing: { label: 'Preparing', color: '#6A1B9A', bg: '#F3E5F5', icon: <Package size={14} /> },
+                    shipped: { label: 'Shipped', color: '#0277BD', bg: '#E1F5FE', icon: <Truck size={14} /> },
+                    delivered: { label: 'Delivered', color: '#2E7D32', bg: '#E8F5E9', icon: <CheckCircle size={14} /> },
+                    dispatched: { label: 'Dispatched', color: '#0277BD', bg: '#E1F5FE', icon: <Truck size={14} /> },
+                    cancelled: { label: 'Cancelled', color: '#C62828', bg: '#FFEBEE', icon: <Ban size={14} /> }
+                  };
+                  const sc = statusConfig[order.status] || statusConfig.placed;
+
+                  return (
+                    <div key={order.id} style={{
+                      backgroundColor: '#FFF',
+                      border: '1px solid var(--color-line-strong)',
+                      padding: '20px',
+                    }}>
+                      {/* Order Header */}
+                      <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                          <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '18px' }}>#{order.id}</span>
+                          <span style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '5px',
+                            padding: '4px 10px',
+                            fontSize: '11px',
+                            fontWeight: 700,
+                            fontFamily: 'var(--font-mono)',
+                            textTransform: 'uppercase',
+                            backgroundColor: sc.bg,
+                            color: sc.color,
+                            letterSpacing: '0.05em'
+                          }}>
+                            {sc.icon} {sc.label}
+                          </span>
+                        </div>
+                        <span style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', color: 'var(--color-muted)' }}>
+                          {new Date(order.date).toLocaleString('en-PK', { dateStyle: 'medium', timeStyle: 'short' })}
+                        </span>
+                      </div>
+
+                      {/* Customer & Items */}
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }} className="admin-order-grid">
+                        <div style={{ fontSize: '13px', lineHeight: 1.7, color: 'var(--color-body)' }}>
+                          <div><strong>👤 Customer:</strong> {order.customer?.name}</div>
+                          <div><strong>📱 WhatsApp:</strong> {order.customer?.whatsapp}</div>
+                          <div><strong>📍 Address:</strong> {order.customer?.address}, {order.customer?.city}</div>
+                          <div><strong>💳 Payment:</strong> {order.paymentMethod === 'cod' ? 'COD (PKR 300 Advance)' : 'Bank Transfer (Full Prepaid)'}</div>
+                          <div><strong>📦 Tracking:</strong> <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-oxblood)' }}>{order.trackingNumber}</span></div>
+                        </div>
+                        <div>
+                          <div style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', textTransform: 'uppercase', color: 'var(--color-faint)', marginBottom: '8px', letterSpacing: '0.1em' }}>Items Ordered</div>
+                          {(order.items || []).map((item, idx) => (
+                            <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
+                              {item.photos?.[0] && <img src={item.photos[0]} alt="" style={{ width: '40px', height: '40px', objectFit: 'cover', backgroundColor: 'var(--color-image-bg)' }} />}
+                              {item.photo && !item.photos?.[0] && <img src={item.photo} alt="" style={{ width: '40px', height: '40px', objectFit: 'cover', backgroundColor: 'var(--color-image-bg)' }} />}
+                              <div style={{ flex: 1, fontSize: '13px' }}>
+                                <div style={{ fontWeight: 600 }}>{item.model}</div>
+                                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--color-muted)' }}>UK {item.sizeUK} · {item.score}/10</div>
+                              </div>
+                              <div style={{ fontFamily: 'var(--font-mono)', fontSize: '13px', fontWeight: 600 }}>{formatPrice(item.price)}</div>
+                            </div>
+                          ))}
+                          <div style={{ borderTop: '1px solid var(--color-line)', paddingTop: '8px', marginTop: '4px', display: 'flex', justifyContent: 'space-between', fontWeight: 700, fontSize: '15px' }}>
+                            <span>Total</span>
+                            <span style={{ fontFamily: 'var(--font-display)' }}>{formatPrice(order.total)}</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Action Buttons */}
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', borderTop: '1px solid var(--color-line)', paddingTop: '14px' }}>
+                        {/* WhatsApp button */}
+                        <a
+                          href={buildWhatsAppUrl(`Hello ${order.customer?.name}! Regarding your Gitsole order #${order.id}:`)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            padding: '7px 14px',
+                            fontSize: '12px',
+                            fontWeight: 600,
+                            backgroundColor: '#25D366',
+                            color: '#FFF',
+                            border: 'none',
+                            cursor: 'pointer',
+                            textDecoration: 'none'
+                          }}
+                        >
+                          <MessageSquare size={14} /> WhatsApp Customer
+                        </a>
+
+                        {/* Direct Status Selector Dropdown */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <span style={{ fontSize: '11.5px', fontWeight: 700, fontFamily: 'var(--font-mono)', textTransform: 'uppercase', color: 'var(--color-muted)' }}>
+                            Status:
+                          </span>
+                          <select
+                            value={order.status}
+                            onChange={(e) => updateOrderStatus(order.id, e.target.value)}
+                            style={{
+                              padding: '6px 10px',
+                              fontSize: '12.5px',
+                              fontWeight: 700,
+                              fontFamily: 'var(--font-mono)',
+                              border: '1.5px solid var(--color-ink)',
+                              backgroundColor: sc.bg,
+                              color: sc.color,
+                              cursor: 'pointer',
+                              borderRadius: '2px'
+                            }}
+                          >
+                            <option value="placed">⏳ Order Placed (Pending Advance)</option>
+                            <option value="advance_paid">💵 Advance Paid (PKR 300 Received)</option>
+                            <option value="confirmed">✅ Order Confirmed</option>
+                            <option value="preparing">📦 Sanitized & Preparing</option>
+                            <option value="shipped">🚚 Dispatched & On The Way</option>
+                            <option value="delivered">🎉 Delivered to Doorstep</option>
+                            <option value="cancelled">❌ Cancelled Order</option>
+                          </select>
+                        </div>
+
+                        {/* Delete Order Button */}
+                        <button
+                          onClick={() => { if (window.confirm(`Delete order #${order.id}?`)) deleteOrder(order.id); }}
+                          style={{
+                            padding: '6px 12px',
+                            fontSize: '12px',
+                            fontWeight: 600,
+                            backgroundColor: '#FFEBEE',
+                            color: '#C62828',
+                            border: '1px solid #EF9A9A',
+                            cursor: 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '5px',
+                            marginLeft: 'auto'
+                          }}
+                        >
+                          <Trash2 size={13} /> Delete Order
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+            </div>
+          )}
+        </div>
+      )}
+
+      <style>{`
+        @media (max-width: 768px) {
+          .admin-order-grid {
+            grid-template-columns: 1fr !important;
+          }
+        }
+      `}</style>
     </div>
   );
 }
