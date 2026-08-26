@@ -1,7 +1,7 @@
 // Frontend Service Helper: AI Shopping Assistant
 // Communicates with backend endpoint POST /api/chat-assistant with client-side fallback
 
-import { searchProducts, parseNaturalLanguageText, detectUserIntent } from './productSearchEngine';
+import { searchProducts, parseNaturalLanguageText, detectUserIntent } from './productSearchEngine.js';
 
 /**
  * Send customer message to AI Shopping Assistant API
@@ -114,25 +114,48 @@ export async function sendChatMessageToAI(userMessage, history = [], contextFilt
       mergedFilters.sortOrder = 'desc';
       mergedFilters.limit = newExtracted.limit || (userMessage.toLowerCase().includes('3') ? 3 : (userMessage.toLowerCase().includes('5') ? 5 : 1));
       delete mergedFilters.maxPrice;
+      delete mergedFilters.minPrice;
     } else if (intent === 'MIN_PRICE') {
       mergedFilters.sortBy = 'price';
       mergedFilters.sortOrder = 'asc';
       mergedFilters.limit = newExtracted.limit || (userMessage.toLowerCase().includes('3') ? 3 : (userMessage.toLowerCase().includes('5') ? 5 : 1));
       delete mergedFilters.minPrice;
+      delete mergedFilters.maxPrice;
     }
 
     let matchingProducts = searchProducts(products, mergedFilters);
-    let relaxedNotice = false;
+    let relaxedNotice = '';
 
-    if (matchingProducts.length === 0 && intent === 'PRODUCT_SEARCH' && (mergedFilters.maxPrice || mergedFilters.brand)) {
-      const relaxed = { ...mergedFilters };
-      if (relaxed.maxPrice) relaxed.maxPrice = Math.round(relaxed.maxPrice * 1.35);
-      delete relaxed.color;
-
-      const fallbackMatches = searchProducts(products, relaxed);
-      if (fallbackMatches.length > 0) {
-        matchingProducts = fallbackMatches;
-        relaxedNotice = true;
+    // Smart context unblocking: if combined filters yielded 0 results, retry with isolated new query
+    if (matchingProducts.length === 0) {
+      // 1. Try with fresh query filters only (ignore stale context)
+      const freshMatches = searchProducts(products, newExtracted);
+      if (freshMatches.length > 0) {
+        matchingProducts = freshMatches;
+        mergedFilters = { ...newExtracted };
+        if (contextFilters.maxPrice && !newExtracted.maxPrice) {
+          relaxedNotice = `We don't have ${newExtracted.brand || ''} pairs under your previous budget of Rs. ${contextFilters.maxPrice.toLocaleString()}, but here are the available ${newExtracted.brand || ''} pairs in stock:`.replace(/\s+/g, ' ');
+        } else if (contextFilters.sizeUK && !newExtracted.sizeUK) {
+          relaxedNotice = `We don't have ${newExtracted.brand || ''} in size UK ${contextFilters.sizeUK}, but here are other available pairs:`.replace(/\s+/g, ' ');
+        }
+      } else if (mergedFilters.brand) {
+        // 2. Try brand alone
+        const brandOnlyMatches = searchProducts(products, { brand: mergedFilters.brand });
+        if (brandOnlyMatches.length > 0) {
+          matchingProducts = brandOnlyMatches;
+          mergedFilters = { brand: mergedFilters.brand };
+          relaxedNotice = `Here are the available ${mergedFilters.brand} pairs currently in stock:`;
+        }
+      } else if (mergedFilters.maxPrice) {
+        // 3. Relax price threshold by 35%
+        const relaxed = { ...mergedFilters, maxPrice: Math.round(mergedFilters.maxPrice * 1.35) };
+        delete relaxed.color;
+        const fallbackMatches = searchProducts(products, relaxed);
+        if (fallbackMatches.length > 0) {
+          matchingProducts = fallbackMatches;
+          mergedFilters = relaxed;
+          relaxedNotice = `I couldn't find an exact match under your strict criteria, but I found these closest options:`;
+        }
       }
     }
 
@@ -163,7 +186,7 @@ export async function sendChatMessageToAI(userMessage, history = [], contextFilt
         ? `Here are our top ${count} most affordable ${brandMention}available pairs:`
         : `Here is the most affordable available ${brandMention}pair currently in our store:`;
     } else if (relaxedNotice) {
-      reply = `I couldn't find an exact match under your strict criteria, but I found these closest options currently available in our store:`;
+      reply = relaxedNotice;
     } else if (finalProducts.length > 0) {
       const count = finalProducts.length;
       reply = `I found ${count} pair${count > 1 ? 's' : ''} that match your preferences:`;

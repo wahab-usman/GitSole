@@ -96,31 +96,53 @@ export default async function handler(req, res) {
 
     // 2. Shopping Query (MAX_PRICE, MIN_PRICE, PRODUCT_SEARCH, COUNT_QUERY)
     const newExtracted = parseNaturalLanguageText(message);
-
-    // Context handling: If asking broader MAX_PRICE or MIN_PRICE, don't let old budget filters block it unless explicitly requested
     let mergedFilters = { ...contextFilters, ...newExtracted };
 
     if (intent === 'MAX_PRICE') {
       mergedFilters.sortBy = 'price';
       mergedFilters.sortOrder = 'desc';
       mergedFilters.limit = newExtracted.limit || (message.toLowerCase().includes('3') ? 3 : (message.toLowerCase().includes('5') ? 5 : 1));
-      delete mergedFilters.maxPrice; // Do not apply maxPrice ceiling when asking for highest price
+      delete mergedFilters.maxPrice;
+      delete mergedFilters.minPrice;
     } else if (intent === 'MIN_PRICE') {
       mergedFilters.sortBy = 'price';
       mergedFilters.sortOrder = 'asc';
       mergedFilters.limit = newExtracted.limit || (message.toLowerCase().includes('3') ? 3 : (message.toLowerCase().includes('5') ? 5 : 1));
       delete mergedFilters.minPrice;
+      delete mergedFilters.maxPrice;
     }
 
     let matchingProducts = searchProducts(products, mergedFilters);
     let relaxedSearchNotice = null;
 
-    if (matchingProducts.length === 0 && intent === 'PRODUCT_SEARCH' && (mergedFilters.maxPrice || mergedFilters.brand)) {
-      const relaxed = { ...mergedFilters };
-      if (relaxed.maxPrice) relaxed.maxPrice = Math.round(relaxed.maxPrice * 1.35);
-      delete relaxed.color;
-      matchingProducts = searchProducts(products, relaxed);
-      if (matchingProducts.length > 0) relaxedSearchNotice = true;
+    // Smart context unblocking: if combined filters yielded 0 results, retry with isolated new query
+    if (matchingProducts.length === 0) {
+      const freshMatches = searchProducts(products, newExtracted);
+      if (freshMatches.length > 0) {
+        matchingProducts = freshMatches;
+        mergedFilters = { ...newExtracted };
+        if (contextFilters.maxPrice && !newExtracted.maxPrice) {
+          relaxedSearchNotice = `We don't have ${newExtracted.brand || ''} pairs under your previous budget of Rs. ${contextFilters.maxPrice.toLocaleString()}, but here are the available ${newExtracted.brand || ''} pairs:`.replace(/\s+/g, ' ');
+        } else if (contextFilters.sizeUK && !newExtracted.sizeUK) {
+          relaxedSearchNotice = `We don't have ${newExtracted.brand || ''} in size UK ${contextFilters.sizeUK}, but here are other available pairs:`.replace(/\s+/g, ' ');
+        }
+      } else if (mergedFilters.brand) {
+        const brandOnlyMatches = searchProducts(products, { brand: mergedFilters.brand });
+        if (brandOnlyMatches.length > 0) {
+          matchingProducts = brandOnlyMatches;
+          mergedFilters = { brand: mergedFilters.brand };
+          relaxedSearchNotice = `Here are the available ${mergedFilters.brand} pairs currently in stock:`;
+        }
+      } else if (mergedFilters.maxPrice) {
+        const relaxed = { ...mergedFilters, maxPrice: Math.round(mergedFilters.maxPrice * 1.35) };
+        delete relaxed.color;
+        const fallbackMatches = searchProducts(products, relaxed);
+        if (fallbackMatches.length > 0) {
+          matchingProducts = fallbackMatches;
+          mergedFilters = relaxed;
+          relaxedSearchNotice = `I couldn't find an exact match under your strict criteria, but I found these closest options:`;
+        }
+      }
     }
 
     // If COUNT_QUERY intent
@@ -209,7 +231,7 @@ RULES:
         ? `Here are our top ${count} most affordable ${brandMention}available pairs:`
         : `Here is the most affordable available ${brandMention}pair currently in our store:`;
     } else if (relaxedSearchNotice) {
-      fallbackReply = `I couldn't find an exact match under your strict filter, but I found these closest options currently available in our store:`;
+      fallbackReply = relaxedSearchNotice;
     } else if (finalProductCards.length > 0) {
       const count = finalProductCards.length;
       fallbackReply = `I found ${count} pair${count > 1 ? 's' : ''} that match your preferences:`;

@@ -11,10 +11,11 @@
  * - 'GREETING': Pure greetings ("hi", "how are you", "are you okay", "thanks")
  * - 'GITSOLE_FAQ': Delivery, tracking, authenticity, returns, contact info
  * - 'VAGUE_SHOPPING': "I need something good", "I have 5000 find me something good"
- * - 'PRODUCT_SEARCH': "Nike sneakers under 6000 size 9", "black shoes", "i need nike shoe"
+ * - 'PRODUCT_SEARCH': "Nike sneakers under 6000 size 9", "black shoes", "i need nike shoe", "nike"
  */
 export function detectUserIntent(userMessage = '') {
-  const text = userMessage.toLowerCase().trim();
+  const text = (userMessage || '').toLowerCase().trim();
+  if (!text) return { intent: 'GREETING', subType: 'EMPTY' };
 
   // 1. Check for MAX_PRICE / EXPENSIVE Intent FIRST
   if (
@@ -50,13 +51,15 @@ export function detectUserIntent(userMessage = '') {
     text.includes('which brands') ||
     text.includes('list of brands') ||
     text.includes('available brands') ||
-    text.includes('brands do you have')
+    text.includes('brands do you have') ||
+    text === 'brands' ||
+    text === 'brand'
   ) {
     return { intent: 'BRAND_LIST' };
   }
 
   // 4. Check for COUNT_QUERY Intent
-  if (text.includes('how many') && (text.includes('shoe') || text.includes('nike') || text.includes('adidas') || text.includes('pair'))) {
+  if (text.includes('how many') && (text.includes('shoe') || text.includes('nike') || text.includes('adidas') || text.includes('pair') || text.includes('item') || text.includes('stock'))) {
     return { intent: 'COUNT_QUERY' };
   }
 
@@ -73,18 +76,19 @@ export function detectUserIntent(userMessage = '') {
   if (text.includes('return') || text.includes('exchange') || text.includes('refund') || text.includes('policy')) {
     return { intent: 'GITSOLE_FAQ', subType: 'RETURNS' };
   }
-  if (text.includes('contact') || text.includes('phone') || text.includes('whatsapp') || text.includes('number') || text.includes('location') || text.includes('address')) {
+  if (text.includes('contact') || text.includes('phone') || text.includes('whatsapp') || text.includes('number') || text.includes('location') || text.includes('address') || text.includes('helpline')) {
     return { intent: 'GITSOLE_FAQ', subType: 'CONTACT' };
   }
 
   // 6. Shopping Indicators (Brand, Price, Size, Color, Category)
-  const hasShoppingKeywords = ['shoe', 'shoes', 'sneaker', 'sneakers', 'pair', 'nike', 'jordan', 'adidas', 'new balance', 'puma', 'asics', 'reebok', 'timberland', 'vans', 'converse', 'yeezy', 'boot', 'boots', 'dunk', 'force'].some(k => text.includes(k));
-  const hasPrice = /(?:under|below|max|budget|within|around|upto)?\s*(?:rs|pkr)?\s*(\d+(?:\.\d+)?\s*k|\d{4,5}|\d+\s*hazar)/.test(text) || text.includes('cheap') || text.includes('budget') || text.includes('rupees') || text.includes('price');
-  const hasBrand = ['nike', 'jordan', 'adidas', 'new balance', 'puma', 'asics', 'reebok', 'timberland', 'vans', 'converse', 'yeezy'].some(b => text.includes(b));
-  const hasSize = /(?:size|uk|eu)?\s*(4[0-6]|1[0-2]|[5-9](?:\.5)?)/.test(text);
-  const hasColor = ['black', 'white', 'red', 'blue', 'green', 'grey', 'gray', 'wheat', 'brown', 'yellow'].some(c => text.includes(c));
+  const brands = ['nike', 'jordan', 'adidas', 'new balance', 'puma', 'asics', 'reebok', 'timberland', 'vans', 'converse', 'yeezy'];
+  const hasBrand = brands.some(b => new RegExp(`\\b${b}\\b`, 'i').test(text));
+  const hasShoppingKeywords = ['shoe', 'shoes', 'sneaker', 'sneakers', 'pair', 'kicks', 'boot', 'boots', 'dunk', 'force', 'trainer', 'trainers', 'footwear'].some(k => text.includes(k));
+  const hasPrice = /(?:under|below|max|maximum|budget|within|around|upto|less than)?\s*(?:rs\.?|pkr\.?)?\s*(\d+(?:\.\d+)?\s*k|\d{4,6}|\d+\s*hazar)/i.test(text) || text.includes('cheap') || text.includes('budget') || text.includes('rupees') || text.includes('price');
+  const hasExplicitSize = /\b(?:size|uk|eu|us)\s*[:#\-]?\s*(4[0-6]|1[0-3]|[5-9](?:\.5)?)\b/i.test(text);
+  const hasColor = ['black', 'white', 'red', 'blue', 'green', 'grey', 'gray', 'wheat', 'brown', 'yellow', 'pink'].some(c => new RegExp(`\\b${c}\\b`, 'i').test(text));
 
-  if (hasShoppingKeywords || hasPrice || hasBrand || hasSize || hasColor) {
+  if (hasShoppingKeywords || hasPrice || hasBrand || hasExplicitSize || hasColor) {
     if (text === 'something good' || text === 'i need something good' || text === 'shoes' || text === 'sneakers') {
       return { intent: 'VAGUE_SHOPPING', subType: 'VAGUE' };
     }
@@ -143,13 +147,20 @@ export function searchProducts(products = [], filters = {}) {
       return false;
     }
 
-    // 2. Robust Brand Filter (Handles "nike", "nike shoe", "nike sneakers", "i need nike")
+    // 2. Robust Brand Filter
     if (brand && brand !== 'ALL' && brand.toLowerCase() !== 'all' && brand.toLowerCase() !== 'unknown') {
       const b = brand.toLowerCase().trim();
       const pBrand = (p.brand || '').toLowerCase().trim();
-      const cleanBrandQuery = b.replace(/\b(shoe|shoes|sneaker|sneakers|pair|footwear)\b/gi, '').trim();
+      const pModel = (p.model || '').toLowerCase().trim();
+      const cleanBrandQuery = b.replace(/\b(shoe|shoes|sneaker|sneakers|pair|footwear|brand)\b/gi, '').trim();
 
-      if (!pBrand.includes(cleanBrandQuery) && !cleanBrandQuery.includes(pBrand)) {
+      const brandMatches = pBrand.includes(cleanBrandQuery) ||
+                           cleanBrandQuery.includes(pBrand) ||
+                           pModel.includes(cleanBrandQuery) ||
+                           (cleanBrandQuery === 'nike' && (pBrand === 'jordan' || pModel.includes('jordan'))) ||
+                           (cleanBrandQuery === 'jordan' && (pBrand === 'nike' || pModel.includes('jordan')));
+
+      if (!brandMatches) {
         return false;
       }
     }
@@ -241,13 +252,14 @@ export function searchProducts(products = [], filters = {}) {
  * Parse natural language user text into numeric price & filter values
  */
 export function parseNaturalLanguageText(userMessage = '') {
-  const text = userMessage.toLowerCase();
+  const text = (userMessage || '').toLowerCase().trim();
   const filters = {};
 
   let maxPrice = null;
   let minPrice = null;
 
-  const rangeMatch = text.match(/(?:between|from)?\s*(\d+(?:k)?)\s*(?:to|and|-)\s*(\d+(?:k)?)/);
+  // 1. Price Range: "between 4000 and 8000", "4k to 8k", "5000 - 9000", "from 5k to 10k"
+  const rangeMatch = text.match(/(?:between|from)?\s*(\d+(?:\.\d+)?\s*k|\d{4,6})\s*(?:to|and|-)\s*(\d+(?:\.\d+)?\s*k|\d{4,6})/i);
   if (rangeMatch) {
     const minVal = parsePriceVal(rangeMatch[1]);
     const maxVal = parsePriceVal(rangeMatch[2]);
@@ -256,42 +268,81 @@ export function parseNaturalLanguageText(userMessage = '') {
       maxPrice = maxVal;
     }
   } else {
-    const singlePriceMatch = text.match(/(?:under|below|max|budget|within|around|upto)?\s*(?:rs|pkr)?\s*(\d+(?:\.\d+)?\s*k|\d{4,5}|\d+\s*hazar)/);
+    // 2. Single Price Match
+    const cleanedText = text.replace(/,/g, '');
+    const singlePriceMatch = cleanedText.match(/(?:under|below|max|maximum|budget|within|around|upto|less than|up to)?\s*(?:rs\.?|pkr\.?)?\s*(\d+(?:\.\d+)?\s*k|\d{4,6}|\d+\s*hazar)\s*(?:rs\.?|pkr|rupees)?/i);
     if (singlePriceMatch) {
-      const rawPrice = singlePriceMatch[1];
-      maxPrice = parsePriceVal(rawPrice);
+      const matchedStr = singlePriceMatch[0];
+      const isPriceContext = /(?:under|below|max|maximum|budget|within|around|upto|less than|up to|rs|pkr|rupees|price|k\b|hazar|\d{4,6})/i.test(matchedStr);
+      if (isPriceContext) {
+        maxPrice = parsePriceVal(singlePriceMatch[1]);
+      }
     }
   }
 
   if (maxPrice) filters.maxPrice = maxPrice;
   if (minPrice) filters.minPrice = minPrice;
 
-  // Extract Brand (Handles "i need nike shoe", "show me nike sneakers", "nike")
-  const brands = ['nike', 'jordan', 'adidas', 'new balance', 'puma', 'asics', 'reebok', 'timberland', 'vans', 'converse', 'yeezy'];
+  // Extract Brand
+  const brands = [
+    'new balance',
+    'air jordan',
+    'jordan',
+    'nike',
+    'adidas',
+    'timberland',
+    'puma',
+    'asics',
+    'reebok',
+    'vans',
+    'converse',
+    'yeezy'
+  ];
+
   for (const b of brands) {
-    if (text.includes(b)) {
-      filters.brand = b === 'new balance' ? 'New Balance' : b.charAt(0).toUpperCase() + b.slice(1);
+    const regex = new RegExp(`\\b${b}\\b`, 'i');
+    if (regex.test(text)) {
+      if (b === 'new balance') filters.brand = 'New Balance';
+      else if (b === 'air jordan' || b === 'jordan') filters.brand = 'Jordan';
+      else filters.brand = b.charAt(0).toUpperCase() + b.slice(1);
       break;
     }
   }
 
-  // Extract Limit (e.g. "top 3", "3 most expensive", "5 cheapest")
-  const limitMatch = text.match(/(?:top|show me|find|get)\s*(\d+)/);
+  // Extract Limit (e.g. "top 3", "show me 5")
+  const limitMatch = text.match(/(?:top|show me|find|get|best)\s*(\d+)/i);
   if (limitMatch) {
     filters.limit = parseInt(limitMatch[1], 10);
   }
 
+  // Extract Color
   const colors = ['black', 'white', 'red', 'blue', 'green', 'grey', 'gray', 'wheat', 'brown', 'gold', 'yellow', 'silver', 'pink'];
   for (const c of colors) {
-    if (text.includes(c)) {
+    const colorRegex = new RegExp(`\\b${c}\\b`, 'i');
+    if (colorRegex.test(text)) {
       filters.color = c === 'gray' ? 'grey' : c;
       break;
     }
   }
 
-  const sizeMatch = text.match(/(?:size|uk|eu)?\s*(4[0-6]|1[0-2]|[5-9](?:\.5)?)/);
-  if (sizeMatch) {
-    filters.sizeUK = sizeMatch[1];
+  // Extract Size safely (Ensure price numbers like 5000 don't get misparsed as size 5!)
+  let textForSize = text
+    .replace(/,/g, '')
+    .replace(/(?:between|from)?\s*(\d+(?:\.\d+)?\s*k|\d{4,6})\s*(?:to|and|-)\s*(\d+(?:\.\d+)?\s*k|\d{4,6})/gi, ' ')
+    .replace(/(?:under|below|max|budget|within|around|upto|less than)?\s*(?:rs\.?|pkr\.?)?\s*(\d+(?:\.\d+)?\s*k|\d{4,6}|\d+\s*hazar)\s*(?:rs\.?|pkr|rupees)?/gi, ' ')
+    .replace(/\b\d{4,6}\b/g, ' ')
+    .replace(/\b\d+\s*k\b/gi, ' ');
+
+  // 1. Explicit size: "size 9", "size 9.5", "uk 9", "eu 42", "size: 9"
+  const explicitSizeMatch = textForSize.match(/\b(?:size|uk|eu|us)\s*[:#\-]?\s*(4[0-6]|1[0-3]|[5-9](?:\.5)?)\b/i);
+  if (explicitSizeMatch) {
+    filters.sizeUK = explicitSizeMatch[1];
+  } else {
+    // 2. Standalone size number (only when explicitly requested like "in 9", "size 9.5")
+    const standaloneSizeMatch = textForSize.match(/\b(?:in|a|for)?\s*(4[0-6]|1[0-3]|[6-9]\.5|[7-9])\b/i);
+    if (standaloneSizeMatch && !text.includes('top ' + standaloneSizeMatch[1]) && !text.includes('best ' + standaloneSizeMatch[1])) {
+      filters.sizeUK = standaloneSizeMatch[1];
+    }
   }
 
   return filters;
@@ -299,7 +350,7 @@ export function parseNaturalLanguageText(userMessage = '') {
 
 function parsePriceVal(valStr) {
   if (!valStr) return null;
-  const s = String(valStr).toLowerCase().trim();
+  const s = String(valStr).toLowerCase().trim().replace(/,/g, '');
   if (s.includes('k')) {
     const num = parseFloat(s.replace('k', ''));
     return num ? Math.round(num * 1000) : null;
