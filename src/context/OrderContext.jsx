@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { fetchCloudOrders, saveCloudOrder, updateCloudOrderFields, deleteCloudOrder } from '../services/cloudDb';
 
 const OrderContext = createContext();
 
@@ -53,6 +54,9 @@ export function OrderProvider({ children }) {
     }
   });
 
+  const [isCloudConnected, setIsCloudConnected] = useState(true);
+  const [lastSyncedAt, setLastSyncedAt] = useState(null);
+
   const [sizeAlerts, setSizeAlerts] = useState(() => {
     try {
       const saved = localStorage.getItem('gitsole_size_alerts');
@@ -62,6 +66,7 @@ export function OrderProvider({ children }) {
     }
   });
 
+  // Sync state to local storage
   useEffect(() => {
     try {
       localStorage.setItem('gitsole_orders', JSON.stringify(orders));
@@ -77,6 +82,44 @@ export function OrderProvider({ children }) {
       console.error(e);
     }
   }, [sizeAlerts]);
+
+  // Sync with Cloud DB function
+  const syncWithCloud = useCallback(async () => {
+    const cloudOrders = await fetchCloudOrders();
+    if (cloudOrders && Array.isArray(cloudOrders)) {
+      setIsCloudConnected(true);
+      setLastSyncedAt(new Date());
+
+      if (cloudOrders.length === 0) {
+        // Seed initial orders to cloud DB if cloud DB is brand new
+        for (const o of INITIAL_ORDERS) {
+          await saveCloudOrder(o);
+        }
+        setOrders(INITIAL_ORDERS);
+      } else {
+        // Merge cloud orders with local state
+        setOrders(prev => {
+          const map = new Map();
+          // First add existing local orders
+          prev.forEach(o => map.set(o.id, o));
+          // Cloud orders override / add new items
+          cloudOrders.forEach(o => map.set(o.id, o));
+          const merged = Array.from(map.values());
+          merged.sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
+          return merged;
+        });
+      }
+    } else {
+      setIsCloudConnected(false);
+    }
+  }, []);
+
+  // Initial cloud fetch and 5-second polling loop for real-time live sync
+  useEffect(() => {
+    syncWithCloud();
+    const interval = setInterval(syncWithCloud, 5000);
+    return () => clearInterval(interval);
+  }, [syncWithCloud]);
 
   const placeOrder = (orderData) => {
     const orderId = `GS-${Math.floor(10000 + Math.random() * 90000)}`;
@@ -103,7 +146,14 @@ export function OrderProvider({ children }) {
       ]
     };
 
+    // 1. Instant local update
     setOrders(prev => [newOrder, ...prev]);
+
+    // 2. Real-time push to Cloud Database
+    saveCloudOrder(newOrder).then(() => {
+      setLastSyncedAt(new Date());
+    });
+
     return newOrder;
   };
 
@@ -119,6 +169,8 @@ export function OrderProvider({ children }) {
   };
 
   const updateOrderStatus = (orderId, newStatus) => {
+    let updatedOrderObj = null;
+
     setOrders(prev => prev.map(order => {
       if (order.id !== orderId) return order;
 
@@ -148,16 +200,27 @@ export function OrderProvider({ children }) {
         });
       }
 
-      return {
+      updatedOrderObj = {
         ...order,
         status: newStatus,
         timeline: updatedTimeline
       };
+
+      return updatedOrderObj;
     }));
+
+    // Update Cloud DB
+    if (updatedOrderObj) {
+      updateCloudOrderFields(orderId, {
+        status: updatedOrderObj.status,
+        timeline: updatedOrderObj.timeline
+      });
+    }
   };
 
   const deleteOrder = (orderId) => {
     setOrders(prev => prev.filter(order => order.id !== orderId));
+    deleteCloudOrder(orderId);
   };
 
   return (
@@ -168,7 +231,10 @@ export function OrderProvider({ children }) {
       updateOrderStatus,
       deleteOrder,
       registerSizeAlert,
-      sizeAlerts
+      sizeAlerts,
+      isCloudConnected,
+      lastSyncedAt,
+      syncWithCloud
     }}>
       {children}
     </OrderContext.Provider>

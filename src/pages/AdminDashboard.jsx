@@ -35,11 +35,18 @@ import {
 export default function AdminDashboard() {
   const { products, addProduct, updateProduct, deleteProduct, toggleSoldStatus, resetToDefault } = useProducts();
   const { isAdminLoggedIn, logout, credentials, updateCredentials } = useAdminAuth();
-  const { orders, updateOrderStatus, deleteOrder } = useOrder();
+  const { orders, updateOrderStatus, deleteOrder, isCloudConnected, lastSyncedAt, syncWithCloud } = useOrder();
   const navigate = useNavigate();
 
+  const [isSyncing, setIsSyncing] = useState(false);
   const [activeTab, setActiveTab] = useState('products');
   const [orderStatusFilter, setOrderStatusFilter] = useState('ALL');
+
+  const handleManualSync = async () => {
+    setIsSyncing(true);
+    await syncWithCloud();
+    setTimeout(() => setIsSyncing(false), 500);
+  };
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedBrand, setSelectedBrand] = useState('ALL');
@@ -142,7 +149,7 @@ export default function AdminDashboard() {
       }}>
         <div style={{ maxWidth: '1360px', margin: '0 auto', display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '16px' }}>
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
               <span style={{
                 fontFamily: 'var(--font-mono)',
                 fontSize: '10px',
@@ -155,8 +162,25 @@ export default function AdminDashboard() {
               }}>
                 ADMIN DASHBOARD
               </span>
-              <span style={{ fontSize: '13px', color: 'var(--color-on-ink)', fontFamily: 'var(--font-mono)' }}>
-                Gitsole Portal v1.0
+              <span style={{
+                fontFamily: 'var(--font-mono)',
+                fontSize: '11px',
+                color: isCloudConnected ? '#81C784' : '#E57373',
+                backgroundColor: 'rgba(255,255,255,0.08)',
+                padding: '3px 10px',
+                borderRadius: '999px',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px'
+              }}>
+                <span style={{
+                  width: '7px',
+                  height: '7px',
+                  borderRadius: '50%',
+                  backgroundColor: isCloudConnected ? '#66BB6A' : '#EF5350',
+                  display: 'inline-block'
+                }} />
+                {isCloudConnected ? 'LIVE CLOUD SYNC ACTIVE' : 'OFFLINE MODE'}
               </span>
             </div>
             <h1 style={{
@@ -171,6 +195,24 @@ export default function AdminDashboard() {
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+            <button
+              onClick={handleManualSync}
+              title="Pull latest orders live from Cloud DB"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '9px 14px',
+                backgroundColor: 'transparent',
+                border: '1px solid var(--color-on-ink-line)',
+                color: 'var(--color-paper)',
+                cursor: 'pointer',
+                fontSize: '13px',
+                fontWeight: 500
+              }}
+            >
+              <RotateCcw size={14} /> Refresh Sync
+            </button>
             <Link
               to="/"
               target="_blank"
