@@ -507,11 +507,11 @@ export default function ProductFormModal({ isOpen, onClose, onSubmit, initialDat
                   style={{ width: '100%', padding: '6px 10px', fontSize: '12px', border: '1px solid var(--color-line)' }}
                 />
                 <div style={{ fontSize: '11px', color: 'var(--color-muted)', marginTop: '4px' }}>
-                  Get your 100% free Gemini Key in 10 seconds at{' '}
+                  Get your 100% free Gemini API Key (starts with <strong>AIzaSy...</strong>) in 10 seconds at{' '}
                   <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--color-oxblood)', fontWeight: 700, textDecoration: 'underline' }}>
                     aistudio.google.com/app/apikey
                   </a>
-                  . Without a key, Gitsole uses the Canvas Visual Pixel AI locally!
+                  . Note: OAuth tokens starting with <code>AQ.Ab...</code> are not API keys.
                 </div>
               </div>
             )}
