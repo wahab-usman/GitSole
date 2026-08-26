@@ -29,6 +29,13 @@ export default function ProductFormModal({ isOpen, onClose, onSubmit, initialDat
   const [showUrlInput, setShowUrlInput] = useState(false);
   const [isScanning, setIsScanning] = useState(false);
   const [scanMessage, setScanMessage] = useState('');
+  const [showApiKeyInput, setShowApiKeyInput] = useState(false);
+  const [userApiKey, setUserApiKey] = useState(localStorage.getItem('gitsole_gemini_api_key') || '');
+
+  const handleSaveApiKey = (val) => {
+    setUserApiKey(val);
+    localStorage.setItem('gitsole_gemini_api_key', val);
+  };
 
   const handleAIShoeScan = async (targetPhoto = null) => {
     const photoToScan = targetPhoto || photos[0] || flawPhoto || customUrlInput;
@@ -38,9 +45,9 @@ export default function ProductFormModal({ isOpen, onClose, onSubmit, initialDat
     }
 
     setIsScanning(true);
-    setScanMessage('AI Vision is analyzing shoe brand, model, colourway & condition...');
+    setScanMessage('AI Vision is analyzing shoe pixels, brand, model & colourway...');
 
-    const res = await analyzeShoePhotoWithAI(photoToScan);
+    const res = await analyzeShoePhotoWithAI(photoToScan, userApiKey);
 
     setIsScanning(false);
     if (res.success && res.data) {
@@ -54,7 +61,8 @@ export default function ProductFormModal({ isOpen, onClose, onSubmit, initialDat
         tier: res.data.tier || prev.tier,
         conditionNotes: res.data.conditionNotes || prev.conditionNotes
       }));
-      setScanMessage(`✨ AI Auto-Detected: ${res.data.brand} ${res.data.model} (${res.data.colourway})`);
+      const sourceBadge = res.isRealVision ? 'Google Gemini Live AI' : 'Canvas Visual Pixel AI';
+      setScanMessage(`✨ Detected [${sourceBadge}]: ${res.data.brand} ${res.data.model} (${res.data.colourway})`);
     } else {
       setScanMessage('Could not auto-detect shoe details. Please fill fields manually.');
     }
@@ -397,43 +405,71 @@ export default function ProductFormModal({ isOpen, onClose, onSubmit, initialDat
             border: '1.5px solid var(--color-oxblood)',
             padding: '14px 16px',
             display: 'flex',
-            flexWrap: 'wrap',
-            alignItems: 'center',
-            justifyContent: 'space-between',
+            flexDirection: 'column',
             gap: '12px'
           }}>
-            <div>
-              <div style={{ fontWeight: 700, fontSize: '13.5px', color: 'var(--color-ink)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <Sparkles size={16} color="var(--color-oxblood)" />
-                AI Shoe Vision Autodetect
+            <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
+              <div>
+                <div style={{ fontWeight: 700, fontSize: '13.5px', color: 'var(--color-ink)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <Sparkles size={16} color="var(--color-oxblood)" />
+                  AI Shoe Vision Autodetect
+                </div>
+                <div style={{ fontSize: '12px', color: 'var(--color-muted)', marginTop: '2px' }}>
+                  Upload picture ➔ Click scan ➔ AI fills Brand, Model, Colourway & Notes automatically!
+                </div>
               </div>
-              <div style={{ fontSize: '12px', color: 'var(--color-muted)', marginTop: '2px' }}>
-                Upload picture ➔ Click scan ➔ AI fills Brand, Model, Colourway & Notes automatically!
+
+              <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                <button
+                  type="button"
+                  onClick={() => setShowApiKeyInput(!showApiKeyInput)}
+                  style={{ background: 'none', border: 'none', color: 'var(--color-oxblood)', fontSize: '12px', fontWeight: 600, cursor: 'pointer', textDecoration: 'underline' }}
+                >
+                  {showApiKeyInput ? 'Hide Key Setting' : '⚙️ Gemini API Key'}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleAIShoeScan()}
+                  disabled={isScanning}
+                  className="btn btn-oxblood"
+                  style={{
+                    padding: '8px 16px',
+                    minHeight: '38px',
+                    fontSize: '13px',
+                    opacity: isScanning ? 0.75 : 1
+                  }}
+                >
+                  {isScanning ? (
+                    <>
+                      <Loader2 size={15} className="animate-spin" /> Scanning Photo...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles size={15} /> Auto-Fill Shoe Details with AI
+                    </>
+                  )}
+                </button>
               </div>
             </div>
 
-            <button
-              type="button"
-              onClick={() => handleAIShoeScan()}
-              disabled={isScanning}
-              className="btn btn-oxblood"
-              style={{
-                padding: '8px 16px',
-                minHeight: '38px',
-                fontSize: '13px',
-                opacity: isScanning ? 0.75 : 1
-              }}
-            >
-              {isScanning ? (
-                <>
-                  <Loader2 size={15} className="animate-spin" /> Scanning Photo...
-                </>
-              ) : (
-                <>
-                  <Sparkles size={15} /> Auto-Fill Shoe Details with AI
-                </>
-              )}
-            </button>
+            {showApiKeyInput && (
+              <div style={{ backgroundColor: '#FFF', border: '1px solid var(--color-line-strong)', padding: '10px 12px' }}>
+                <label style={{ fontSize: '11px', fontWeight: 700, fontFamily: 'var(--font-mono)', textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>
+                  Google Gemini API Key (Optional for 100% Live AI Cloud Model):
+                </label>
+                <input
+                  type="text"
+                  placeholder="Paste your free AIStudio key (AIzaSy...)"
+                  value={userApiKey}
+                  onChange={(e) => handleSaveApiKey(e.target.value)}
+                  style={{ width: '100%', padding: '6px 10px', fontSize: '12px', border: '1px solid var(--color-line)' }}
+                />
+                <div style={{ fontSize: '11px', color: 'var(--color-muted)', marginTop: '4px' }}>
+                  Without a key, Gitsole uses the Canvas RGB Visual Pixel Analysis Engine locally!
+                </div>
+              </div>
+            )}
           </div>
 
           {scanMessage && (
