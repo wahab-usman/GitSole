@@ -43,6 +43,17 @@ export async function sendChatMessageToAI(userMessage, history = [], contextFilt
     // 2. Client-side Intent Classification & Fallback Engine
     const { intent, subType } = detectUserIntent(userMessage);
 
+    if (intent === 'BRAND_LIST') {
+      const availableBrands = [...new Set(products.filter(p => p.status === 'available').map(p => p.brand))].filter(Boolean);
+      const brandText = availableBrands.length > 0 ? availableBrands.join(', ') : 'Nike, Adidas, Jordan, New Balance, Timberland, Puma, Vans';
+      return {
+        success: true,
+        reply: `We currently have curated pairs available from top brands including: ${brandText}. Which brand would you like to explore?`,
+        products: [],
+        appliedFilters: contextFilters
+      };
+    }
+
     if (intent === 'GREETING') {
       let greetingReply = "I'm doing great, thank you for asking! 😊 I'm here to help you find your next pair of kicks from GitSole. What size, brand, or budget are you looking for today?";
       if (subType === 'ARE_YOU_OKAY') {
@@ -94,17 +105,26 @@ export async function sendChatMessageToAI(userMessage, history = [], contextFilt
       };
     }
 
-    // Intent: PRODUCT_SEARCH
+    // 3. Process Product Search & Sorting (MAX_PRICE, MIN_PRICE, PRODUCT_SEARCH, COUNT_QUERY)
     const newExtracted = parseNaturalLanguageText(userMessage);
-    const mergedFilters = {
-      ...contextFilters,
-      ...newExtracted
-    };
+    let mergedFilters = { ...contextFilters, ...newExtracted };
+
+    if (intent === 'MAX_PRICE') {
+      mergedFilters.sortBy = 'price';
+      mergedFilters.sortOrder = 'desc';
+      mergedFilters.limit = newExtracted.limit || (userMessage.toLowerCase().includes('3') ? 3 : (userMessage.toLowerCase().includes('5') ? 5 : 1));
+      delete mergedFilters.maxPrice;
+    } else if (intent === 'MIN_PRICE') {
+      mergedFilters.sortBy = 'price';
+      mergedFilters.sortOrder = 'asc';
+      mergedFilters.limit = newExtracted.limit || (userMessage.toLowerCase().includes('3') ? 3 : (userMessage.toLowerCase().includes('5') ? 5 : 1));
+      delete mergedFilters.minPrice;
+    }
 
     let matchingProducts = searchProducts(products, mergedFilters);
     let relaxedNotice = false;
 
-    if (matchingProducts.length === 0 && (mergedFilters.maxPrice || mergedFilters.brand)) {
+    if (matchingProducts.length === 0 && intent === 'PRODUCT_SEARCH' && (mergedFilters.maxPrice || mergedFilters.brand)) {
       const relaxed = { ...mergedFilters };
       if (relaxed.maxPrice) relaxed.maxPrice = Math.round(relaxed.maxPrice * 1.35);
       delete relaxed.color;
@@ -113,15 +133,36 @@ export async function sendChatMessageToAI(userMessage, history = [], contextFilt
       if (fallbackMatches.length > 0) {
         matchingProducts = fallbackMatches;
         relaxedNotice = true;
-      } else {
-        matchingProducts = searchProducts(products, { status: 'available' }).slice(0, 4);
       }
     }
 
-    const finalProducts = matchingProducts.slice(0, 5);
+    if (intent === 'COUNT_QUERY') {
+      const count = matchingProducts.length;
+      const brandMention = mergedFilters.brand ? `${mergedFilters.brand} ` : '';
+      return {
+        success: true,
+        reply: `We currently have ${count} available ${brandMention}pair${count !== 1 ? 's' : ''} in our GitSole inventory.`,
+        products: matchingProducts.slice(0, 5),
+        appliedFilters: mergedFilters
+      };
+    }
+
+    const finalProducts = matchingProducts;
 
     let reply = '';
-    if (relaxedNotice) {
+    if (intent === 'MAX_PRICE') {
+      const count = finalProducts.length;
+      const brandMention = mergedFilters.brand ? `${mergedFilters.brand} ` : '';
+      reply = count > 1
+        ? `Here are our top ${count} highest-priced ${brandMention}available pairs:`
+        : `Here is the highest-priced available ${brandMention}pair currently in our store:`;
+    } else if (intent === 'MIN_PRICE') {
+      const count = finalProducts.length;
+      const brandMention = mergedFilters.brand ? `${mergedFilters.brand} ` : '';
+      reply = count > 1
+        ? `Here are our top ${count} most affordable ${brandMention}available pairs:`
+        : `Here is the most affordable available ${brandMention}pair currently in our store:`;
+    } else if (relaxedNotice) {
       reply = `I couldn't find an exact match under your strict criteria, but I found these closest options currently available in our store:`;
     } else if (finalProducts.length > 0) {
       const count = finalProducts.length;

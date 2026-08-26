@@ -1,5 +1,5 @@
 // Vercel Serverless Function: POST /api/chat-assistant
-// AI Shopping Assistant backend for GitSole e-commerce platform with ChatGPT-like conversational capability
+// AI Shopping Assistant backend for GitSole e-commerce platform with MAX_PRICE, MIN_PRICE, and BRAND_LIST intents
 
 import { searchProducts, parseNaturalLanguageText, detectUserIntent } from '../src/services/productSearchEngine.js';
 
@@ -26,65 +26,144 @@ export default async function handler(req, res) {
     }
 
     // 1. Classify User Intent FIRST
-    const { intent, subType } = detectUserIntent(message);
+    const intentResult = detectUserIntent(message);
+    const { intent, subType } = intentResult;
     const geminiApiKey = process.env.GEMINI_API_KEY || '';
 
-    // Check if intent requires searching product database
-    const isProductSearch = intent === 'PRODUCT_SEARCH';
-    let finalProductCards = [];
-    let mergedFilters = { ...contextFilters };
-
-    if (isProductSearch) {
-      const newExtracted = parseNaturalLanguageText(message);
-      mergedFilters = { ...contextFilters, ...newExtracted };
-
-      if (message.toLowerCase().includes('start over') || message.toLowerCase().includes('reset')) {
-        if (!newExtracted.brand) delete mergedFilters.brand;
-        if (!newExtracted.maxPrice) delete mergedFilters.maxPrice;
-        if (!newExtracted.minPrice) delete mergedFilters.minPrice;
-        if (!newExtracted.color) delete mergedFilters.color;
-        if (!newExtracted.sizeUK) delete mergedFilters.sizeUK;
-      }
-
-      let matchingProducts = searchProducts(products, mergedFilters);
-      if (matchingProducts.length === 0 && (mergedFilters.maxPrice || mergedFilters.brand)) {
-        const relaxed = { ...mergedFilters };
-        if (relaxed.maxPrice) relaxed.maxPrice = Math.round(relaxed.maxPrice * 1.35);
-        delete relaxed.color;
-        matchingProducts = searchProducts(products, relaxed);
-      }
-      finalProductCards = matchingProducts.slice(0, 5).map(p => ({
-        code: p.code,
-        brand: p.brand,
-        model: p.model,
-        colourway: p.colourway,
-        price: p.price,
-        retailPrice: p.retailPrice,
-        sizeUK: p.sizeUK,
-        sizeUS: p.sizeUS,
-        score: p.score,
-        tier: p.tier,
-        photo: p.photos?.[0] || p.photo || '',
-        status: p.status || 'available'
-      }));
+    // Handle BRAND_LIST Intent
+    if (intent === 'BRAND_LIST') {
+      const availableBrands = [...new Set(products.filter(p => p.status === 'available').map(p => p.brand))].filter(Boolean);
+      const brandText = availableBrands.length > 0 ? availableBrands.join(', ') : 'Nike, Adidas, Jordan, New Balance, Timberland, Puma, Vans';
+      return res.status(200).json({
+        success: true,
+        reply: `We currently have curated pairs available from top brands including: ${brandText}. Which brand would you like to explore?`,
+        products: [],
+        appliedFilters: contextFilters
+      });
     }
 
-    // 2. Call Gemini API for dynamic, ChatGPT-quality conversational response
+    // Handle GREETING Intent
+    if (intent === 'GREETING') {
+      let greetingReply = "I'm doing great, thank you for asking! 😊 I'm here to help you find your next pair of kicks from GitSole. What size, brand, or budget are you looking for today?";
+      if (subType === 'ARE_YOU_OKAY') {
+        greetingReply = "I'm doing great, thank you for checking! 😊 I'm fully ready to help you discover your next favourite pair of kicks on GitSole. How can I help you today?";
+      } else if (subType === 'HOW_ARE_YOU') {
+        greetingReply = "I'm doing awesome! 👟 Ready to help you hunt for clean sneakers or boots. What brand or size are you looking for?";
+      } else if (subType === 'JOKE') {
+        greetingReply = "Why did the shoe go to school? To get a little more sole! 👟 Let me know if you'd like to find some clean shoes today!";
+      } else if (subType === 'GREETING') {
+        greetingReply = "Hi there! Welcome to GitSole Concierge 👋 How can I help you find your next pair of shoes today?";
+      }
+      return res.status(200).json({
+        success: true,
+        reply: greetingReply,
+        products: [],
+        appliedFilters: contextFilters
+      });
+    }
+
+    // Handle GITSOLE FAQ Intent
+    if (intent === 'GITSOLE_FAQ') {
+      let faqReply = "GitSole offers curated branded thrift footwear with cash on delivery and free home delivery all over Pakistan!";
+      if (subType === 'DELIVERY') {
+        faqReply = "Yes! We offer cash on delivery (COD) and free home delivery all over Pakistan. Delivery takes 3–5 working days.";
+      } else if (subType === 'TRACKING') {
+        faqReply = "You can track your GitSole order anytime by clicking 'Track Order' in our header menu or visiting our tracking page.";
+      } else if (subType === 'AUTHENTICITY') {
+        faqReply = "Every pair on GitSole is 100% hand-inspected for authenticity, cleanliness, and structural condition before listing!";
+      } else if (subType === 'RETURNS') {
+        faqReply = "We provide a 7-day hassle-free return and exchange guarantee. If your shoes don't fit or match expectations, we will replace or refund!";
+      } else {
+        faqReply = "You can chat with our team directly on WhatsApp at 0309-4376043 or email us at support@gitsole.pk!";
+      }
+      return res.status(200).json({
+        success: true,
+        reply: faqReply,
+        products: [],
+        appliedFilters: contextFilters
+      });
+    }
+
+    // Handle VAGUE SHOPPING Intent
+    if (intent === 'VAGUE_SHOPPING') {
+      return res.status(200).json({
+        success: true,
+        reply: "Sure thing! What is your budget, size (e.g. UK 9 / 42), or preferred brand (Nike, Adidas, Jordan)?",
+        products: [],
+        appliedFilters: contextFilters
+      });
+    }
+
+    // 2. Shopping Query (MAX_PRICE, MIN_PRICE, PRODUCT_SEARCH, COUNT_QUERY)
+    const newExtracted = parseNaturalLanguageText(message);
+
+    // Context handling: If asking broader MAX_PRICE or MIN_PRICE, don't let old budget filters block it unless explicitly requested
+    let mergedFilters = { ...contextFilters, ...newExtracted };
+
+    if (intent === 'MAX_PRICE') {
+      mergedFilters.sortBy = 'price';
+      mergedFilters.sortOrder = 'desc';
+      mergedFilters.limit = newExtracted.limit || (message.toLowerCase().includes('3') ? 3 : (message.toLowerCase().includes('5') ? 5 : 1));
+      delete mergedFilters.maxPrice; // Do not apply maxPrice ceiling when asking for highest price
+    } else if (intent === 'MIN_PRICE') {
+      mergedFilters.sortBy = 'price';
+      mergedFilters.sortOrder = 'asc';
+      mergedFilters.limit = newExtracted.limit || (message.toLowerCase().includes('3') ? 3 : (message.toLowerCase().includes('5') ? 5 : 1));
+      delete mergedFilters.minPrice;
+    }
+
+    let matchingProducts = searchProducts(products, mergedFilters);
+    let relaxedSearchNotice = null;
+
+    if (matchingProducts.length === 0 && intent === 'PRODUCT_SEARCH' && (mergedFilters.maxPrice || mergedFilters.brand)) {
+      const relaxed = { ...mergedFilters };
+      if (relaxed.maxPrice) relaxed.maxPrice = Math.round(relaxed.maxPrice * 1.35);
+      delete relaxed.color;
+      matchingProducts = searchProducts(products, relaxed);
+      if (matchingProducts.length > 0) relaxedSearchNotice = true;
+    }
+
+    // If COUNT_QUERY intent
+    if (intent === 'COUNT_QUERY') {
+      const count = matchingProducts.length;
+      const brandMention = mergedFilters.brand ? `${mergedFilters.brand} ` : '';
+      return res.status(200).json({
+        success: true,
+        reply: `We currently have ${count} available ${brandMention}pair${count !== 1 ? 's' : ''} in our GitSole inventory.`,
+        products: matchingProducts.slice(0, 5),
+        appliedFilters: mergedFilters
+      });
+    }
+
+    const finalProductCards = matchingProducts.map(p => ({
+      code: p.code,
+      brand: p.brand,
+      model: p.model,
+      colourway: p.colourway,
+      price: p.price,
+      retailPrice: p.retailPrice,
+      sizeUK: p.sizeUK,
+      sizeUS: p.sizeUS,
+      score: p.score,
+      tier: p.tier,
+      photo: p.photos?.[0] || p.photo || '',
+      status: p.status || 'available'
+    }));
+
+    // 3. Gemini API Chat Response Generation
     if (geminiApiKey) {
       try {
-        const promptText = `You are GitSole Concierge, an intelligent, empathetic, and friendly AI Assistant & Personal Shopper for GitSole e-commerce platform in Pakistan.
+        const promptText = `You are GitSole Concierge, an intelligent AI Personal Shopper for GitSole.
+User message: "${message}"
+Intent: ${intent}
 
-Customer message: "${message}"
-Detected Intent: ${intent} (${subType})
+Matching products found in store (${finalProductCards.length}): ${JSON.stringify(finalProductCards.map(p => ({ brand: p.brand, model: p.model, price: `PKR ${p.price}`, size: `UK ${p.sizeUK}` })))}
 
-${isProductSearch ? `Matching real products found in store inventory (${finalProductCards.length}): ${JSON.stringify(finalProductCards.map(p => ({ brand: p.brand, model: p.model, price: `PKR ${p.price}`, size: `UK ${p.sizeUK}` })))}` : 'No product cards attached.'}
-
-CONVERSATIONAL RULES:
-1. Answer naturally, warmly, intelligently, and conversationally like ChatGPT or Gemini.
-2. If the user asks a casual question ("are you okay?", "how are you?", "tell me a joke", "what is your name?"), answer directly with warmth, humor, and personality!
-3. If the user asks a GitSole store question (delivery, COD, tracking, returns, guarantee), answer accurately.
-4. If recommending shoes, summarize the matches nicely in 1-2 sentences.
-5. Keep your response concise (1 to 3 sentences) and never show technical JSON or internal code.`;
+RULES:
+1. Speak naturally, warmly, and concisely like ChatGPT (1-2 sentences).
+2. If MAX_PRICE intent: "Here is our highest-priced available pair:" or "Here are our top highest-priced pairs:"
+3. If MIN_PRICE intent: "Here is our most affordable pair currently available:"
+4. Never show technical JSON or internal code.`;
 
         const geminiRes = await fetch(
           `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`,
@@ -115,37 +194,27 @@ CONVERSATIONAL RULES:
       }
     }
 
-    // Fallback Natural Language Replies if Gemini API key is pending
+    // Default Fallback Replies
     let fallbackReply = '';
-    if (intent === 'GREETING') {
-      if (subType === 'ARE_YOU_OKAY') {
-        fallbackReply = "I'm doing great, thank you for asking! 😊 I'm fully ready to help you discover your next pair of kicks. How can I help you today?";
-      } else if (subType === 'HOW_ARE_YOU') {
-        fallbackReply = "I'm doing awesome! 👟 Ready to help you hunt for clean sneakers or boots. What brand or size are you looking for?";
-      } else if (subType === 'JOKE') {
-        fallbackReply = "Why did the shoe go to school? To get a little more sole! 👟 Let me know if you'd like to find some clean shoes today!";
-      } else {
-        fallbackReply = "Hi there! Welcome to GitSole Concierge 👋 How can I help you find your next pair of shoes today?";
-      }
-    } else if (intent === 'GITSOLE_FAQ') {
-      if (subType === 'DELIVERY') {
-        fallbackReply = "Yes! We offer cash on delivery (COD) and free home delivery all over Pakistan. Delivery takes 3–5 working days.";
-      } else if (subType === 'TRACKING') {
-        fallbackReply = "You can track your GitSole order anytime by clicking 'Track Order' in our header menu or visiting our tracking page.";
-      } else if (subType === 'AUTHENTICITY') {
-        fallbackReply = "Every pair on GitSole is 100% hand-inspected for authenticity, cleanliness, and structural condition before listing!";
-      } else if (subType === 'RETURNS') {
-        fallbackReply = "We provide a 7-day hassle-free return and exchange guarantee. If your shoes don't fit or match expectations, we will replace or refund!";
-      } else {
-        fallbackReply = "You can chat with our team directly on WhatsApp at 0309-4376043 or email us at support@gitsole.pk!";
-      }
-    } else if (intent === 'VAGUE_SHOPPING') {
-      fallbackReply = "Sure! What budget, size (e.g. UK 9 / 42), or preferred brand (Nike, Adidas, Jordan) are you looking for?";
-    } else {
+    if (intent === 'MAX_PRICE') {
       const count = finalProductCards.length;
-      fallbackReply = count > 0
-        ? `I found ${count} pair${count > 1 ? 's' : ''} that match your preferences:`
-        : `I couldn't find available shoes matching those exact criteria right now. What other budget or brand would you like to try?`;
+      const brandMention = mergedFilters.brand ? `${mergedFilters.brand} ` : '';
+      fallbackReply = count > 1
+        ? `Here are our top ${count} highest-priced ${brandMention}available pairs:`
+        : `Here is the highest-priced available ${brandMention}pair currently in our store:`;
+    } else if (intent === 'MIN_PRICE') {
+      const count = finalProductCards.length;
+      const brandMention = mergedFilters.brand ? `${mergedFilters.brand} ` : '';
+      fallbackReply = count > 1
+        ? `Here are our top ${count} most affordable ${brandMention}available pairs:`
+        : `Here is the most affordable available ${brandMention}pair currently in our store:`;
+    } else if (relaxedSearchNotice) {
+      fallbackReply = `I couldn't find an exact match under your strict filter, but I found these closest options currently available in our store:`;
+    } else if (finalProductCards.length > 0) {
+      const count = finalProductCards.length;
+      fallbackReply = `I found ${count} pair${count > 1 ? 's' : ''} that match your preferences:`;
+    } else {
+      fallbackReply = `I couldn't find available shoes matching those criteria right now. What other budget or brand would you like to try?`;
     }
 
     return res.status(200).json({
