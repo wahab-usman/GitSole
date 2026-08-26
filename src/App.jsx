@@ -6,6 +6,7 @@ import { OrderProvider } from './context/OrderContext';
 import { AdminAuthProvider } from './context/AdminAuthContext';
 import Header from './components/Header';
 import Footer from './components/Footer';
+import AiShoppingAssistant from './components/AiShoppingAssistant';
 
 // Pages
 import Home from './pages/Home';
@@ -41,7 +42,6 @@ function ScrollToTop() {
 
   return null;
 }
-
 function Layout({ children }) {
   const location = useLocation();
   const isBarePage = location.pathname.startsWith('/checkout') || location.pathname.startsWith('/gitsole-owner-panel');
@@ -51,6 +51,7 @@ function Layout({ children }) {
       {!isBarePage && <Header />}
       <main style={{ flex: 1 }}>{children}</main>
       {!isBarePage && <Footer />}
+      {!isBarePage && <AiShoppingAssistant />}
       <ScrollToTopButton />
     </div>
   );
