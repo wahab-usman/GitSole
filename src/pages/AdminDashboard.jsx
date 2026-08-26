@@ -32,6 +32,24 @@ import {
   Clock
 } from 'lucide-react';
 
+const formatDateSafe = (dateVal) => {
+  if (!dateVal) return 'Recently placed';
+  const d = new Date(dateVal);
+  if (isNaN(d.getTime())) return String(dateVal);
+  return d.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+};
+
+const calcOrderTotal = (order) => {
+  const tot = Number(order.total);
+  if (!isNaN(tot) && tot > 0) return tot;
+  const sub = Number(order.subtotal);
+  if (!isNaN(sub) && sub > 0) return sub;
+  if (Array.isArray(order.items) && order.items.length > 0) {
+    return order.items.reduce((sum, item) => sum + (Number(item.price) || 0), 0);
+  }
+  return 0;
+};
+
 export default function AdminDashboard() {
   const { products, addProduct, updateProduct, deleteProduct, toggleSoldStatus, resetToDefault } = useProducts();
   const { isAdminLoggedIn, logout, credentials, updateCredentials } = useAdminAuth();
@@ -214,7 +232,7 @@ export default function AdminDashboard() {
             </h1>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }} className="admin-header-actions">
             <button
               onClick={handleManualSync}
               title="Pull latest orders live from Cloud DB"
@@ -895,14 +913,14 @@ export default function AdminDashboard() {
                       padding: '20px',
                     }}>
                       {/* Order Header */}
-                      <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
                           <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '18px' }}>#{order.id}</span>
                           <span style={{
                             display: 'inline-flex',
                             alignItems: 'center',
                             gap: '5px',
-                            padding: '4px 10px',
+                            padding: '3px 8px',
                             fontSize: '11px',
                             fontWeight: 700,
                             fontFamily: 'var(--font-mono)',
@@ -915,74 +933,80 @@ export default function AdminDashboard() {
                           </span>
                         </div>
                         <span style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', color: 'var(--color-muted)' }}>
-                          {new Date(order.date).toLocaleString('en-PK', { dateStyle: 'medium', timeStyle: 'short' })}
+                          {formatDateSafe(order.date)}
                         </span>
                       </div>
 
                       {/* Customer & Items */}
                       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }} className="admin-order-grid">
-                        <div style={{ fontSize: '13px', lineHeight: 1.7, color: 'var(--color-body)' }}>
-                          <div><strong>👤 Customer:</strong> {order.customer?.name}</div>
-                          <div><strong>📱 WhatsApp:</strong> {order.customer?.whatsapp}</div>
-                          <div><strong>📍 Address:</strong> {order.customer?.address}, {order.customer?.city}</div>
+                        <div style={{ fontSize: '13px', lineHeight: 1.6, color: 'var(--color-body)', wordBreak: 'break-word' }}>
+                          <div><strong>👤 Customer:</strong> {order.customer?.name || 'N/A'}</div>
+                          <div><strong>📱 WhatsApp:</strong> {order.customer?.whatsapp || 'N/A'}</div>
+                          <div><strong>📍 Address:</strong> {order.customer?.address || 'N/A'}, {order.customer?.city || ''}</div>
                           <div><strong>💳 Payment:</strong> {order.paymentMethod === 'cod' ? 'COD (PKR 300 Advance)' : 'Bank Transfer (Full Prepaid)'}</div>
-                          <div><strong>📦 Tracking:</strong> <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-oxblood)' }}>{order.trackingNumber}</span></div>
+                          <div><strong>📦 Tracking:</strong> <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-oxblood)' }}>{order.trackingNumber || 'N/A'}</span></div>
                         </div>
-                        <div>
+                        <div style={{ wordBreak: 'break-word' }}>
                           <div style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', textTransform: 'uppercase', color: 'var(--color-faint)', marginBottom: '8px', letterSpacing: '0.1em' }}>Items Ordered</div>
                           {(order.items || []).map((item, idx) => (
-                            <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
-                              {item.photos?.[0] && <img src={item.photos[0]} alt="" style={{ width: '40px', height: '40px', objectFit: 'cover', backgroundColor: 'var(--color-image-bg)' }} />}
-                              {item.photo && !item.photos?.[0] && <img src={item.photo} alt="" style={{ width: '40px', height: '40px', objectFit: 'cover', backgroundColor: 'var(--color-image-bg)' }} />}
-                              <div style={{ flex: 1, fontSize: '13px' }}>
-                                <div style={{ fontWeight: 600 }}>{item.model}</div>
-                                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--color-muted)' }}>UK {item.sizeUK} · {item.score}/10</div>
+                            <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px', flexWrap: 'wrap' }}>
+                              {(item.photos?.[0] || item.photo) && (
+                                <img src={item.photos?.[0] || item.photo} alt="" style={{ width: '40px', height: '40px', objectFit: 'cover', backgroundColor: 'var(--color-image-bg)', flexShrink: 0 }} />
+                              )}
+                              <div style={{ flex: 1, minWidth: '120px', fontSize: '13px' }}>
+                                <div style={{ fontWeight: 600 }}>{item.model || 'Thrift Footwear'}</div>
+                                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--color-muted)' }}>UK {item.sizeUK || '9'} · {item.score || 8}/10</div>
                               </div>
-                              <div style={{ fontFamily: 'var(--font-mono)', fontSize: '13px', fontWeight: 600 }}>{formatPrice(item.price)}</div>
+                              <div style={{ fontFamily: 'var(--font-mono)', fontSize: '13px', fontWeight: 600 }}>{formatPrice(Number(item.price) || 0)}</div>
                             </div>
                           ))}
                           <div style={{ borderTop: '1px solid var(--color-line)', paddingTop: '8px', marginTop: '4px', display: 'flex', justifyContent: 'space-between', fontWeight: 700, fontSize: '15px' }}>
                             <span>Total</span>
-                            <span style={{ fontFamily: 'var(--font-display)' }}>{formatPrice(order.total)}</span>
+                            <span style={{ fontFamily: 'var(--font-display)' }}>{formatPrice(calcOrderTotal(order))}</span>
                           </div>
                         </div>
                       </div>
 
                       {/* Action Buttons */}
-                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', borderTop: '1px solid var(--color-line)', paddingTop: '14px' }}>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', alignItems: 'center', borderTop: '1px solid var(--color-line)', paddingTop: '14px' }} className="admin-order-actions">
                         {/* WhatsApp button */}
                         <a
-                          href={buildWhatsAppUrl(`Hello ${order.customer?.name}! Regarding your Gitsole order #${order.id}:`)}
+                          href={buildWhatsAppUrl(`Hello ${order.customer?.name || 'Customer'}! Regarding your Gitsole order #${order.id}:`)}
                           target="_blank"
                           rel="noopener noreferrer"
                           style={{
                             display: 'inline-flex',
                             alignItems: 'center',
+                            justifyContent: 'center',
                             gap: '6px',
-                            padding: '7px 14px',
+                            padding: '8px 14px',
                             fontSize: '12px',
                             fontWeight: 600,
                             backgroundColor: '#25D366',
                             color: '#FFF',
                             border: 'none',
                             cursor: 'pointer',
-                            textDecoration: 'none'
+                            textDecoration: 'none',
+                            borderRadius: '2px',
+                            flex: '1 1 auto',
+                            minWidth: '140px'
                           }}
                         >
                           <MessageSquare size={14} /> WhatsApp Customer
                         </a>
 
                         {/* Direct Status Selector Dropdown */}
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          <span style={{ fontSize: '11.5px', fontWeight: 700, fontFamily: 'var(--font-mono)', textTransform: 'uppercase', color: 'var(--color-muted)' }}>
-                            Status:
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flex: '2 1 200px', minWidth: '180px' }}>
+                          <span style={{ fontSize: '11px', fontWeight: 700, fontFamily: 'var(--font-mono)', textTransform: 'uppercase', color: 'var(--color-muted)', whiteSpace: 'nowrap' }}>
+                            STATUS:
                           </span>
                           <select
-                            value={order.status}
+                            value={order.status || 'placed'}
                             onChange={(e) => updateOrderStatus(order.id, e.target.value)}
                             style={{
-                              padding: '6px 10px',
-                              fontSize: '12.5px',
+                              width: '100%',
+                              padding: '7px 10px',
+                              fontSize: '12px',
                               fontWeight: 700,
                               fontFamily: 'var(--font-mono)',
                               border: '1.5px solid var(--color-ink)',
@@ -1006,7 +1030,7 @@ export default function AdminDashboard() {
                         <button
                           onClick={() => { if (window.confirm(`Delete order #${order.id}?`)) deleteOrder(order.id); }}
                           style={{
-                            padding: '6px 12px',
+                            padding: '8px 12px',
                             fontSize: '12px',
                             fontWeight: 600,
                             backgroundColor: '#FFEBEE',
@@ -1015,8 +1039,11 @@ export default function AdminDashboard() {
                             cursor: 'pointer',
                             display: 'inline-flex',
                             alignItems: 'center',
+                            justifyContent: 'center',
                             gap: '5px',
-                            marginLeft: 'auto'
+                            borderRadius: '2px',
+                            flex: '1 1 auto',
+                            minWidth: '110px'
                           }}
                         >
                           <Trash2 size={13} /> Delete Order
@@ -1163,9 +1190,22 @@ export default function AdminDashboard() {
       )}
 
       <style>{`
-        @media (max-width: 768px) {
+        @media (max-width: 900px) {
           .admin-order-grid {
             grid-template-columns: 1fr !important;
+          }
+        }
+        @media (max-width: 600px) {
+          .admin-header-actions button, .admin-header-actions a {
+            flex: 1 1 100% !important;
+            justify-content: center !important;
+          }
+          .admin-order-actions {
+            flex-direction: column !important;
+            align-items: stretch !important;
+          }
+          .admin-order-actions > * {
+            width: 100% !important;
           }
         }
       `}</style>
