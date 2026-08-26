@@ -35,12 +35,32 @@ import {
 export default function AdminDashboard() {
   const { products, addProduct, updateProduct, deleteProduct, toggleSoldStatus, resetToDefault } = useProducts();
   const { isAdminLoggedIn, logout, credentials, updateCredentials } = useAdminAuth();
-  const { orders, updateOrderStatus, deleteOrder, isCloudConnected, lastSyncedAt, syncWithCloud } = useOrder();
+  const { orders, updateOrderStatus, deleteOrder, isCloudConnected, lastSyncedAt, syncWithCloud, addManualOrder } = useOrder();
   const navigate = useNavigate();
 
   const [isSyncing, setIsSyncing] = useState(false);
   const [activeTab, setActiveTab] = useState('products');
   const [orderStatusFilter, setOrderStatusFilter] = useState('ALL');
+
+  const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
+  const [manualOrderData, setManualOrderData] = useState({
+    customerName: '',
+    whatsapp: '',
+    address: '',
+    itemCode: 'GS-0442',
+    model: '',
+    price: 8900
+  });
+
+  const handleAddManualOrderSubmit = (e) => {
+    e.preventDefault();
+    if (manualOrderData.customerName.trim() && manualOrderData.whatsapp.trim()) {
+      addManualOrder(manualOrderData);
+      setIsOrderModalOpen(false);
+      setManualOrderData({ customerName: '', whatsapp: '', address: '', itemCode: 'GS-0442', model: '', price: 8900 });
+      setActiveTab('orders');
+    }
+  };
 
   const handleManualSync = async () => {
     setIsSyncing(true);
@@ -237,6 +257,14 @@ export default function AdminDashboard() {
               style={{ padding: '9px 18px', minHeight: '40px', fontSize: '13.5px' }}
             >
               <Plus size={16} /> Add New Shoe
+            </button>
+
+            <button
+              onClick={() => setIsOrderModalOpen(true)}
+              className="btn btn-primary"
+              style={{ padding: '9px 18px', minHeight: '40px', fontSize: '13.5px', backgroundColor: '#1B5E20' }}
+            >
+              <Plus size={16} /> Log Order Manually
             </button>
 
             <button
@@ -999,6 +1027,138 @@ export default function AdminDashboard() {
                 })}
             </div>
           )}
+        </div>
+      )}
+
+      {/* Log Order Manually Modal */}
+      {isOrderModalOpen && (
+        <div
+          onClick={() => setIsOrderModalOpen(false)}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 2060,
+            backgroundColor: 'rgba(0, 0, 0, 0.65)',
+            backdropFilter: 'blur(3px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '20px'
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            onWheel={(e) => e.stopPropagation()}
+            data-lenis-prevent="true"
+            style={{
+              backgroundColor: '#FFFFFF',
+              width: '100%',
+              maxWidth: '480px',
+              border: '2px solid var(--color-ink)',
+              boxShadow: '0 20px 50px rgba(0, 0, 0, 0.25)'
+            }}
+          >
+            <div style={{
+              backgroundColor: 'var(--color-ink)',
+              color: 'var(--color-paper)',
+              padding: '18px 24px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between'
+            }}>
+              <div>
+                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', letterSpacing: '0.14em', textTransform: 'uppercase', color: '#81C784', backgroundColor: 'rgba(255,255,255,0.1)', padding: '2px 6px', display: 'inline-block', fontWeight: 700, marginBottom: '4px' }}>
+                  WHATSAPP ORDER INTAKE
+                </div>
+                <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '18px' }}>
+                  Log Order Manually
+                </h3>
+              </div>
+              <button onClick={() => setIsOrderModalOpen(false)} style={{ background: 'none', border: 'none', color: '#FFF', cursor: 'pointer' }}>
+                <X size={20} />
+              </button>
+            </div>
+
+            <form onSubmit={handleAddManualOrderSubmit} style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              <div>
+                <label style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>
+                  Customer Name *
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Safia Younas / Hamza"
+                  value={manualOrderData.customerName}
+                  onChange={(e) => setManualOrderData({ ...manualOrderData, customerName: e.target.value })}
+                  style={{ width: '100%', padding: '9px 12px', border: '1px solid var(--color-line-strong)' }}
+                />
+              </div>
+
+              <div>
+                <label style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>
+                  WhatsApp Number *
+                </label>
+                <input
+                  type="tel"
+                  required
+                  placeholder="0321 1234567"
+                  value={manualOrderData.whatsapp}
+                  onChange={(e) => setManualOrderData({ ...manualOrderData, whatsapp: e.target.value })}
+                  style={{ width: '100%', padding: '9px 12px', border: '1px solid var(--color-line-strong)' }}
+                />
+              </div>
+
+              <div>
+                <label style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>
+                  Delivery Address & Landmark
+                </label>
+                <textarea
+                  rows={2}
+                  placeholder="Street Address, Sector, City..."
+                  value={manualOrderData.address}
+                  onChange={(e) => setManualOrderData({ ...manualOrderData, address: e.target.value })}
+                  style={{ width: '100%', padding: '9px 12px', border: '1px solid var(--color-line-strong)', fontFamily: 'var(--font-body)', fontSize: '13px' }}
+                />
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div>
+                  <label style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>
+                    Shoe Stock Code / Name
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. GS-0442 / Air Max 90"
+                    value={manualOrderData.model}
+                    onChange={(e) => setManualOrderData({ ...manualOrderData, model: e.target.value })}
+                    style={{ width: '100%', padding: '9px 12px', border: '1px solid var(--color-line-strong)' }}
+                  />
+                </div>
+
+                <div>
+                  <label style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>
+                    Total Amount (PKR)
+                  </label>
+                  <input
+                    type="number"
+                    placeholder="8900"
+                    value={manualOrderData.price}
+                    onChange={(e) => setManualOrderData({ ...manualOrderData, price: e.target.value })}
+                    style={{ width: '100%', padding: '9px 12px', border: '1px solid var(--color-line-strong)' }}
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '12px' }}>
+                <button type="button" onClick={() => setIsOrderModalOpen(false)} className="btn btn-outline" style={{ padding: '8px 16px', minHeight: '38px' }}>
+                  Cancel
+                </button>
+                <button type="submit" className="btn btn-primary" style={{ padding: '8px 20px', minHeight: '38px', backgroundColor: '#1B5E20' }}>
+                  Log Order
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
 
