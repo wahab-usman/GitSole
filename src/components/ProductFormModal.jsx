@@ -52,16 +52,22 @@ export default function ProductFormModal({ isOpen, onClose, onSubmit, initialDat
   };
 
   const handleAIShoeScan = async (targetPhoto = null) => {
-    const imagesToScan = photos.length > 0 ? photos : (targetPhoto ? [targetPhoto] : [flawPhoto || customUrlInput].filter(Boolean));
+    const imagesToScan = targetPhoto ? [targetPhoto] : (photos.length > 0 ? photos : [customUrlInput].filter(Boolean));
     if (imagesToScan.length === 0) {
       alert('Please upload or add at least one shoe picture first to generate details with AI.');
       return;
     }
 
+    const requestId = 'req_' + Math.random().toString(36).substring(2, 9);
+    console.log(`[${requestId}] Frontend image payload:`, {
+      count: imagesToScan.length,
+      sampleSnippet: typeof imagesToScan[0] === 'string' ? imagesToScan[0].substring(0, 45) : 'binary'
+    });
+
     setIsScanning(true);
     setScanMessage('Analyzing shoe...');
 
-    const res = await analyzeShoeImagesWithAI(imagesToScan, userApiKey);
+    const res = await analyzeShoeImagesWithAI(imagesToScan, userApiKey, requestId);
 
     setIsScanning(false);
     if (res.success && res.product) {
@@ -140,19 +146,19 @@ export default function ProductFormModal({ isOpen, onClose, onSubmit, initialDat
         insoleCm: 28.0,
         score: 9.0,
         tier: 'Excellent',
-        price: 8500,
+        price: '',
         retailPrice: 22000,
         boxIncluded: false,
         status: 'available',
-        conditionNotes: 'Hand-inspected, cleaned and graded. Upper, sole and insoles in solid shape.',
-        flawCaption: 'Faint surface rub mark on inner lateral side.',
+        conditionNotes: '',
+        flawCaption: '',
         featured: false,
       });
-      setPhotos([
-        'https://images.unsplash.com/photo-1552346154-21d32810aba3?auto=format&fit=crop&w=800&q=80',
-        'https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?auto=format&fit=crop&w=800&q=80'
-      ]);
-      setFlawPhoto('https://images.unsplash.com/photo-1552346154-21d32810aba3?auto=format&fit=crop&w=800&q=80');
+      setPhotos([]);
+      setFlawPhoto('');
+      setHasAiGenerated(false);
+      setAiGeneratedMap({});
+      setScanMessage('');
     }
   }, [initialData, isOpen]);
 
@@ -193,19 +199,24 @@ export default function ProductFormModal({ isOpen, onClose, onSubmit, initialDat
   // Upload product photos from device
   const handleDevicePhotosUpload = (e) => {
     const files = Array.from(e.target.files || []);
-    files.forEach((file, index) => {
-      if (file.type.startsWith('image/')) {
+    const validImageFiles = files.filter((file) => file.type.startsWith('image/'));
+    if (validImageFiles.length === 0) return;
+
+    const readPromises = validImageFiles.map((file) => {
+      return new Promise((resolve) => {
         const reader = new FileReader();
-        reader.onload = (event) => {
-          const uploadedDataUrl = event.target.result;
-          setPhotos((prev) => [...prev, uploadedDataUrl]);
-          if (index === 0) {
-            handleAIShoeScan(uploadedDataUrl);
-          }
-        };
+        reader.onload = (event) => resolve(event.target.result);
         reader.readAsDataURL(file);
+      });
+    });
+
+    Promise.all(readPromises).then((newPhotos) => {
+      if (newPhotos.length > 0) {
+        setPhotos((prev) => [...prev, ...newPhotos]);
+        handleAIShoeScan(newPhotos[0]);
       }
     });
+
     e.target.value = '';
   };
 

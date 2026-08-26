@@ -17,7 +17,11 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { images, apiKey } = req.body || {};
+    const { images, apiKey, requestId = 'req_' + Date.now() } = req.body || {};
+
+    console.log(`[${requestId}] Backend received image analysis request:`, {
+      imageCount: Array.isArray(images) ? images.length : 1
+    });
 
     // 1. Validate API Key from Server Environment or Admin Request
     const geminiApiKey = process.env.GEMINI_API_KEY || (apiKey && apiKey.startsWith('AIzaSy') ? apiKey : '');
@@ -39,23 +43,26 @@ export default async function handler(req, res) {
       });
     }
 
-    // 3. Prepare Gemini API vision payload
+    // 3. Prepare Gemini API vision payload with strict single-image isolation prompt
     const geminiParts = [
       {
         text: `You are an expert sneaker authenticator and thrift footwear cataloger for GitSole e-commerce platform.
-Analyze the provided shoe image(s) in detail.
+Analyze ONLY the image(s) provided in this specific request payload. Ignore any previous product information, previous images, previous responses, cached data, filenames, URLs, or assumptions. Identify the shoe based solely on the visual content of the current image.
 
 CRITICAL NO-HALLUCINATION RULES:
 1. Do NOT invent or make up details that are not visible or identifiable.
-2. If the exact model cannot be determined from the image, output "Unknown" for model.
-3. If the material cannot be determined, output "Unknown" for material.
-4. If gender cannot be determined, output "Unisex" for gender.
-5. If condition tier cannot be reliably determined, output "Needs Review" for condition.
-6. Do NOT invent Price, Size, Stock quantity, or SKU.
-7. Generate a clean, SEO-friendly, professional Product Title without marketing hype words (avoid "BEST", "AMAZING", "PREMIUM", "HOT SELLING").
-8. Keep descriptions concise, factual, and suitable for GitSole.
+2. If the exact model cannot be determined from the visual content alone, output "Unknown" for model.
+3. If the brand cannot be confidently determined from visual logos/features, output "Unknown" for brand.
+4. If the material cannot be determined, output "Unknown" for material.
+5. If gender cannot be determined, output "Unisex" for gender.
+6. If condition tier cannot be reliably determined, output "Needs Review" for condition.
+7. Do NOT invent Price, Size, Stock quantity, or SKU.
+8. Generate a clean, SEO-friendly, professional Product Title without marketing hype words (avoid "BEST", "AMAZING", "PREMIUM", "HOT SELLING").
+9. Keep descriptions concise, factual, and suitable for GitSole.
 
-Return ONLY a valid JSON object matching this exact structure:
+Return ONLY a valid JSON object matching this exact structure:`
+      }
+    ];
 {
   "brand": "Nike|Jordan|Adidas|New Balance|Puma|Asics|Reebok|Timberland|Vans|Converse|Yeezy|Other",
   "model": "Exact Model Name or Unknown",

@@ -8,7 +8,7 @@ import { analyzeShoePhotoWithAI } from './aiShoeScanner';
  * @param {Array<string>} images - Array of image Base64 data URLs or HTTP URLs
  * @param {string} userApiKey - Optional admin fallback API Key
  */
-export async function analyzeShoeImagesWithAI(images, userApiKey = '') {
+export async function analyzeShoeImagesWithAI(images, userApiKey = '', requestId = 'req_' + Date.now()) {
   try {
     const imageList = Array.isArray(images) ? images.filter(Boolean) : [images].filter(Boolean);
 
@@ -28,7 +28,8 @@ export async function analyzeShoeImagesWithAI(images, userApiKey = '') {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           images: imageList,
-          apiKey: userApiKey || undefined
+          apiKey: userApiKey || undefined,
+          requestId
         })
       });
 
