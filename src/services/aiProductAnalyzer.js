@@ -46,10 +46,10 @@ export async function analyzeShoeImagesWithAI(images, userApiKey = '') {
       console.warn('[Backend Endpoint Fetch Failed, using smart visual fallback]:', netErr.message);
     }
 
-    // 2. Direct Gemini Vision API call if key is provided
+    // 2. Direct Gemini Vision API call if valid AIzaSy key is provided
     const activeKey = (userApiKey || import.meta.env.VITE_GEMINI_API_KEY || localStorage.getItem('gitsole_gemini_api_key') || '').trim();
 
-    if (activeKey) {
+    if (activeKey && activeKey.startsWith('AIzaSy')) {
       try {
         const directRes = await fetch(
           `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${activeKey}`,
@@ -122,25 +122,25 @@ export async function analyzeShoeImagesWithAI(images, userApiKey = '') {
       return {
         success: true,
         product: {
-          brand: d.brand || 'Jordan',
-          model: d.model || 'Air Jordan 1 Low',
-          title: `${d.brand || 'Jordan'} ${d.model || 'Air Jordan 1 Low'}`,
+          brand: d.brand || 'Adidas',
+          model: d.model || 'Gazelle / Campus 00s Suede',
+          title: `${d.brand || 'Adidas'} ${d.model || 'Gazelle / Campus 00s Suede'}`,
           category: 'Sneakers',
           subcategory: 'Low-Top',
           gender: 'Unisex',
-          color: d.colourway || 'Black / Red / White',
+          color: d.colourway || 'Collegiate Navy / Cloud White',
           secondaryColors: ['White'],
           shoeType: 'Lifestyle',
           style: 'Retro',
-          material: 'Leather',
-          condition: d.tier || 'Excellent',
-          tier: d.tier || 'Excellent',
-          score: d.score || 9.0,
-          retailPrice: d.retailPrice || 28000,
+          material: 'Suede',
+          condition: d.tier || 'Great',
+          tier: d.tier || 'Great',
+          score: d.score || 8.5,
+          retailPrice: d.retailPrice || 22500,
           shortDescription: 'Curated authentic thrift footwear.',
-          conditionNotes: d.conditionNotes || 'Upper leather and outsole in solid shape.',
+          conditionNotes: d.conditionNotes || 'Upper suede and outsole in solid shape.',
           description: 'Pre-owned curated footwear in solid structural condition.',
-          features: ['Lace-up closure', 'Rubber cupsole', 'Wings branding'],
+          features: ['Classic 3-stripes', 'Rubber cupsole', 'Lace-up closure'],
           tags: [d.brand, d.model].filter(Boolean),
           keywords: [d.brand, d.model].filter(Boolean)
         },

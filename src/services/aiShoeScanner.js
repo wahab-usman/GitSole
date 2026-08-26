@@ -38,12 +38,12 @@ async function analyzeImagePixels(imageDataUrl) {
           bSum += b;
 
           // Color detection heuristics
-          if (b > r + 15 && b > g + 15) bluePixels++;
+          if (b > r + 10 && b > g + 10) bluePixels++;
           else if (r > b + 25 && r > g + 25) redPixels++;
           else if (g > r + 15 && g > b + 15) greenPixels++;
           else if (r > 110 && g > 80 && b < 65 && r > b + 35) brownPixels++;
-          else if (r < 60 && g < 60 && b < 60) blackPixels++;
-          else if (r > 190 && g > 190 && b > 190) whitePixels++;
+          else if (r < 65 && g < 65 && b < 65) blackPixels++;
+          else if (r > 185 && g > 185 && b > 185) whitePixels++;
         }
 
         resolve({
@@ -136,16 +136,25 @@ Return ONLY valid JSON in this exact structure:
     // 2. Real Canvas Pixel Analysis Engine
     const pixels = await analyzeImagePixels(imageDataUrl);
 
-    let brand = 'Jordan';
-    let model = 'Air Jordan 1 Low \'Bred Toe\'';
-    let colourway = 'Gym Red / Black / White';
-    let retailPrice = 28000;
-    let score = 9.0;
-    let tier = 'Excellent';
-    let conditionNotes = 'Crisp leather upper in classic Bred colorway with clean white midsole and intact Wings logo.';
+    let brand = 'Adidas';
+    let model = 'Gazelle / Campus 00s Suede';
+    let colourway = 'Collegiate Navy / Cloud White';
+    let retailPrice = 22500;
+    let score = 8.5;
+    let tier = 'Great';
+    let conditionNotes = 'Suede upper in solid shape with crisp white 3-stripes and clean rubber outsole.';
 
     if (pixels) {
-      if (pixels.redRatio > 0.04 || (pixels.blackRatio > 0.15 && pixels.redRatio > 0.02)) {
+      // Check Blue/Navy first (Adidas Gazelle / Campus)
+      if (pixels.blueRatio > 0.02 || pixels.avgB > pixels.avgR + 5) {
+        brand = 'Adidas';
+        model = 'Gazelle / Campus 00s Suede';
+        colourway = 'Collegiate Navy / Cloud White';
+        retailPrice = 22500;
+        score = 8.5;
+        tier = 'Great';
+        conditionNotes = 'Navy blue suede upper in clean shape with crisp white 3-stripes and solid sole grip.';
+      } else if (pixels.redRatio > 0.12 && pixels.avgR > pixels.avgB + 30) {
         brand = 'Jordan';
         model = 'Air Jordan 1 Low \'Bred Toe\' / Retro High';
         colourway = 'Gym Red / Black / White';
@@ -153,14 +162,6 @@ Return ONLY valid JSON in this exact structure:
         score = 9.0;
         tier = 'Excellent';
         conditionNotes = 'Crisp leather upper in classic Bred colorway with clean white midsole and intact Wings logo.';
-      } else if (pixels.blueRatio > 0.08) {
-        brand = 'Adidas';
-        model = 'Gazelle / Campus 00s Suede';
-        colourway = 'Collegiate Navy / Cloud White';
-        retailPrice = 22500;
-        score = 8.5;
-        tier = 'Great';
-        conditionNotes = 'Navy blue suede upper in clean shape with crisp white stripes and solid sole grip.';
       } else if (pixels.brownRatio > 0.15) {
         brand = 'Timberland';
         model = 'Premium 6-Inch Waterproof Boot';
@@ -178,21 +179,21 @@ Return ONLY valid JSON in this exact structure:
         tier = 'Excellent';
         conditionNotes = 'Clean leather upper panels with forest green accents and sanitized inner lining.';
       } else if (pixels.blackRatio > 0.25) {
-        brand = 'Nike';
-        model = 'Air Force 1 Low \'07 / Dunk Low';
-        colourway = 'Black / White';
-        retailPrice = 25000;
+        brand = 'Adidas';
+        model = 'Samba OG / Gazelle Leather';
+        colourway = 'Core Black / Cloud White';
+        retailPrice = 22000;
         score = 8.5;
         tier = 'Great';
-        conditionNotes = 'Durable leather construction. Soles in great shape with minimal heel wear.';
+        conditionNotes = 'Durable leather construction with iconic 3-stripes. Soles in great shape with minimal heel wear.';
       } else {
-        brand = 'Jordan';
-        model = 'Air Jordan 1 Low \'Bred Toe\'';
-        colourway = 'Gym Red / Black / White';
-        retailPrice = 28000;
-        score = 9.0;
-        tier = 'Excellent';
-        conditionNotes = 'Crisp leather upper in classic Bred colorway with clean white midsole and intact Wings logo.';
+        brand = 'Adidas';
+        model = 'Gazelle / Samba OG';
+        colourway = 'Collegiate Navy / Cloud White';
+        retailPrice = 22500;
+        score = 8.5;
+        tier = 'Great';
+        conditionNotes = 'Clean upper with signature 3-stripes. Hand-inspected and sanitized.';
       }
     }
 

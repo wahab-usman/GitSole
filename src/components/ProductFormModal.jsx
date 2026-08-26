@@ -33,13 +33,22 @@ export default function ProductFormModal({ isOpen, onClose, onSubmit, initialDat
   const [aiGeneratedMap, setAiGeneratedMap] = useState({});
   const [showApiKeyInput, setShowApiKeyInput] = useState(false);
   const [userApiKey, setUserApiKey] = useState(() => {
-    const k = localStorage.getItem('gitsole_gemini_api_key') || '';
-    return k.startsWith('AIzaSy') ? k : '';
+    const k = (localStorage.getItem('gitsole_gemini_api_key') || '').trim();
+    if (k && !k.startsWith('AIzaSy')) {
+      localStorage.removeItem('gitsole_gemini_api_key');
+      return '';
+    }
+    return k;
   });
 
   const handleSaveApiKey = (val) => {
-    setUserApiKey(val);
-    localStorage.setItem('gitsole_gemini_api_key', val);
+    const trimmed = (val || '').trim();
+    setUserApiKey(trimmed);
+    if (trimmed.startsWith('AIzaSy')) {
+      localStorage.setItem('gitsole_gemini_api_key', trimmed);
+    } else {
+      localStorage.removeItem('gitsole_gemini_api_key');
+    }
   };
 
   const handleAIShoeScan = async (targetPhoto = null) => {
