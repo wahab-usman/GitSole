@@ -30,7 +30,10 @@ export default function ProductFormModal({ isOpen, onClose, onSubmit, initialDat
   const [isScanning, setIsScanning] = useState(false);
   const [scanMessage, setScanMessage] = useState('');
   const [showApiKeyInput, setShowApiKeyInput] = useState(false);
-  const [userApiKey, setUserApiKey] = useState(localStorage.getItem('gitsole_gemini_api_key') || '');
+  const [userApiKey, setUserApiKey] = useState(() => {
+    const k = localStorage.getItem('gitsole_gemini_api_key') || '';
+    return k.startsWith('AIzaSy') ? k : '';
+  });
 
   const handleSaveApiKey = (val) => {
     setUserApiKey(val);
@@ -466,7 +469,11 @@ export default function ProductFormModal({ isOpen, onClose, onSubmit, initialDat
                   style={{ width: '100%', padding: '6px 10px', fontSize: '12px', border: '1px solid var(--color-line)' }}
                 />
                 <div style={{ fontSize: '11px', color: 'var(--color-muted)', marginTop: '4px' }}>
-                  Without a key, Gitsole uses the Canvas RGB Visual Pixel Analysis Engine locally!
+                  Get your 100% free Gemini Key in 10 seconds at{' '}
+                  <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--color-oxblood)', fontWeight: 700, textDecoration: 'underline' }}>
+                    aistudio.google.com/app/apikey
+                  </a>
+                  . Without a key, Gitsole uses the Canvas Visual Pixel AI locally!
                 </div>
               </div>
             )}

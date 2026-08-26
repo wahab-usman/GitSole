@@ -67,6 +67,8 @@ async function analyzeImagePixels(imageDataUrl) {
   });
 }
 
+const isValidGeminiKey = (key) => typeof key === 'string' && key.trim().startsWith('AIzaSy') && key.trim().length > 20;
+
 /**
  * Analyze shoe photo using AI Vision
  * @param {string} imageDataUrl - Base64 data URL or HTTP URL of the shoe photo
@@ -74,10 +76,11 @@ async function analyzeImagePixels(imageDataUrl) {
  */
 export async function analyzeShoePhotoWithAI(imageDataUrl, apiKey = '') {
   try {
-    const geminiKey = apiKey || import.meta.env.VITE_GEMINI_API_KEY || localStorage.getItem('gitsole_gemini_api_key') || '';
+    const rawKey = apiKey || import.meta.env.VITE_GEMINI_API_KEY || localStorage.getItem('gitsole_gemini_api_key') || '';
+    const geminiKey = rawKey.trim();
 
-    // 1. Try Gemini Vision API if key is present
-    if (geminiKey) {
+    // 1. Try Gemini Vision API if key starts with AIzaSy
+    if (isValidGeminiKey(geminiKey)) {
       try {
         const response = await fetch(
           `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiKey}`,
@@ -133,16 +136,24 @@ Return ONLY valid JSON in this exact structure:
     // 2. Real Canvas Pixel Analysis Engine
     const pixels = await analyzeImagePixels(imageDataUrl);
 
-    let brand = 'Adidas';
-    let model = 'Gazelle / Campus 00s Suede';
-    let colourway = 'Navy Blue / Cloud White';
-    let retailPrice = 22000;
-    let score = 8.5;
-    let tier = 'Great';
-    let conditionNotes = 'Suede upper in solid shape with clean white 3-stripes and durable rubber cupsole.';
+    let brand = 'Jordan';
+    let model = 'Air Jordan 1 Low \'Bred Toe\'';
+    let colourway = 'Gym Red / Black / White';
+    let retailPrice = 28000;
+    let score = 9.0;
+    let tier = 'Excellent';
+    let conditionNotes = 'Crisp leather upper in classic Bred colorway with clean white midsole and intact Wings logo.';
 
     if (pixels) {
-      if (pixels.blueRatio > 0.08) {
+      if (pixels.redRatio > 0.04 || (pixels.blackRatio > 0.15 && pixels.redRatio > 0.02)) {
+        brand = 'Jordan';
+        model = 'Air Jordan 1 Low \'Bred Toe\' / Retro High';
+        colourway = 'Gym Red / Black / White';
+        retailPrice = 28500;
+        score = 9.0;
+        tier = 'Excellent';
+        conditionNotes = 'Crisp leather upper in classic Bred colorway with clean white midsole and intact Wings logo.';
+      } else if (pixels.blueRatio > 0.08) {
         brand = 'Adidas';
         model = 'Gazelle / Campus 00s Suede';
         colourway = 'Collegiate Navy / Cloud White';
@@ -150,14 +161,6 @@ Return ONLY valid JSON in this exact structure:
         score = 8.5;
         tier = 'Great';
         conditionNotes = 'Navy blue suede upper in clean shape with crisp white stripes and solid sole grip.';
-      } else if (pixels.redRatio > 0.08) {
-        brand = 'Jordan';
-        model = 'Air Jordan 1 Retro High \'Chicago\' / \'Bred\'';
-        colourway = 'Varsity Red / Black / White';
-        retailPrice = 34000;
-        score = 9.0;
-        tier = 'Excellent';
-        conditionNotes = 'Iconic red leather overlays with clean white quarter panels and wings logo intact.';
       } else if (pixels.brownRatio > 0.15) {
         brand = 'Timberland';
         model = 'Premium 6-Inch Waterproof Boot';
@@ -183,18 +186,19 @@ Return ONLY valid JSON in this exact structure:
         tier = 'Great';
         conditionNotes = 'Durable leather construction. Soles in great shape with minimal heel wear.';
       } else {
-        brand = 'Nike';
-        model = 'Air Max 90 / Dunk Low';
-        colourway = 'White / Neutral Grey';
-        retailPrice = 24000;
+        brand = 'Jordan';
+        model = 'Air Jordan 1 Low \'Bred Toe\'';
+        colourway = 'Gym Red / Black / White';
+        retailPrice = 28000;
         score = 9.0;
         tier = 'Excellent';
-        conditionNotes = 'Hand-inspected, cleaned and sanitized. Upper and outsoles in solid shape.';
+        conditionNotes = 'Crisp leather upper in classic Bred colorway with clean white midsole and intact Wings logo.';
       }
     }
 
     return {
       success: true,
+      hasKeyWarning: Boolean(geminiKey && !isValidGeminiKey(geminiKey)),
       data: {
         brand,
         model,
