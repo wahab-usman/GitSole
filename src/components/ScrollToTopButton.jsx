@@ -38,7 +38,7 @@ export default function ScrollToTopButton() {
       aria-label="Scroll back to top of page"
       style={{
         position: 'fixed',
-        bottom: '24px',
+        bottom: '84px',
         right: '24px',
         zIndex: 990,
         width: '46px',
