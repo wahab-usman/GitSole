@@ -30,6 +30,18 @@ export default function AiShoppingAssistant() {
 
   const chatContainerRef = useRef(null);
 
+  // Lock body scroll when assistant modal is open to prevent background scrolling
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isOpen]);
+
   // Auto-scroll chat to bottom on new messages
   useEffect(() => {
     if (chatContainerRef.current) {
@@ -172,6 +184,11 @@ export default function AiShoppingAssistant() {
         >
           <div
             onClick={(e) => e.stopPropagation()}
+            data-lenis-prevent="true"
+            data-lenis-prevent-wheel="true"
+            data-lenis-prevent-touch="true"
+            onWheel={(e) => e.stopPropagation()}
+            onTouchMove={(e) => e.stopPropagation()}
             style={{
               backgroundColor: '#FFFFFF',
               width: '100%',
@@ -335,9 +352,17 @@ export default function AiShoppingAssistant() {
             {/* CHAT STREAM AREA */}
             <div
               ref={chatContainerRef}
+              data-lenis-prevent="true"
+              data-lenis-prevent-wheel="true"
+              data-lenis-prevent-touch="true"
+              onWheel={(e) => e.stopPropagation()}
+              onTouchMove={(e) => e.stopPropagation()}
               style={{
                 flex: 1,
                 overflowY: 'auto',
+                overscrollBehavior: 'contain',
+                touchAction: 'pan-y',
+                WebkitOverflowScrolling: 'touch',
                 padding: '16px',
                 backgroundColor: '#FAF8F5',
                 display: 'flex',
