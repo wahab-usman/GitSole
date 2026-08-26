@@ -44,10 +44,17 @@ export async function sendChatMessageToAI(userMessage, history = [], contextFilt
     const { intent, subType } = detectUserIntent(userMessage);
 
     if (intent === 'GREETING') {
-      let greetingReply = "I'm doing great! 👟 I'm here to help you find the right pair from GitSole. What size, brand, or budget are you looking for today?";
-      if (subType === 'GREETING') {
-        greetingReply = "Hi! Welcome to GitSole Concierge 👋 How can I help you find your next pair of shoes today?";
+      let greetingReply = "I'm doing great, thank you for asking! 😊 I'm here to help you find your next pair of kicks from GitSole. What size, brand, or budget are you looking for today?";
+      if (subType === 'ARE_YOU_OKAY') {
+        greetingReply = "I'm doing great, thank you for checking! 😊 I'm fully ready to help you discover your next favourite pair of kicks on GitSole. How can I help you today?";
+      } else if (subType === 'HOW_ARE_YOU') {
+        greetingReply = "I'm doing awesome! 👟 Ready to help you hunt for clean sneakers or boots. What brand or size are you looking for?";
+      } else if (subType === 'JOKE') {
+        greetingReply = "Why did the shoe go to school? To get a little more sole! 👟 Let me know if you'd like to find some clean shoes today!";
+      } else if (subType === 'GREETING') {
+        greetingReply = "Hi there! Welcome to GitSole Concierge 👋 How can I help you find your next pair of shoes today?";
       }
+
       return {
         success: true,
         reply: greetingReply,
@@ -81,7 +88,7 @@ export async function sendChatMessageToAI(userMessage, history = [], contextFilt
     if (intent === 'VAGUE_SHOPPING') {
       return {
         success: true,
-        reply: "Sure! What is your budget, size (e.g. UK 9 / 42), or preferred brand (Nike, Adidas, Jordan)?",
+        reply: "Sure thing! What is your budget, size (e.g. UK 9 / 42), or preferred brand (Nike, Adidas, Jordan)?",
         products: [],
         appliedFilters: contextFilters
       };
@@ -89,7 +96,6 @@ export async function sendChatMessageToAI(userMessage, history = [], contextFilt
 
     // Intent: PRODUCT_SEARCH
     const newExtracted = parseNaturalLanguageText(userMessage);
-
     const mergedFilters = {
       ...contextFilters,
       ...newExtracted

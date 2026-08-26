@@ -4,7 +4,7 @@
 /**
  * Classify user intent before calling database search
  * Intents:
- * - 'GREETING': Casual greetings ("hi", "how are you", "thanks")
+ * - 'GREETING': Casual greetings ("hi", "how are you", "are you okay", "thanks")
  * - 'GITSOLE_FAQ': Delivery, tracking, authenticity, returns, contact info
  * - 'VAGUE_SHOPPING': "I need something good", "Show me shoes"
  * - 'PRODUCT_SEARCH': "Nike sneakers under 6000 size 9", "black shoes"
@@ -12,17 +12,25 @@
 export function detectUserIntent(userMessage = '') {
   const text = userMessage.toLowerCase().trim();
 
-  // 1. Casual Greetings & Pleasantries
+  // 1. Casual Greetings, Wellness & Pleasantries
   const greetingPhrases = [
-    'hi', 'hello', 'hey', 'how are you', 'how r u', 'whatsup', "what's up",
-    'good morning', 'good evening', 'good afternoon', 'thanks', 'thank you',
+    'hi', 'hello', 'hey', 'how are you', 'how r u', 'are you okay', 'are u ok', 'are you ok',
+    'whatsup', "what's up", 'good morning', 'good evening', 'good afternoon', 'thanks', 'thank you',
     'ok', 'okay', 'cool', 'nice', 'great', 'bye', 'goodbye', 'who are you',
-    'what is your name', 'tell me a joke'
+    'what is your name', 'tell me a joke', 'feeling good', 'how do you do'
   ];
 
-  const isPureGreeting = greetingPhrases.some(g => text === g || text === `${g}!` || text === `${g}?` || text === `${g}.`);
-  if (isPureGreeting || text.startsWith('how are you') || text.startsWith('hi ') || text.startsWith('hello ')) {
-    return { intent: 'GREETING', subType: text.includes('how') ? 'HOW_ARE_YOU' : 'GREETING' };
+  const isPureGreeting = greetingPhrases.some(g => text === g || text === `${g}!` || text === `${g}?` || text === `${g}.` || text.includes(g));
+  if (isPureGreeting || text.startsWith('how are you') || text.startsWith('are you ok') || text.startsWith('hi ') || text.startsWith('hello ')) {
+    let subType = 'GREETING';
+    if (text.includes('are you ok') || text.includes('are u ok') || text.includes('are you okay')) {
+      subType = 'ARE_YOU_OKAY';
+    } else if (text.includes('how are you') || text.includes('how r u')) {
+      subType = 'HOW_ARE_YOU';
+    } else if (text.includes('joke')) {
+      subType = 'JOKE';
+    }
+    return { intent: 'GREETING', subType };
   }
 
   // 2. GitSole Store FAQs & Support Questions
@@ -65,7 +73,7 @@ export function detectUserIntent(userMessage = '') {
     return { intent: 'GREETING', subType: 'GREETING' };
   }
 
-  return { intent: 'VAGUE_SHOPPING', subType: 'UNCLEAR' };
+  return { intent: 'GREETING', subType: 'CASUAL_CHAT' };
 }
 
 /**
@@ -88,12 +96,10 @@ export function searchProducts(products = [], filters = {}) {
   if (!Array.isArray(products)) return [];
 
   const matching = products.filter((p) => {
-    // 1. Availability Filter: Only available products
     if (status === 'available' && p.status && p.status !== 'available') {
       return false;
     }
 
-    // 2. Brand Filter
     if (brand && brand !== 'ALL' && brand.toLowerCase() !== 'all' && brand.toLowerCase() !== 'unknown') {
       const b = brand.toLowerCase().trim();
       const pBrand = (p.brand || '').toLowerCase().trim();
@@ -102,7 +108,6 @@ export function searchProducts(products = [], filters = {}) {
       }
     }
 
-    // 3. Price Filter
     const itemPrice = Number(p.price) || 0;
     if (typeof minPrice === 'number' && minPrice > 0 && itemPrice < minPrice) {
       return false;
@@ -111,7 +116,6 @@ export function searchProducts(products = [], filters = {}) {
       return false;
     }
 
-    // 4. Size Filter (Handles UK sizes and EU size mappings e.g. 42 -> UK 8, 43 -> UK 9)
     if (sizeUK) {
       const cleanInput = String(sizeUK).toLowerCase().replace(/uk|us|size|\s/g, '').trim();
       const pSize = String(p.sizeUK || '').toLowerCase().trim();
@@ -133,7 +137,6 @@ export function searchProducts(products = [], filters = {}) {
       }
     }
 
-    // 5. Color Filter
     if (color && color.toLowerCase() !== 'all' && color.toLowerCase() !== 'unknown') {
       const c = color.toLowerCase().trim();
       const pColourway = (p.colourway || '').toLowerCase();
@@ -143,7 +146,6 @@ export function searchProducts(products = [], filters = {}) {
       }
     }
 
-    // 6. Category Filter (e.g. Sneakers, Boots)
     if (category && category.toLowerCase() !== 'all' && category.toLowerCase() !== 'unknown') {
       const cat = category.toLowerCase().trim();
       const pModel = (p.model || '').toLowerCase();
@@ -153,7 +155,6 @@ export function searchProducts(products = [], filters = {}) {
       }
     }
 
-    // 7. General Text Search Query
     if (query && typeof query === 'string' && query.trim().length > 0) {
       const q = query.toLowerCase().trim();
       const inBrand = (p.brand || '').toLowerCase().includes(q);
@@ -172,9 +173,6 @@ export function searchProducts(products = [], filters = {}) {
   return matching;
 }
 
-/**
- * Parse natural language user text into numeric price & filter values
- */
 export function parseNaturalLanguageText(userMessage = '') {
   const text = userMessage.toLowerCase();
   const filters = {};
