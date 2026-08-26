@@ -74,7 +74,7 @@ export default async function handler(req, res) {
       } else if (subType === 'RETURNS') {
         faqReply = "We provide a 7-day hassle-free return and exchange guarantee. If your shoes don't fit or match expectations, we will replace or refund!";
       } else {
-        faqReply = "You can chat with our team directly on WhatsApp at 0309-4376043 or email us at support@gitsole.pk!";
+        faqReply = "You can chat with our team directly on WhatsApp at 0321-1123474 or email us at support@gitsole.pk!";
       }
       return res.status(200).json({
         success: true,

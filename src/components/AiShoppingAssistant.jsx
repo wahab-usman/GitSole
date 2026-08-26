@@ -323,7 +323,7 @@ export default function AiShoppingAssistant() {
 
               <button
                 onClick={() => {
-                  window.open('https://wa.me/923094376043', '_blank');
+                  window.open('https://wa.me/923211123474', '_blank');
                 }}
                 style={{
                   backgroundColor: '#E8F5E9',

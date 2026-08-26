@@ -79,7 +79,7 @@ const INITIAL_ORDERS = [
     date: "2026-08-26T10:44:00Z",
     customer: {
       name: "Usman",
-      whatsapp: "03094376043",
+      whatsapp: "03211123474",
       address: "Amir road, Near Shadbagh, Lahore, Punjab",
       city: "Lahore",
       province: "Punjab"
