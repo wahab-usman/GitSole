@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { BRANDS, SIZES_UK, TIERS } from '../data/products';
-import { X, Plus, Trash2, Image, UploadCloud, AlertCircle, Sparkles, Loader2 } from 'lucide-react';
-import { analyzeShoePhotoWithAI } from '../services/aiShoeScanner';
+import { X, Plus, Trash2, Image, UploadCloud, AlertCircle, Sparkles, Loader2, Check } from 'lucide-react';
+import { analyzeShoeImagesWithAI } from '../services/aiProductAnalyzer';
 
 export default function ProductFormModal({ isOpen, onClose, onSubmit, initialData = null }) {
   const [formData, setFormData] = useState({
@@ -14,7 +14,7 @@ export default function ProductFormModal({ isOpen, onClose, onSubmit, initialDat
     insoleCm: 28.0,
     score: 9.0,
     tier: 'Excellent',
-    price: 8500,
+    price: '',
     retailPrice: 22000,
     boxIncluded: false,
     status: 'available',
@@ -29,6 +29,8 @@ export default function ProductFormModal({ isOpen, onClose, onSubmit, initialDat
   const [showUrlInput, setShowUrlInput] = useState(false);
   const [isScanning, setIsScanning] = useState(false);
   const [scanMessage, setScanMessage] = useState('');
+  const [hasAiGenerated, setHasAiGenerated] = useState(false);
+  const [aiGeneratedMap, setAiGeneratedMap] = useState({});
   const [showApiKeyInput, setShowApiKeyInput] = useState(false);
   const [userApiKey, setUserApiKey] = useState(() => {
     const k = localStorage.getItem('gitsole_gemini_api_key') || '';
@@ -41,33 +43,45 @@ export default function ProductFormModal({ isOpen, onClose, onSubmit, initialDat
   };
 
   const handleAIShoeScan = async (targetPhoto = null) => {
-    const photoToScan = targetPhoto || photos[0] || flawPhoto || customUrlInput;
-    if (!photoToScan) {
-      alert('Please upload or add a shoe picture first to run AI Vision Scanner.');
+    const imagesToScan = photos.length > 0 ? photos : (targetPhoto ? [targetPhoto] : [flawPhoto || customUrlInput].filter(Boolean));
+    if (imagesToScan.length === 0) {
+      alert('Please upload or add at least one shoe picture first to generate details with AI.');
       return;
     }
 
     setIsScanning(true);
-    setScanMessage('AI Vision is analyzing shoe pixels, brand, model & colourway...');
+    setScanMessage('Analyzing shoe...');
 
-    const res = await analyzeShoePhotoWithAI(photoToScan, userApiKey);
+    const res = await analyzeShoeImagesWithAI(imagesToScan, userApiKey);
 
     setIsScanning(false);
-    if (res.success && res.data) {
+    if (res.success && res.product) {
+      const p = res.product;
       setFormData(prev => ({
         ...prev,
-        brand: res.data.brand || prev.brand,
-        model: res.data.model || prev.model,
-        colourway: res.data.colourway || prev.colourway,
-        retailPrice: res.data.retailPrice || prev.retailPrice,
-        score: res.data.score || prev.score,
-        tier: res.data.tier || prev.tier,
-        conditionNotes: res.data.conditionNotes || prev.conditionNotes
+        brand: p.brand || prev.brand,
+        model: p.model || prev.model,
+        colourway: p.colourway || prev.colourway,
+        retailPrice: p.retailPrice || prev.retailPrice,
+        score: p.score || prev.score,
+        tier: p.tier || prev.tier,
+        conditionNotes: p.conditionNotes || prev.conditionNotes,
       }));
-      const sourceBadge = res.isRealVision ? 'Google Gemini Live AI' : 'Canvas Visual Pixel AI';
-      setScanMessage(`✨ Detected [${sourceBadge}]: ${res.data.brand} ${res.data.model} (${res.data.colourway})`);
+
+      setHasAiGenerated(true);
+      setAiGeneratedMap({
+        brand: true,
+        model: true,
+        colourway: true,
+        retailPrice: true,
+        score: true,
+        tier: true,
+        conditionNotes: true
+      });
+
+      setScanMessage('✓ Details generated successfully');
     } else {
-      setScanMessage('Could not auto-detect shoe details. Please fill fields manually.');
+      setScanMessage(res.error || "AI couldn't analyze this image. Please try again or enter the details manually.");
     }
   };
 
@@ -132,6 +146,30 @@ export default function ProductFormModal({ isOpen, onClose, onSubmit, initialDat
       setFlawPhoto('https://images.unsplash.com/photo-1552346154-21d32810aba3?auto=format&fit=crop&w=800&q=80');
     }
   }, [initialData, isOpen]);
+
+  const renderAiBadge = (fieldName) => {
+    if (!aiGeneratedMap[fieldName]) return null;
+    return (
+      <span style={{
+        fontFamily: 'var(--font-mono)',
+        fontSize: '9.5px',
+        letterSpacing: '0.08em',
+        textTransform: 'uppercase',
+        backgroundColor: '#E8F5E9',
+        color: '#2E7D32',
+        border: '1px solid #A5D6A7',
+        padding: '1px 6px',
+        borderRadius: '3px',
+        marginLeft: '6px',
+        fontWeight: 700,
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: '3px'
+      }}>
+        ✨ AI Generated
+      </span>
+    );
+  };
 
   if (!isOpen) return null;
 
@@ -445,11 +483,11 @@ export default function ProductFormModal({ isOpen, onClose, onSubmit, initialDat
                 >
                   {isScanning ? (
                     <>
-                      <Loader2 size={15} className="animate-spin" /> Scanning Photo...
+                      <Loader2 size={15} className="animate-spin" /> Analyzing shoe...
                     </>
                   ) : (
                     <>
-                      <Sparkles size={15} /> Auto-Fill Shoe Details with AI
+                      <Sparkles size={15} /> {hasAiGenerated ? 'Regenerate Details' : '✨ Generate Details with AI'}
                     </>
                   )}
                 </button>
@@ -511,7 +549,7 @@ export default function ProductFormModal({ isOpen, onClose, onSubmit, initialDat
 
             <div>
               <label style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>
-                Brand *
+                Brand *{renderAiBadge('brand')}
               </label>
               <select
                 name="brand"
@@ -527,7 +565,7 @@ export default function ProductFormModal({ isOpen, onClose, onSubmit, initialDat
 
             <div>
               <label style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>
-                Model *
+                Model *{renderAiBadge('model')}
               </label>
               <input
                 type="text"
@@ -545,7 +583,7 @@ export default function ProductFormModal({ isOpen, onClose, onSubmit, initialDat
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
             <div>
               <label style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>
-                Colourway
+                Colourway{renderAiBadge('colourway')}
               </label>
               <input
                 type="text"
@@ -640,7 +678,7 @@ export default function ProductFormModal({ isOpen, onClose, onSubmit, initialDat
 
             <div>
               <label style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>
-                Retail Price (PKR)
+                Retail Price (PKR){renderAiBadge('retailPrice')}
               </label>
               <input
                 type="number"
@@ -654,7 +692,7 @@ export default function ProductFormModal({ isOpen, onClose, onSubmit, initialDat
 
             <div>
               <label style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>
-                Condition Score (/10)
+                Condition Score (/10){renderAiBadge('score')}
               </label>
               <input
                 type="number"
@@ -670,7 +708,7 @@ export default function ProductFormModal({ isOpen, onClose, onSubmit, initialDat
 
             <div>
               <label style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>
-                Condition Tier
+                Condition Tier{renderAiBadge('tier')}
               </label>
               <select
                 name="tier"
@@ -688,7 +726,7 @@ export default function ProductFormModal({ isOpen, onClose, onSubmit, initialDat
           {/* Condition Notes */}
           <div>
             <label style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>
-              Condition Inspection Notes
+              Condition Inspection Notes{renderAiBadge('conditionNotes')}
             </label>
             <textarea
               name="conditionNotes"
