@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { BRANDS, SIZES_UK, TIERS } from '../data/products';
-import { X, Plus, Trash2, Image, UploadCloud, AlertCircle } from 'lucide-react';
+import { X, Plus, Trash2, Image, UploadCloud, AlertCircle, Sparkles, Loader2 } from 'lucide-react';
+import { analyzeShoePhotoWithAI } from '../services/aiShoeScanner';
 
 export default function ProductFormModal({ isOpen, onClose, onSubmit, initialData = null }) {
   const [formData, setFormData] = useState({
@@ -26,6 +27,38 @@ export default function ProductFormModal({ isOpen, onClose, onSubmit, initialDat
   const [flawPhoto, setFlawPhoto] = useState('');
   const [customUrlInput, setCustomUrlInput] = useState('');
   const [showUrlInput, setShowUrlInput] = useState(false);
+  const [isScanning, setIsScanning] = useState(false);
+  const [scanMessage, setScanMessage] = useState('');
+
+  const handleAIShoeScan = async (targetPhoto = null) => {
+    const photoToScan = targetPhoto || photos[0] || flawPhoto || customUrlInput;
+    if (!photoToScan) {
+      alert('Please upload or add a shoe picture first to run AI Vision Scanner.');
+      return;
+    }
+
+    setIsScanning(true);
+    setScanMessage('AI Vision is analyzing shoe brand, model, colourway & condition...');
+
+    const res = await analyzeShoePhotoWithAI(photoToScan);
+
+    setIsScanning(false);
+    if (res.success && res.data) {
+      setFormData(prev => ({
+        ...prev,
+        brand: res.data.brand || prev.brand,
+        model: res.data.model || prev.model,
+        colourway: res.data.colourway || prev.colourway,
+        retailPrice: res.data.retailPrice || prev.retailPrice,
+        score: res.data.score || prev.score,
+        tier: res.data.tier || prev.tier,
+        conditionNotes: res.data.conditionNotes || prev.conditionNotes
+      }));
+      setScanMessage(`✨ AI Auto-Detected: ${res.data.brand} ${res.data.model} (${res.data.colourway})`);
+    } else {
+      setScanMessage('Could not auto-detect shoe details. Please fill fields manually.');
+    }
+  };
 
   // Scroll locking for body when modal is open
   useEffect(() => {
@@ -102,11 +135,15 @@ export default function ProductFormModal({ isOpen, onClose, onSubmit, initialDat
   // Upload product photos from device
   const handleDevicePhotosUpload = (e) => {
     const files = Array.from(e.target.files || []);
-    files.forEach((file) => {
+    files.forEach((file, index) => {
       if (file.type.startsWith('image/')) {
         const reader = new FileReader();
         reader.onload = (event) => {
-          setPhotos((prev) => [...prev, event.target.result]);
+          const uploadedDataUrl = event.target.result;
+          setPhotos((prev) => [...prev, uploadedDataUrl]);
+          if (index === 0) {
+            handleAIShoeScan(uploadedDataUrl);
+          }
         };
         reader.readAsDataURL(file);
       }
@@ -353,6 +390,64 @@ export default function ProductFormModal({ isOpen, onClose, onSubmit, initialDat
               )}
             </div>
           </div>
+
+          {/* AI Shoe Vision Scanner Action Band */}
+          <div style={{
+            backgroundColor: '#F4F1EA',
+            border: '1.5px solid var(--color-oxblood)',
+            padding: '14px 16px',
+            display: 'flex',
+            flexWrap: 'wrap',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '12px'
+          }}>
+            <div>
+              <div style={{ fontWeight: 700, fontSize: '13.5px', color: 'var(--color-ink)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <Sparkles size={16} color="var(--color-oxblood)" />
+                AI Shoe Vision Autodetect
+              </div>
+              <div style={{ fontSize: '12px', color: 'var(--color-muted)', marginTop: '2px' }}>
+                Upload picture ➔ Click scan ➔ AI fills Brand, Model, Colourway & Notes automatically!
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => handleAIShoeScan()}
+              disabled={isScanning}
+              className="btn btn-oxblood"
+              style={{
+                padding: '8px 16px',
+                minHeight: '38px',
+                fontSize: '13px',
+                opacity: isScanning ? 0.75 : 1
+              }}
+            >
+              {isScanning ? (
+                <>
+                  <Loader2 size={15} className="animate-spin" /> Scanning Photo...
+                </>
+              ) : (
+                <>
+                  <Sparkles size={15} /> Auto-Fill Shoe Details with AI
+                </>
+              )}
+            </button>
+          </div>
+
+          {scanMessage && (
+            <div style={{
+              backgroundColor: scanMessage.includes('✨') ? '#E8F5E9' : '#FFF3E0',
+              border: scanMessage.includes('✨') ? '1px solid #4CAF50' : '1px solid #FF9800',
+              color: scanMessage.includes('✨') ? '#2E7D32' : '#E65100',
+              padding: '10px 14px',
+              fontSize: '13px',
+              fontWeight: 600
+            }}>
+              {scanMessage}
+            </div>
+          )}
 
           {/* Row 1: Code, Brand, Model */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px' }}>
