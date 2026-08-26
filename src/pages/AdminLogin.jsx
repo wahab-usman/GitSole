@@ -13,7 +13,7 @@ export default function AdminLogin() {
   // If already logged in, redirect to admin dashboard
   React.useEffect(() => {
     if (isAdminLoggedIn) {
-      navigate('/admin');
+      navigate('/gitsole-owner-panel');
     }
   }, [isAdminLoggedIn, navigate]);
 
@@ -23,7 +23,7 @@ export default function AdminLogin() {
 
     const res = login(username, password);
     if (res.success) {
-      navigate('/admin');
+      navigate('/gitsole-owner-panel');
     } else {
       setError(res.message);
     }

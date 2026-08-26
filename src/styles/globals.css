@@ -64,7 +64,7 @@ a {
 }
 
 /* Input Fields - 16px min on mobile prevents iOS safari auto-zoom */
-input, select, textarea {
+input:not([type="checkbox"]):not([type="radio"]), select, textarea {
   font-family: var(--font-body);
   font-size: 16px !important;
   color: var(--color-ink);
@@ -73,8 +73,28 @@ input, select, textarea {
   border-radius: 0;
 }
 
+input[type="checkbox"] {
+  -webkit-appearance: checkbox !important;
+  appearance: checkbox !important;
+  width: 18px;
+  height: 18px;
+  accent-color: var(--color-oxblood);
+  cursor: pointer;
+  vertical-align: middle;
+}
+
+input[type="radio"] {
+  -webkit-appearance: radio !important;
+  appearance: radio !important;
+  width: 18px;
+  height: 18px;
+  accent-color: var(--color-oxblood);
+  cursor: pointer;
+  vertical-align: middle;
+}
+
 @media (min-width: 768px) {
-  input, select, textarea {
+  input:not([type="checkbox"]):not([type="radio"]), select, textarea {
     font-size: 14px !important;
   }
 }

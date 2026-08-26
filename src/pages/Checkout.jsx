@@ -54,8 +54,11 @@ export default function Checkout() {
       return;
     }
 
-    if (paymentMethod === 'cod' && !advanceAcknowledged) {
-      setErrorMessage('Please confirm that you agree to pay the PKR 300 advance to proceed with your COD order.');
+    if (!advanceAcknowledged) {
+      setErrorMessage(paymentMethod === 'cod'
+        ? 'Please check the box agreeing to pay the PKR 300 advance to proceed with your order.'
+        : 'Please check the box agreeing to the full upfront payment terms to proceed with your order.'
+      );
       return;
     }
 
@@ -310,47 +313,73 @@ export default function Checkout() {
               </div>
             </div>
 
-            {/* Step 3: Condition Acknowledgement (Spec #7) */}
+            {/* Step 3: Condition Acknowledgement */}
             <div style={{
-              backgroundColor: 'var(--color-card)',
-              border: '1px solid var(--color-line-strong)',
-              padding: '18px'
+              backgroundColor: conditionAcknowledged ? '#F9F6F0' : 'var(--color-card)',
+              border: conditionAcknowledged ? '1.5px solid var(--color-oxblood)' : '1.5px solid var(--color-line-strong)',
+              padding: '18px',
+              borderRadius: '4px',
+              transition: 'all 0.2s ease'
             }}>
-              <label style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', cursor: 'pointer' }}>
+              <label style={{ display: 'flex', alignItems: 'flex-start', gap: '14px', cursor: 'pointer' }}>
                 <input
                   type="checkbox"
+                  id="condition-acknowledgement-checkbox"
                   required
                   checked={conditionAcknowledged}
                   onChange={(e) => setConditionAcknowledged(e.target.checked)}
-                  style={{ accentColor: 'var(--color-oxblood)', marginTop: '3px', width: '16px', height: '16px' }}
+                  style={{
+                    accentColor: 'var(--color-oxblood)',
+                    marginTop: '2px',
+                    width: '20px',
+                    height: '20px',
+                    flexShrink: 0,
+                    cursor: 'pointer'
+                  }}
                 />
-                <span style={{ fontSize: '13px', lineHeight: 1.5, color: 'var(--color-body)' }}>
-                  I acknowledge that Gitsole sells <strong>hand-picked, condition-graded pre-owned footwear</strong> and that I have reviewed the specific photos, flaw close-ups, and condition score ({cart.map(c => `${c.score}/10`).join(', ')}) for this 1-of-1 order.
+                <span style={{ fontSize: '13.5px', lineHeight: 1.5, color: 'var(--color-ink)' }}>
+                  <strong>I acknowledge</strong> that Gitsole sells <strong>hand-picked, condition-graded pre-owned footwear</strong> and that I have reviewed the specific photos, flaw close-ups, and condition score ({cart.map(c => `${c.score}/10`).join(', ')}) for this 1-of-1 order.
                 </span>
               </label>
             </div>
 
-            {/* Step 4: Advance Payment Acknowledgement for COD */}
-            {paymentMethod === 'cod' && (
-              <div style={{
-                backgroundColor: '#FFF8F0',
-                border: '1px solid #E8D5BF',
-                padding: '18px'
-              }}>
-                <label style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', cursor: 'pointer' }}>
-                  <input
-                    type="checkbox"
-                    required
-                    checked={advanceAcknowledged}
-                    onChange={(e) => setAdvanceAcknowledged(e.target.checked)}
-                    style={{ accentColor: 'var(--color-oxblood)', marginTop: '3px', width: '16px', height: '16px' }}
-                  />
-                  <span style={{ fontSize: '13px', lineHeight: 1.5, color: 'var(--color-body)' }}>
-                    I agree to pay <strong>PKR 300 advance</strong> via JazzCash / EasyPaisa / Bank Transfer. I understand that payment details will be sent to my WhatsApp and my order will only be dispatched after the advance is confirmed.
-                  </span>
-                </label>
-              </div>
-            )}
+            {/* Step 4: Terms / Payment Agreement */}
+            <div style={{
+              backgroundColor: advanceAcknowledged ? '#FFF3E8' : '#FFF8F0',
+              border: advanceAcknowledged ? '1.5px solid var(--color-oxblood)' : '1.5px solid #E8D5BF',
+              padding: '18px',
+              borderRadius: '4px',
+              transition: 'all 0.2s ease'
+            }}>
+              <label style={{ display: 'flex', alignItems: 'flex-start', gap: '14px', cursor: 'pointer' }}>
+                <input
+                  type="checkbox"
+                  id="advance-agreement-checkbox"
+                  required
+                  checked={advanceAcknowledged}
+                  onChange={(e) => setAdvanceAcknowledged(e.target.checked)}
+                  style={{
+                    accentColor: 'var(--color-oxblood)',
+                    marginTop: '2px',
+                    width: '20px',
+                    height: '20px',
+                    flexShrink: 0,
+                    cursor: 'pointer'
+                  }}
+                />
+                <span style={{ fontSize: '13.5px', lineHeight: 1.5, color: 'var(--color-ink)' }}>
+                  {paymentMethod === 'cod' ? (
+                    <>
+                      <strong>I agree</strong> to pay <strong>PKR 300 advance</strong> via JazzCash / EasyPaisa / Bank Transfer. I understand that payment details will be sent to my WhatsApp and my order will only be dispatched after the advance is confirmed.
+                    </>
+                  ) : (
+                    <>
+                      <strong>I agree</strong> to pay <strong>full payment upfront ({formatPrice(finalTotal)})</strong> via JazzCash / EasyPaisa / Bank Transfer. I understand that payment details will be sent to my WhatsApp and my order will only be dispatched after payment is confirmed.
+                    </>
+                  )}
+                </span>
+              </label>
+            </div>
 
             {errorMessage && (
               <div style={{ backgroundColor: '#FFECEB', border: '1px solid var(--color-oxblood)', color: 'var(--color-oxblood)', padding: '12px 16px', fontSize: '13.5px' }}>

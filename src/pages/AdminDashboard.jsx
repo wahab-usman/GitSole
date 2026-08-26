@@ -74,7 +74,7 @@ export default function AdminDashboard() {
   // Redirect to login if unauthenticated
   React.useEffect(() => {
     if (!isAdminLoggedIn) {
-      navigate('/admin/login');
+      navigate('/gitsole-owner-panel/login');
     }
   }, [isAdminLoggedIn, navigate]);
 

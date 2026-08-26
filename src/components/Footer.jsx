@@ -114,11 +114,6 @@ export default function Footer() {
         <div>
           © {new Date().getFullYear()} GITSOLE PAKISTAN. SINGLE-PIECE THRIFT FOOTWEAR. ALL RIGHTS RESERVED.
         </div>
-        <div>
-          <Link to="/admin" style={{ color: 'var(--color-muted)', textDecoration: 'underline' }}>
-            Store Admin Portal
-          </Link>
-        </div>
       </div>
     </footer>
   );

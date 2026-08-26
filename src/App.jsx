@@ -44,7 +44,7 @@ function ScrollToTop() {
 
 function Layout({ children }) {
   const location = useLocation();
-  const isBarePage = location.pathname.startsWith('/checkout') || location.pathname.startsWith('/admin');
+  const isBarePage = location.pathname.startsWith('/checkout') || location.pathname.startsWith('/gitsole-owner-panel');
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
@@ -83,8 +83,8 @@ export default function App() {
                     <Route path="/guarantee" element={<ReturnsGuarantee />} />
                     <Route path="/faq" element={<FAQ />} />
                     <Route path="/faqs" element={<FAQ />} />
-                    <Route path="/admin/login" element={<AdminLogin />} />
-                    <Route path="/admin" element={<AdminDashboard />} />
+                    <Route path="/gitsole-owner-panel/login" element={<AdminLogin />} />
+                    <Route path="/gitsole-owner-panel" element={<AdminDashboard />} />
                     <Route path="*" element={<Home />} />
                   </Routes>
                 </Layout>
