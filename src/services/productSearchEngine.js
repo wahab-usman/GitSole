@@ -1,5 +1,72 @@
 // GitSole Product Search Engine & Inventory Filtering Utility
-// Performs structured searches against actual GitSole database products
+// Performs structured searches against actual GitSole database products with intent detection
+
+/**
+ * Classify user intent before calling database search
+ * Intents:
+ * - 'GREETING': Casual greetings ("hi", "how are you", "thanks")
+ * - 'GITSOLE_FAQ': Delivery, tracking, authenticity, returns, contact info
+ * - 'VAGUE_SHOPPING': "I need something good", "Show me shoes"
+ * - 'PRODUCT_SEARCH': "Nike sneakers under 6000 size 9", "black shoes"
+ */
+export function detectUserIntent(userMessage = '') {
+  const text = userMessage.toLowerCase().trim();
+
+  // 1. Casual Greetings & Pleasantries
+  const greetingPhrases = [
+    'hi', 'hello', 'hey', 'how are you', 'how r u', 'whatsup', "what's up",
+    'good morning', 'good evening', 'good afternoon', 'thanks', 'thank you',
+    'ok', 'okay', 'cool', 'nice', 'great', 'bye', 'goodbye', 'who are you',
+    'what is your name', 'tell me a joke'
+  ];
+
+  const isPureGreeting = greetingPhrases.some(g => text === g || text === `${g}!` || text === `${g}?` || text === `${g}.`);
+  if (isPureGreeting || text.startsWith('how are you') || text.startsWith('hi ') || text.startsWith('hello ')) {
+    return { intent: 'GREETING', subType: text.includes('how') ? 'HOW_ARE_YOU' : 'GREETING' };
+  }
+
+  // 2. GitSole Store FAQs & Support Questions
+  if (text.includes('deliver') || text.includes('shipping') || text.includes('cod') || text.includes('cash on delivery') || text.includes('all over pakistan')) {
+    return { intent: 'GITSOLE_FAQ', subType: 'DELIVERY' };
+  }
+  if (text.includes('track') || text.includes('tracking') || text.includes('order status') || text.includes('where is my order')) {
+    return { intent: 'GITSOLE_FAQ', subType: 'TRACKING' };
+  }
+  if (text.includes('original') || text.includes('authentic') || text.includes('real') || text.includes('copy') || text.includes('fake') || text.includes('guarantee')) {
+    return { intent: 'GITSOLE_FAQ', subType: 'AUTHENTICITY' };
+  }
+  if (text.includes('return') || text.includes('exchange') || text.includes('refund') || text.includes('policy')) {
+    return { intent: 'GITSOLE_FAQ', subType: 'RETURNS' };
+  }
+  if (text.includes('contact') || text.includes('phone') || text.includes('whatsapp') || text.includes('number') || text.includes('location') || text.includes('address')) {
+    return { intent: 'GITSOLE_FAQ', subType: 'CONTACT' };
+  }
+
+  // 3. Check for specific Shopping Criteria (Price, Brand, Size, Color, Category)
+  const hasPrice = /(?:under|below|max|budget|within|around|upto)?\s*(?:rs|pkr)?\s*(\d+(?:\.\d+)?\s*k|\d{4,5}|\d+\s*hazar)/.test(text) || text.includes('cheap') || text.includes('budget') || text.includes('rupees') || text.includes('price');
+  const hasBrand = ['nike', 'jordan', 'adidas', 'new balance', 'puma', 'asics', 'reebok', 'timberland', 'vans', 'converse', 'yeezy'].some(b => text.includes(b));
+  const hasSize = /(?:size|uk|eu)?\s*(4[0-6]|1[0-2]|[5-9](?:\.5)?)/.test(text);
+  const hasColor = ['black', 'white', 'red', 'blue', 'green', 'grey', 'gray', 'wheat', 'brown', 'yellow'].some(c => text.includes(c));
+  const hasCategory = ['sneaker', 'shoe', 'boot', 'runner', 'retro', 'dunk', 'force', 'gazelle', 'samba', '550', 'air max'].some(cat => text.includes(cat));
+  const hasFollowUpKeyword = ['cheaper', 'similar', 'other', 'different', 'another', 'more', 'what about', 'any other'].some(k => text.includes(k));
+
+  if (hasPrice || hasBrand || hasSize || hasColor || hasFollowUpKeyword) {
+    return { intent: 'PRODUCT_SEARCH', subType: 'SPECIFIC' };
+  }
+
+  if (hasCategory) {
+    if (text === 'shoes' || text === 'sneakers' || text === 'i need shoes' || text === 'i want shoes' || text === 'something good' || text === 'show me shoes') {
+      return { intent: 'VAGUE_SHOPPING', subType: 'VAGUE' };
+    }
+    return { intent: 'PRODUCT_SEARCH', subType: 'CATEGORY' };
+  }
+
+  if (text.length < 15 && (text.includes('hi') || text.includes('hello') || text.includes('hey') || text.includes('thanks'))) {
+    return { intent: 'GREETING', subType: 'GREETING' };
+  }
+
+  return { intent: 'VAGUE_SHOPPING', subType: 'UNCLEAR' };
+}
 
 /**
  * Filter GitSole product inventory based on structured AI filters
@@ -20,9 +87,8 @@ export function searchProducts(products = [], filters = {}) {
 
   if (!Array.isArray(products)) return [];
 
-  // Filter products strictly from active database
   const matching = products.filter((p) => {
-    // 1. Availability Filter: Only available products (unless explicitly asking for all)
+    // 1. Availability Filter: Only available products
     if (status === 'available' && p.status && p.status !== 'available') {
       return false;
     }
@@ -113,11 +179,9 @@ export function parseNaturalLanguageText(userMessage = '') {
   const text = userMessage.toLowerCase();
   const filters = {};
 
-  // 1. Budget parsing (e.g., "5k", "5000", "5 hazar", "under 5000", "between 4k and 6k", "around 5k")
   let maxPrice = null;
   let minPrice = null;
 
-  // Range match: "between 4000 and 6000" or "4k to 6k"
   const rangeMatch = text.match(/(?:between|from)?\s*(\d+(?:k)?)\s*(?:to|and|-)\s*(\d+(?:k)?)/);
   if (rangeMatch) {
     const minVal = parsePriceVal(rangeMatch[1]);
@@ -127,7 +191,6 @@ export function parseNaturalLanguageText(userMessage = '') {
       maxPrice = maxVal;
     }
   } else {
-    // "under 5k", "below 5000", "max 6000", "5000 rupees", "5k budget", "5 hazar"
     const singlePriceMatch = text.match(/(?:under|below|max|budget|within|around|upto)?\s*(?:rs|pkr)?\s*(\d+(?:\.\d+)?\s*k|\d{4,5}|\d+\s*hazar)/);
     if (singlePriceMatch) {
       const rawPrice = singlePriceMatch[1];
@@ -138,7 +201,6 @@ export function parseNaturalLanguageText(userMessage = '') {
   if (maxPrice) filters.maxPrice = maxPrice;
   if (minPrice) filters.minPrice = minPrice;
 
-  // 2. Brand detection
   const brands = ['nike', 'jordan', 'adidas', 'new balance', 'puma', 'asics', 'reebok', 'timberland', 'vans', 'converse', 'yeezy'];
   for (const b of brands) {
     if (text.includes(b)) {
@@ -147,7 +209,6 @@ export function parseNaturalLanguageText(userMessage = '') {
     }
   }
 
-  // 3. Color detection
   const colors = ['black', 'white', 'red', 'blue', 'green', 'grey', 'gray', 'wheat', 'brown', 'gold', 'yellow', 'silver', 'pink'];
   for (const c of colors) {
     if (text.includes(c)) {
@@ -156,7 +217,6 @@ export function parseNaturalLanguageText(userMessage = '') {
     }
   }
 
-  // 4. Size detection ("size 9", "uk 8", "size 42", "43")
   const sizeMatch = text.match(/(?:size|uk|eu)?\s*(4[0-6]|1[0-2]|[5-9](?:\.5)?)/);
   if (sizeMatch) {
     filters.sizeUK = sizeMatch[1];

@@ -1,7 +1,7 @@
 // Frontend Service Helper: AI Shopping Assistant
-// Sends customer messages to backend API POST /api/chat-assistant with client-side fallback
+// Communicates with backend endpoint POST /api/chat-assistant with client-side fallback
 
-import { searchProducts, parseNaturalLanguageText } from './productSearchEngine';
+import { searchProducts, parseNaturalLanguageText, detectUserIntent } from './productSearchEngine';
 
 /**
  * Send customer message to AI Shopping Assistant API
@@ -40,7 +40,54 @@ export async function sendChatMessageToAI(userMessage, history = [], contextFilt
       console.warn('[Chat Assistant Serverless API unreachable, using client engine]:', netErr.message);
     }
 
-    // 2. Client-side Engine Fallback (Guaranteed to work everywhere with 100% real products)
+    // 2. Client-side Intent Classification & Fallback Engine
+    const { intent, subType } = detectUserIntent(userMessage);
+
+    if (intent === 'GREETING') {
+      let greetingReply = "I'm doing great! 👟 I'm here to help you find the right pair from GitSole. What size, brand, or budget are you looking for today?";
+      if (subType === 'GREETING') {
+        greetingReply = "Hi! Welcome to GitSole Concierge 👋 How can I help you find your next pair of shoes today?";
+      }
+      return {
+        success: true,
+        reply: greetingReply,
+        products: [],
+        appliedFilters: contextFilters
+      };
+    }
+
+    if (intent === 'GITSOLE_FAQ') {
+      let faqReply = "GitSole offers curated branded thrift footwear with cash on delivery and free home delivery all over Pakistan!";
+      if (subType === 'DELIVERY') {
+        faqReply = "Yes! We offer cash on delivery (COD) and free home delivery all over Pakistan. Normal delivery takes 3–5 working days.";
+      } else if (subType === 'TRACKING') {
+        faqReply = "You can track your GitSole order anytime by clicking 'Track Order' in our header menu or visiting our tracking page.";
+      } else if (subType === 'AUTHENTICITY') {
+        faqReply = "Every pair on GitSole is 100% hand-inspected for authenticity, cleanliness, and structural condition before listing!";
+      } else if (subType === 'RETURNS') {
+        faqReply = "We provide a 7-day hassle-free return and exchange guarantee. If your shoes don't fit or match expectations, we will replace or refund!";
+      } else if (subType === 'CONTACT') {
+        faqReply = "You can chat with our team directly on WhatsApp at 0309-4376043 or email us at support@gitsole.pk!";
+      }
+
+      return {
+        success: true,
+        reply: faqReply,
+        products: [],
+        appliedFilters: contextFilters
+      };
+    }
+
+    if (intent === 'VAGUE_SHOPPING') {
+      return {
+        success: true,
+        reply: "Sure! What is your budget, size (e.g. UK 9 / 42), or preferred brand (Nike, Adidas, Jordan)?",
+        products: [],
+        appliedFilters: contextFilters
+      };
+    }
+
+    // Intent: PRODUCT_SEARCH
     const newExtracted = parseNaturalLanguageText(userMessage);
 
     const mergedFilters = {
@@ -69,14 +116,12 @@ export async function sendChatMessageToAI(userMessage, history = [], contextFilt
 
     let reply = '';
     if (relaxedNotice) {
-      reply = `I couldn't find an exact match under your strict criteria, but I found these closest options currently available in our store!`;
+      reply = `I couldn't find an exact match under your strict criteria, but I found these closest options currently available in our store:`;
     } else if (finalProducts.length > 0) {
-      const brandStr = mergedFilters.brand ? `${mergedFilters.brand} ` : '';
-      const priceStr = mergedFilters.maxPrice ? ` under PKR ${mergedFilters.maxPrice.toLocaleString()}` : '';
-      const sizeStr = mergedFilters.sizeUK ? ` in size UK ${mergedFilters.sizeUK}` : '';
-      reply = `Sure thing! Here are available ${brandStr}shoes${priceStr}${sizeStr} from GitSole:`;
+      const count = finalProducts.length;
+      reply = `I found ${count} pair${count > 1 ? 's' : ''} that match your preferences:`;
     } else {
-      reply = `I couldn't find shoes matching those exact criteria right now. What other budget or brand would you like to try?`;
+      reply = `I couldn't find available shoes matching those criteria right now. What other budget or brand would you like to try?`;
     }
 
     return {
