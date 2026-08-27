@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { formatPrice, buildWhatsAppUrl, WHATSAPP_DISPLAY } from '../data/products';
+import { formatPrice, buildWhatsAppUrl, WHATSAPP_DISPLAY, getEuFromUk } from '../data/products';
 import { useProducts } from '../context/ProductContext';
 import { useCart } from '../context/CartContext';
 import { useOrder } from '../context/OrderContext';
@@ -371,7 +371,7 @@ export default function ProductDetail() {
                 alignItems: 'center',
                 gap: '8px'
               }}>
-                <span>UK {product.sizeUK} / US {product.sizeUS}</span>
+                <span>EU {product.sizeEU || getEuFromUk(product.sizeUK) || '44'} · UK {product.sizeUK} · US {product.sizeUS || ''}</span>
                 <span style={{ fontSize: '10px', opacity: 0.8 }}>(1 of 1)</span>
               </div>
             </div>

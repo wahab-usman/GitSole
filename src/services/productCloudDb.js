@@ -1,6 +1,6 @@
 // Product Cloud Database Service: Supabase integration with automatic fallback
 import { supabase, isSupabaseConfigured } from './supabaseClient.js';
-import { PRODUCTS as DEFAULT_PRODUCTS } from '../data/products.js';
+import { PRODUCTS as DEFAULT_PRODUCTS, getEuFromUk } from '../data/products.js';
 
 const FALLBACK_CONTAINER_ID = 'ff8081819ff5b11001a03ca2ee9c2319';
 const FALLBACK_DB_URL = `https://api.restful-api.dev/objects/${FALLBACK_CONTAINER_ID}`;
@@ -178,6 +178,7 @@ function formatDbProductToApp(row) {
     brand: row.brand,
     model: row.model,
     colourway: row.colourway,
+    sizeEU: row.size_eu || row.sizeEU || getEuFromUk(row.size_uk || row.sizeUK) || '44',
     sizeUK: row.size_uk || row.sizeUK,
     sizeUS: row.size_us || row.sizeUS,
     insoleCm: row.insole_cm ? Number(row.insole_cm) : (row.insoleCm ? Number(row.insoleCm) : 28.0),

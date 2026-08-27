@@ -67,7 +67,7 @@ async function analyzeImagePixels(imageDataUrl) {
   });
 }
 
-const isValidGeminiKey = (key) => typeof key === 'string' && key.trim().startsWith('AIzaSy') && key.trim().length > 20;
+const isValidGeminiKey = (key) => typeof key === 'string' && key.trim().length >= 20 && (key.trim().startsWith('AIzaSy') || key.trim().startsWith('AQ.') || key.trim().length >= 30);
 
 /**
  * Analyze shoe photo using AI Vision
@@ -79,14 +79,18 @@ export async function analyzeShoePhotoWithAI(imageDataUrl, apiKey = '') {
     const rawKey = apiKey || import.meta.env.VITE_GEMINI_API_KEY || localStorage.getItem('gitsole_gemini_api_key') || '';
     const geminiKey = rawKey.trim();
 
-    // 1. Try Gemini Vision API if key starts with AIzaSy
+    // 1. Try Gemini Vision API if valid key is available
     if (isValidGeminiKey(geminiKey)) {
       try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000);
+
         const response = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiKey}`,
+          `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${geminiKey}`,
           {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
+            signal: controller.signal,
             body: JSON.stringify({
               contents: [
                 {
@@ -119,6 +123,8 @@ Return ONLY valid JSON in this exact structure:
             })
           }
         );
+
+        clearTimeout(timeoutId);
 
         if (response.ok) {
           const resData = await response.json();

@@ -1,212 +1,255 @@
-// Frontend Service Helper: AI Shopping Assistant
-// Communicates with backend endpoint POST /api/chat-assistant with client-side fallback
+// AI Shopping Assistant Service
+// Conversational multi-turn engine powered by Google Gemini Function Calling & verified Supabase inventory
 
-import { searchProducts, parseNaturalLanguageText, detectUserIntent } from './productSearchEngine.js';
+import { AI_TOOL_DECLARATIONS, executeTool } from './aiToolsEngine.js';
+
+const SYSTEM_INSTRUCTION = `You are GitSole Concierge, the personal shopping assistant for GitSole (Pakistan's thrift sneaker marketplace).
+
+Core Principles:
+1. Grounding in Database: You have access to real-time tools connected to the store database. The database is your single source of truth. NEVER invent or hallucinate product names, IDs, prices, sizes, authenticity claims, conditions, or stock.
+2. Natural Conversation: Speak naturally, warmly, and concisely like ChatGPT. Do NOT force every message into a product search. If the user says "hi", "how are you", "what is your return policy", answer conversationally without searching products.
+3. Tool Usage:
+   - Use 'searchProducts' or 'searchByBudget' when the user expresses shopping intent, budget, size, or brand requirements.
+   - Use 'getProduct' or 'checkAvailability' when the user asks about a specific shoe, reference, or size availability.
+   - Use 'addToCart' ONLY when the user explicitly requests to add an item to their cart/bag.
+   - Use 'getSimilarProducts' when the user asks for alternatives or something similar.
+4. Reference Resolution: Understand relative references in conversation:
+   - "the first one", "number 1", "that one" refers to the 1st product previously shown.
+   - "the second one", "number 2" refers to the 2nd product previously shown.
+   - "the Nike pair", "the black one", "the cheaper one" refers to that specific previously displayed item.
+5. Store Facts:
+   - 100% hand-inspected authentic branded thrift shoes.
+   - Free Home Delivery all over Pakistan with Cash on Delivery (COD). Delivery takes 3-5 working days.
+   - 7-day hassle-free return and exchange guarantee.
+   - WhatsApp helpline: 0321-1123474.
+6. Clean Output: NEVER output HTML, JSX, SVG, technical code, raw JSON, or markdown image tags in your text response. All product cards will be rendered natively by the frontend.`;
 
 /**
- * Send customer message to AI Shopping Assistant API
- * @param {string} userMessage - Customer message text
- * @param {Array} history - Previous message objects in current session
- * @param {Object} contextFilters - Accumulated search filters
- * @param {Array} products - Local products array from ProductContext
+ * Format conversation history into valid Gemini Content messages
  */
-export async function sendChatMessageToAI(userMessage, history = [], contextFilters = {}, products = []) {
-  try {
-    // 1. Try backend serverless endpoint POST /api/chat-assistant
-    try {
-      const response = await fetch('/api/chat-assistant', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          message: userMessage,
-          history,
-          contextFilters,
-          products
-        })
+function buildGeminiContents(history, userMessage, displayedProductsMap) {
+  const contents = [];
+
+  // Add reference context if previous products were displayed
+  let contextualMessage = userMessage;
+  if (displayedProductsMap && Object.keys(displayedProductsMap).length > 0) {
+    const refSummary = Object.entries(displayedProductsMap)
+      .map(([idx, p]) => `#${idx}: ${p.brand} ${p.model} (Code: ${p.code}, UK ${p.sizeUK}, PKR ${p.price})`)
+      .join(', ');
+    contextualMessage = `[Recently displayed products in chat: ${refSummary}]\nUser message: "${userMessage}"`;
+  }
+
+  // Include recent conversation turns (up to last 6)
+  const recentHistory = Array.isArray(history) ? history.slice(-6) : [];
+  for (const msg of recentHistory) {
+    if (msg.sender === 'user') {
+      contents.push({
+        role: 'user',
+        parts: [{ text: msg.text }]
       });
+    } else if (msg.sender === 'ai') {
+      contents.push({
+        role: 'model',
+        parts: [{ text: msg.text }]
+      });
+    }
+  }
+
+  // Append current user message
+  contents.push({
+    role: 'user',
+    parts: [{ text: contextualMessage }]
+  });
+
+  return contents;
+}
+
+/**
+ * Main AI Shopping Assistant entry point
+ */
+export async function sendChatMessageToAI(
+  userMessage,
+  history = [],
+  contextFilters = {},
+  products = [],
+  cartItems = [],
+  displayedProductsMap = {}
+) {
+  const geminiApiKey = import.meta.env.VITE_GEMINI_API_KEY || import.meta.env.GEMINI_API_KEY || '';
+
+  // 1. Live Google Gemini API with Function Calling
+  if (geminiApiKey && geminiApiKey.length > 10) {
+    try {
+      const contents = buildGeminiContents(history, userMessage, displayedProductsMap);
+
+      const payload = {
+        contents,
+        systemInstruction: {
+          parts: [{ text: SYSTEM_INSTRUCTION }]
+        },
+        tools: [
+          {
+            functionDeclarations: AI_TOOL_DECLARATIONS
+          }
+        ],
+        generationConfig: {
+          temperature: 0.35,
+          maxOutputTokens: 600
+        }
+      };
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 11000);
+
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${geminiApiKey}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+          signal: controller.signal
+        }
+      );
+
+      clearTimeout(timeoutId);
 
       if (response.ok) {
-        const resData = await response.json();
-        if (resData.success) {
-          return {
-            success: true,
-            reply: resData.reply,
-            products: resData.products || [],
-            appliedFilters: resData.appliedFilters || contextFilters
-          };
+        const data = await response.json();
+        const candidate = data.candidates?.[0]?.content;
+
+        if (candidate) {
+          const parts = candidate.parts || [];
+          const functionCallPart = parts.find(p => p.functionCall);
+
+          // CASE A: Gemini decided to call a verified Database Tool
+          if (functionCallPart && functionCallPart.functionCall) {
+            const { name, args } = functionCallPart.functionCall;
+            const toolResult = executeTool(name, args, products, cartItems);
+
+            // Extract verified products for UI cards
+            let verifiedProducts = [];
+            if (toolResult.products && Array.isArray(toolResult.products)) {
+              verifiedProducts = toolResult.products;
+            } else if (toolResult.product) {
+              verifiedProducts = [toolResult.product];
+            } else if (toolResult.similarProducts && Array.isArray(toolResult.similarProducts)) {
+              verifiedProducts = toolResult.similarProducts;
+            }
+
+            // Extract actions (e.g. ADD_TO_CART)
+            let action = null;
+            if (toolResult.action === 'ADD_TO_CART' && toolResult.product) {
+              action = { type: 'ADD_TO_CART', product: toolResult.product };
+            }
+
+            // Send tool result back to Gemini in 2nd turn to generate a natural conversational summary
+            const secondTurnPayload = {
+              contents: [
+                ...contents,
+                candidate,
+                {
+                  role: 'user',
+                  parts: [
+                    {
+                      functionResponse: {
+                        name,
+                        response: { output: toolResult }
+                      }
+                    }
+                  ]
+                }
+              ],
+              systemInstruction: {
+                parts: [{ text: SYSTEM_INSTRUCTION }]
+              },
+              generationConfig: {
+                temperature: 0.35,
+                maxOutputTokens: 350
+              }
+            };
+
+            const secondResponse = await fetch(
+              `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${geminiApiKey}`,
+              {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(secondTurnPayload)
+              }
+            );
+
+            if (secondResponse.ok) {
+              const secondData = await secondResponse.json();
+              const finalReplyText = secondData.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+
+              return {
+                success: true,
+                reply: finalReplyText || "Here are the matching pairs from our live catalog:",
+                products: verifiedProducts,
+                action,
+                appliedFilters: args
+              };
+            }
+
+            // Fallback if second turn had network issue
+            return {
+              success: true,
+              reply: toolResult.message || `I found ${verifiedProducts.length} matching pair(s) in our store:`,
+              products: verifiedProducts,
+              action,
+              appliedFilters: args
+            };
+          }
+
+          // CASE B: Gemini replied directly (Chit-chat, FAQs, Policy, Greetings)
+          const textPart = parts.find(p => p.text);
+          if (textPart && textPart.text) {
+            return {
+              success: true,
+              reply: textPart.text.trim(),
+              products: [],
+              appliedFilters: contextFilters
+            };
+          }
         }
       }
-    } catch (netErr) {
-      console.warn('[Chat Assistant Serverless API unreachable, using client engine]:', netErr.message);
+    } catch (apiErr) {
+      console.warn('[Gemini Function Calling Error, switching to local tools]:', apiErr.message);
     }
+  }
 
-    // 2. Client-side Intent Classification & Fallback Engine
-    const { intent, subType } = detectUserIntent(userMessage);
+  // 2. Client-side Local Fallback Engine (Offline / Safe Fallback)
+  const lowerMsg = userMessage.toLowerCase().trim();
 
-    if (intent === 'BRAND_LIST') {
-      const availableBrands = [...new Set(products.filter(p => p.status === 'available').map(p => p.brand))].filter(Boolean);
-      const brandText = availableBrands.length > 0 ? availableBrands.join(', ') : 'Nike, Adidas, Jordan, New Balance, Timberland, Puma, Vans';
-      return {
-        success: true,
-        reply: `We currently have curated pairs available from top brands including: ${brandText}. Which brand would you like to explore?`,
-        products: [],
-        appliedFilters: contextFilters
-      };
-    }
-
-    if (intent === 'GREETING') {
-      let greetingReply = "I'm doing great, thank you for asking! 😊 I'm here to help you find your next pair of kicks from GitSole. What size, brand, or budget are you looking for today?";
-      if (subType === 'ARE_YOU_OKAY') {
-        greetingReply = "I'm doing great, thank you for checking! 😊 I'm fully ready to help you discover your next favourite pair of kicks on GitSole. How can I help you today?";
-      } else if (subType === 'HOW_ARE_YOU') {
-        greetingReply = "I'm doing awesome! 👟 Ready to help you hunt for clean sneakers or boots. What brand or size are you looking for?";
-      } else if (subType === 'JOKE') {
-        greetingReply = "Why did the shoe go to school? To get a little more sole! 👟 Let me know if you'd like to find some clean shoes today!";
-      } else if (subType === 'GREETING') {
-        greetingReply = "Hi there! Welcome to GitSole Concierge 👋 How can I help you find your next pair of shoes today?";
-      }
-
-      return {
-        success: true,
-        reply: greetingReply,
-        products: [],
-        appliedFilters: contextFilters
-      };
-    }
-
-    if (intent === 'GITSOLE_FAQ') {
-      let faqReply = "GitSole offers curated branded thrift footwear with cash on delivery and free home delivery all over Pakistan!";
-      if (subType === 'DELIVERY') {
-        faqReply = "Yes! We offer cash on delivery (COD) and free home delivery all over Pakistan. Normal delivery takes 3–5 working days.";
-      } else if (subType === 'TRACKING') {
-        faqReply = "You can track your GitSole order anytime by clicking 'Track Order' in our header menu or visiting our tracking page.";
-      } else if (subType === 'AUTHENTICITY') {
-        faqReply = "Every pair on GitSole is 100% hand-inspected for authenticity, cleanliness, and structural condition before listing!";
-      } else if (subType === 'RETURNS') {
-        faqReply = "We provide a 7-day hassle-free return and exchange guarantee. If your shoes don't fit or match expectations, we will replace or refund!";
-      } else if (subType === 'CONTACT') {
-        faqReply = "You can chat with our team directly on WhatsApp at 0321-1123474 or email us at support@gitsole.pk!";
-      }
-
-      return {
-        success: true,
-        reply: faqReply,
-        products: [],
-        appliedFilters: contextFilters
-      };
-    }
-
-    if (intent === 'VAGUE_SHOPPING') {
-      return {
-        success: true,
-        reply: "Sure thing! What is your budget, size (e.g. UK 9 / 42), or preferred brand (Nike, Adidas, Jordan)?",
-        products: [],
-        appliedFilters: contextFilters
-      };
-    }
-
-    // 3. Process Product Search & Sorting (MAX_PRICE, MIN_PRICE, PRODUCT_SEARCH, COUNT_QUERY)
-    const newExtracted = parseNaturalLanguageText(userMessage);
-    let mergedFilters = { ...contextFilters, ...newExtracted };
-
-    if (intent === 'MAX_PRICE') {
-      mergedFilters.sortBy = 'price';
-      mergedFilters.sortOrder = 'desc';
-      mergedFilters.limit = newExtracted.limit || (userMessage.toLowerCase().includes('3') ? 3 : (userMessage.toLowerCase().includes('5') ? 5 : 1));
-      delete mergedFilters.maxPrice;
-      delete mergedFilters.minPrice;
-    } else if (intent === 'MIN_PRICE') {
-      mergedFilters.sortBy = 'price';
-      mergedFilters.sortOrder = 'asc';
-      mergedFilters.limit = newExtracted.limit || (userMessage.toLowerCase().includes('3') ? 3 : (userMessage.toLowerCase().includes('5') ? 5 : 1));
-      delete mergedFilters.minPrice;
-      delete mergedFilters.maxPrice;
-    }
-
-    let matchingProducts = searchProducts(products, mergedFilters);
-    let relaxedNotice = '';
-
-    // Smart context unblocking: if combined filters yielded 0 results, retry with isolated new query
-    if (matchingProducts.length === 0) {
-      // 1. Try with fresh query filters only (ignore stale context)
-      const freshMatches = searchProducts(products, newExtracted);
-      if (freshMatches.length > 0) {
-        matchingProducts = freshMatches;
-        mergedFilters = { ...newExtracted };
-        if (contextFilters.maxPrice && !newExtracted.maxPrice) {
-          relaxedNotice = `We don't have ${newExtracted.brand || ''} pairs under your previous budget of Rs. ${contextFilters.maxPrice.toLocaleString()}, but here are the available ${newExtracted.brand || ''} pairs in stock:`.replace(/\s+/g, ' ');
-        } else if (contextFilters.sizeUK && !newExtracted.sizeUK) {
-          relaxedNotice = `We don't have ${newExtracted.brand || ''} in size UK ${contextFilters.sizeUK}, but here are other available pairs:`.replace(/\s+/g, ' ');
-        }
-      } else if (mergedFilters.brand) {
-        // 2. Try brand alone
-        const brandOnlyMatches = searchProducts(products, { brand: mergedFilters.brand });
-        if (brandOnlyMatches.length > 0) {
-          matchingProducts = brandOnlyMatches;
-          mergedFilters = { brand: mergedFilters.brand };
-          relaxedNotice = `Here are the available ${mergedFilters.brand} pairs currently in stock:`;
-        }
-      } else if (mergedFilters.maxPrice) {
-        // 3. Relax price threshold by 35%
-        const relaxed = { ...mergedFilters, maxPrice: Math.round(mergedFilters.maxPrice * 1.35) };
-        delete relaxed.color;
-        const fallbackMatches = searchProducts(products, relaxed);
-        if (fallbackMatches.length > 0) {
-          matchingProducts = fallbackMatches;
-          mergedFilters = relaxed;
-          relaxedNotice = `I couldn't find an exact match under your strict criteria, but I found these closest options:`;
-        }
-      }
-    }
-
-    if (intent === 'COUNT_QUERY') {
-      const count = matchingProducts.length;
-      const brandMention = mergedFilters.brand ? `${mergedFilters.brand} ` : '';
-      return {
-        success: true,
-        reply: `We currently have ${count} available ${brandMention}pair${count !== 1 ? 's' : ''} in our GitSole inventory.`,
-        products: matchingProducts.slice(0, 5),
-        appliedFilters: mergedFilters
-      };
-    }
-
-    const finalProducts = matchingProducts;
-
-    let reply = '';
-    if (intent === 'MAX_PRICE') {
-      const count = finalProducts.length;
-      const brandMention = mergedFilters.brand ? `${mergedFilters.brand} ` : '';
-      reply = count > 1
-        ? `Here are our top ${count} highest-priced ${brandMention}available pairs:`
-        : `Here is the highest-priced available ${brandMention}pair currently in our store:`;
-    } else if (intent === 'MIN_PRICE') {
-      const count = finalProducts.length;
-      const brandMention = mergedFilters.brand ? `${mergedFilters.brand} ` : '';
-      reply = count > 1
-        ? `Here are our top ${count} most affordable ${brandMention}available pairs:`
-        : `Here is the most affordable available ${brandMention}pair currently in our store:`;
-    } else if (relaxedNotice) {
-      reply = relaxedNotice;
-    } else if (finalProducts.length > 0) {
-      const count = finalProducts.length;
-      reply = `I found ${count} pair${count > 1 ? 's' : ''} that match your preferences:`;
-    } else {
-      reply = `I couldn't find available shoes matching those criteria right now. What other budget or brand would you like to try?`;
-    }
-
+  // Greetings
+  if (/^(hi|hello|hey|how are you|how r u|kaise ho|kya haal|assalam)\b/i.test(lowerMsg)) {
     return {
       success: true,
-      reply,
-      products: finalProducts,
-      appliedFilters: mergedFilters
-    };
-  } catch (error) {
-    console.error('[aiAssistantService Error]:', error);
-    return {
-      success: false,
-      reply: "Sorry, I'm having trouble finding shoes right now. Please try again.",
-      products: [],
-      appliedFilters: contextFilters
+      reply: "Hey! 👋 Welcome to GitSole. What size, brand, or style are you looking for today?",
+      products: []
     };
   }
+
+  // Store FAQs
+  if (lowerMsg.includes('return') || lowerMsg.includes('exchange')) {
+    return {
+      success: true,
+      reply: "We offer a 7-day hassle-free return and size exchange guarantee. If your shoes don't fit or match expectations, we will exchange or refund!",
+      products: []
+    };
+  }
+  if (lowerMsg.includes('delivery') || lowerMsg.includes('shipping') || lowerMsg.includes('cod')) {
+    return {
+      success: true,
+      reply: "We provide Free Home Delivery with Cash on Delivery (COD) all over Pakistan. Delivery takes 3-5 working days.",
+      products: []
+    };
+  }
+
+  // Budget / Deals / Search fallback
+  const result = executeTool('searchProducts', { query: userMessage, limit: 4 }, products, cartItems);
+  return {
+    success: true,
+    reply: result.products?.length > 0 ? "Here are matching pairs available in stock:" : "I couldn't find exact matches in our current stock. What other brand or size do you wear?",
+    products: result.products || []
+  };
 }

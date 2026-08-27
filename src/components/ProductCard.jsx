@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
-import { formatPrice } from '../data/products';
+import { formatPrice, getEuFromUk } from '../data/products';
 
 export default function ProductCard({ product }) {
   const { addToCart, isInCart } = useCart();
@@ -178,7 +178,7 @@ export default function ProductCard({ product }) {
             color: 'var(--color-muted)',
             marginTop: '3px'
           }}>
-            UK {product.sizeUK} <span className="hide-on-mobile">· 1 of 1 · {product.listedAt}</span>
+            EU {product.sizeEU || getEuFromUk(product.sizeUK) || '44'} · UK {product.sizeUK} <span className="hide-on-mobile">· 1 of 1 · {product.listedAt}</span>
           </div>
 
           {/* Price Row */}

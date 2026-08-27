@@ -24,7 +24,7 @@ export default async function handler(req, res) {
     });
 
     // 1. Validate API Key from Server Environment or Admin Request
-    const geminiApiKey = process.env.GEMINI_API_KEY || (apiKey && apiKey.startsWith('AIzaSy') ? apiKey : '');
+    const geminiApiKey = process.env.GEMINI_API_KEY || (apiKey && (apiKey.startsWith('AIzaSy') || apiKey.startsWith('AQ.') || apiKey.length >= 20) ? apiKey : '');
 
     if (!geminiApiKey) {
       return res.status(400).json({
@@ -123,7 +123,7 @@ Return ONLY a valid JSON object matching this exact structure:`
     }
 
     // 4. Call Google Gemini API
-    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`;
+    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${geminiApiKey}`;
 
     const apiRes = await fetch(geminiUrl, {
       method: 'POST',

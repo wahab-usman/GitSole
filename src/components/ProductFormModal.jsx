@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { BRANDS, SIZES_UK, TIERS } from '../data/products';
-import { X, Plus, Trash2, Image, UploadCloud, AlertCircle, Sparkles, Loader2, Check } from 'lucide-react';
+import { BRANDS, SIZES_UK, SIZES_EU, convertEuSizeToAll, getEuFromUk, TIERS } from '../data/products';
+import { X, Plus, Trash2, Image, UploadCloud, AlertCircle, Sparkles, Loader2, Check, Zap } from 'lucide-react';
 import { analyzeShoeImagesWithAI } from '../services/aiProductAnalyzer';
 
 export default function ProductFormModal({ isOpen, onClose, onSubmit, initialData = null }) {
@@ -9,6 +9,7 @@ export default function ProductFormModal({ isOpen, onClose, onSubmit, initialDat
     brand: 'Nike',
     model: '',
     colourway: '',
+    sizeEU: '44',
     sizeUK: '9',
     sizeUS: '10',
     insoleCm: 28.0,
@@ -34,7 +35,7 @@ export default function ProductFormModal({ isOpen, onClose, onSubmit, initialDat
   const [showApiKeyInput, setShowApiKeyInput] = useState(false);
   const [userApiKey, setUserApiKey] = useState(() => {
     const k = (localStorage.getItem('gitsole_gemini_api_key') || '').trim();
-    if (k && !k.startsWith('AIzaSy')) {
+    if (k && !k.startsWith('AIzaSy') && !k.startsWith('AQ.') && k.length < 20) {
       localStorage.removeItem('gitsole_gemini_api_key');
       return '';
     }
@@ -44,10 +45,31 @@ export default function ProductFormModal({ isOpen, onClose, onSubmit, initialDat
   const handleSaveApiKey = (val) => {
     const trimmed = (val || '').trim();
     setUserApiKey(trimmed);
-    if (trimmed.startsWith('AIzaSy')) {
+    if (trimmed.startsWith('AIzaSy') || trimmed.startsWith('AQ.') || trimmed.length >= 20) {
       localStorage.setItem('gitsole_gemini_api_key', trimmed);
     } else {
       localStorage.removeItem('gitsole_gemini_api_key');
+    }
+  };
+
+  const handleEuSizeSelect = (selectedEu) => {
+    const res = convertEuSizeToAll(selectedEu);
+    if (res) {
+      setFormData(prev => ({
+        ...prev,
+        sizeEU: res.sizeEU,
+        sizeUK: res.sizeUK,
+        sizeUS: res.sizeUS,
+        insoleCm: res.insoleCm,
+      }));
+      setAiGeneratedMap(prev => ({
+        ...prev,
+        sizeUK: true,
+        sizeUS: true,
+        insoleCm: true
+      }));
+    } else {
+      setFormData(prev => ({ ...prev, sizeEU: selectedEu }));
     }
   };
 
@@ -114,11 +136,13 @@ export default function ProductFormModal({ isOpen, onClose, onSubmit, initialDat
 
   useEffect(() => {
     if (initialData) {
+      const derivedEu = initialData.sizeEU || getEuFromUk(initialData.sizeUK) || '44';
       setFormData({
         code: initialData.code || '',
         brand: initialData.brand || 'Nike',
         model: initialData.model || '',
         colourway: initialData.colourway || '',
+        sizeEU: String(derivedEu),
         sizeUK: String(initialData.sizeUK || '9'),
         sizeUS: String(initialData.sizeUS || '10'),
         insoleCm: Number(initialData.insoleCm || 28.0),
@@ -141,6 +165,7 @@ export default function ProductFormModal({ isOpen, onClose, onSubmit, initialDat
         brand: 'Nike',
         model: '',
         colourway: '',
+        sizeEU: '44',
         sizeUK: '9',
         sizeUS: '10',
         insoleCm: 28.0,
@@ -258,6 +283,7 @@ export default function ProductFormModal({ isOpen, onClose, onSubmit, initialDat
       brand: formData.brand,
       model: formData.model.trim(),
       colourway: formData.colourway.trim() || 'Original Colourway',
+      sizeEU: String(formData.sizeEU || getEuFromUk(formData.sizeUK) || '44'),
       sizeUK: String(formData.sizeUK),
       sizeUS: String(formData.sizeUS),
       insoleCm: Number(formData.insoleCm) || 28.0,
@@ -521,17 +547,16 @@ export default function ProductFormModal({ isOpen, onClose, onSubmit, initialDat
                 </label>
                 <input
                   type="text"
-                  placeholder="Paste your free AIStudio key (AIzaSy...)"
+                  placeholder="Paste your Gemini API Key (starts with AIzaSy... or AQ...)"
                   value={userApiKey}
                   onChange={(e) => handleSaveApiKey(e.target.value)}
                   style={{ width: '100%', padding: '6px 10px', fontSize: '12px', border: '1px solid var(--color-line)' }}
                 />
                 <div style={{ fontSize: '11px', color: 'var(--color-muted)', marginTop: '4px' }}>
-                  Get your 100% free Gemini API Key (starts with <strong>AIzaSy...</strong>) in 10 seconds at{' '}
+                  Get your free Gemini API Key in 10 seconds at{' '}
                   <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--color-oxblood)', fontWeight: 700, textDecoration: 'underline' }}>
                     aistudio.google.com/app/apikey
                   </a>
-                  . Note: OAuth tokens starting with <code>AQ.Ab...</code> are not API keys.
                 </div>
               </div>
             )}
@@ -631,51 +656,115 @@ export default function ProductFormModal({ isOpen, onClose, onSubmit, initialDat
             </div>
           </div>
 
-          {/* Row 3: Sizes & Insole */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '14px' }}>
-            <div>
-              <label style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>
-                Size UK *
+          {/* Row 3: Sizing with 1-Click Europe Auto-Fill */}
+          <div style={{
+            backgroundColor: 'var(--color-card)',
+            border: '1px solid var(--color-line-strong)',
+            padding: '14px 16px',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '12px'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
+              <label style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', color: 'var(--color-ink)', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                <Zap size={14} color="var(--color-oxblood)" />
+                Europe Size (EU) — Pick & Auto-fill All Sizes:
               </label>
-              <select
-                name="sizeUK"
-                value={formData.sizeUK}
-                onChange={handleChange}
-                style={{ width: '100%', padding: '10px 12px', border: '1px solid var(--color-line-strong)', backgroundColor: '#FFF' }}
-              >
-                {SIZES_UK.map((sz) => (
-                  <option key={sz} value={sz}>UK {sz}</option>
-                ))}
-              </select>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '10.5px', color: '#2E7D32', fontWeight: 700, backgroundColor: '#E8F5E9', padding: '2px 8px', borderRadius: '3px' }}>
+                ⚡ Auto-Calculates UK, US & Insole CM
+              </span>
             </div>
 
-            <div>
-              <label style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>
-                Size US
-              </label>
-              <input
-                type="text"
-                name="sizeUS"
-                value={formData.sizeUS}
-                onChange={handleChange}
-                placeholder="e.g. 10"
-                style={{ width: '100%', padding: '10px 12px', border: '1px solid var(--color-line-strong)' }}
-              />
+            {/* Quick EU Pill Buttons */}
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+              {['39', '40', '40.5', '41', '42', '42.5', '43', '44', '44.5', '45', '46'].map((eu) => {
+                const isSelected = String(formData.sizeEU) === eu;
+                return (
+                  <button
+                    key={eu}
+                    type="button"
+                    onClick={() => handleEuSizeSelect(eu)}
+                    style={{
+                      border: isSelected ? '2px solid var(--color-oxblood)' : '1px solid var(--color-line-strong)',
+                      backgroundColor: isSelected ? 'var(--color-oxblood)' : '#FFF',
+                      color: isSelected ? '#FFF' : 'var(--color-ink)',
+                      padding: '6px 10px',
+                      fontFamily: 'var(--font-mono)',
+                      fontSize: '12px',
+                      fontWeight: isSelected ? 800 : 600,
+                      cursor: 'pointer',
+                      borderRadius: '2px',
+                      transition: 'all 0.15s ease'
+                    }}
+                  >
+                    EU {eu}
+                  </button>
+                );
+              })}
             </div>
 
-            <div>
-              <label style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>
-                Insole (CM)
-              </label>
-              <input
-                type="number"
-                step="0.5"
-                name="insoleCm"
-                value={formData.insoleCm}
-                onChange={handleChange}
-                placeholder="28.0"
-                style={{ width: '100%', padding: '10px 12px', border: '1px solid var(--color-line-strong)' }}
-              />
+            {/* Custom EU dropdown & Calculated UK / US / Insole Grid */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '12px', paddingTop: '4px' }}>
+              <div>
+                <label style={{ fontFamily: 'var(--font-mono)', fontSize: '10.5px', fontWeight: 700, textTransform: 'uppercase', display: 'block', marginBottom: '4px', color: 'var(--color-muted)' }}>
+                  All EU Sizes
+                </label>
+                <select
+                  name="sizeEU"
+                  value={formData.sizeEU}
+                  onChange={(e) => handleEuSizeSelect(e.target.value)}
+                  style={{ width: '100%', padding: '9px 10px', border: '1px solid var(--color-line-strong)', backgroundColor: '#FFF', fontWeight: 700 }}
+                >
+                  {SIZES_EU.map((eu) => (
+                    <option key={eu} value={eu}>EU {eu}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label style={{ fontFamily: 'var(--font-mono)', fontSize: '10.5px', fontWeight: 700, textTransform: 'uppercase', display: 'block', marginBottom: '4px', color: 'var(--color-muted)' }}>
+                  Size UK *{renderAiBadge('sizeUK')}
+                </label>
+                <select
+                  name="sizeUK"
+                  value={formData.sizeUK}
+                  onChange={handleChange}
+                  style={{ width: '100%', padding: '9px 10px', border: '1px solid var(--color-line-strong)', backgroundColor: '#FFF' }}
+                >
+                  {SIZES_UK.map((sz) => (
+                    <option key={sz} value={sz}>UK {sz}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label style={{ fontFamily: 'var(--font-mono)', fontSize: '10.5px', fontWeight: 700, textTransform: 'uppercase', display: 'block', marginBottom: '4px', color: 'var(--color-muted)' }}>
+                  Size US{renderAiBadge('sizeUS')}
+                </label>
+                <input
+                  type="text"
+                  name="sizeUS"
+                  value={formData.sizeUS}
+                  onChange={handleChange}
+                  placeholder="e.g. 10"
+                  style={{ width: '100%', padding: '9px 10px', border: '1px solid var(--color-line-strong)', backgroundColor: '#FFF' }}
+                />
+              </div>
+
+              <div>
+                <label style={{ fontFamily: 'var(--font-mono)', fontSize: '10.5px', fontWeight: 700, textTransform: 'uppercase', display: 'block', marginBottom: '4px', color: 'var(--color-muted)' }}>
+                  Insole (CM){renderAiBadge('insoleCm')}
+                </label>
+                <input
+                  type="number"
+                  step="0.5"
+                  name="insoleCm"
+                  value={formData.insoleCm}
+                  onChange={handleChange}
+                  placeholder="28.0"
+                  style={{ width: '100%', padding: '9px 10px', border: '1px solid var(--color-line-strong)', backgroundColor: '#FFF' }}
+                />
+              </div>
             </div>
           </div>
 

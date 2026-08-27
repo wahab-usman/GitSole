@@ -371,6 +371,70 @@ export const BRANDS = [
 
 export const SIZES_UK = ["6", "6.5", "7", "7.5", "8", "8.5", "9", "9.5", "10", "10.5", "11", "12"];
 
+export const SIZES_EU = [
+  "36", "36.5", "37", "37.5", "38", "38.5", "39", "39.5", 
+  "40", "40.5", "41", "41.5", "42", "42.5", "43", "43.5", 
+  "44", "44.5", "45", "45.5", "46", "46.5", "47", "47.5", "48"
+];
+
+export const SIZE_CONVERSIONS = {
+  "36":   { sizeUK: "3.5", sizeUS: "4",   insoleCm: 22.5 },
+  "36.5": { sizeUK: "4",   sizeUS: "4.5", insoleCm: 23.0 },
+  "37":   { sizeUK: "4.5", sizeUS: "5",   insoleCm: 23.5 },
+  "37.5": { sizeUK: "4.5", sizeUS: "5.5", insoleCm: 23.5 },
+  "38":   { sizeUK: "5",   sizeUS: "5.5", insoleCm: 24.0 },
+  "38.5": { sizeUK: "5.5", sizeUS: "6",   insoleCm: 24.0 },
+  "39":   { sizeUK: "6",   sizeUS: "6.5", insoleCm: 24.5 },
+  "39.5": { sizeUK: "6",   sizeUS: "7",   insoleCm: 25.0 },
+  "40":   { sizeUK: "6",   sizeUS: "7",   insoleCm: 25.0 },
+  "40.5": { sizeUK: "6.5", sizeUS: "7.5", insoleCm: 25.5 },
+  "41":   { sizeUK: "7",   sizeUS: "8",   insoleCm: 26.0 },
+  "41.5": { sizeUK: "7.5", sizeUS: "8.5", insoleCm: 26.0 },
+  "42":   { sizeUK: "7.5", sizeUS: "8.5", insoleCm: 26.5 },
+  "42.5": { sizeUK: "8",   sizeUS: "9",   insoleCm: 27.0 },
+  "43":   { sizeUK: "8.5", sizeUS: "9.5", insoleCm: 27.5 },
+  "43.5": { sizeUK: "9",   sizeUS: "10",  insoleCm: 27.5 },
+  "44":   { sizeUK: "9",   sizeUS: "10",  insoleCm: 28.0 },
+  "44.5": { sizeUK: "9.5", sizeUS: "10.5",insoleCm: 28.5 },
+  "45":   { sizeUK: "10",  sizeUS: "11",  insoleCm: 29.0 },
+  "45.5": { sizeUK: "10.5",sizeUS: "11.5",insoleCm: 29.5 },
+  "46":   { sizeUK: "11",  sizeUS: "12",  insoleCm: 30.0 },
+  "46.5": { sizeUK: "11.5",sizeUS: "12.5",insoleCm: 30.0 },
+  "47":   { sizeUK: "11.5",sizeUS: "12.5",insoleCm: 30.5 },
+  "47.5": { sizeUK: "12",  sizeUS: "13",  insoleCm: 31.0 },
+  "48":   { sizeUK: "12.5",sizeUS: "13.5",insoleCm: 31.5 }
+};
+
+export function convertEuSizeToAll(euVal) {
+  if (!euVal) return null;
+  const normalized = String(euVal).trim().replace(/^eu\s*/i, '');
+  if (SIZE_CONVERSIONS[normalized]) {
+    return {
+      sizeEU: normalized,
+      ...SIZE_CONVERSIONS[normalized]
+    };
+  }
+  const num = parseFloat(normalized);
+  if (!isNaN(num) && num >= 30 && num <= 52) {
+    const uk = Math.round((num - 35) * 2) / 2;
+    const us = uk + 1;
+    const insole = Math.round((num * 0.64 + 0.1) * 2) / 2;
+    return {
+      sizeEU: String(num),
+      sizeUK: String(uk),
+      sizeUS: String(us),
+      insoleCm: insole
+    };
+  }
+  return null;
+}
+
+export function getEuFromUk(ukVal) {
+  const ukStr = String(ukVal || '').trim();
+  const entry = Object.entries(SIZE_CONVERSIONS).find(([eu, map]) => map.sizeUK === ukStr);
+  return entry ? entry[0] : '';
+}
+
 export const TIERS = [
   { name: "Like new", range: "9.5–10", meaning: "Barely worn, no visible flaws beyond faint sole marks", priceBand: "45–60% of retail" },
   { name: "Excellent", range: "8.5–9", meaning: "Light wear, clean upper, minor creasing", priceBand: "30–45% of retail" },

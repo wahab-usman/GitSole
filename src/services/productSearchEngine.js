@@ -80,22 +80,31 @@ export function detectUserIntent(userMessage = '') {
     return { intent: 'GITSOLE_FAQ', subType: 'CONTACT' };
   }
 
-  // 6. Shopping Indicators (Brand, Price, Size, Color, Category)
-  const brands = ['nike', 'jordan', 'adidas', 'new balance', 'puma', 'asics', 'reebok', 'timberland', 'vans', 'converse', 'yeezy'];
+  // 6. Shopping Indicators (Brand, Price, Size, Color, Category, Deals)
+  const brands = ['nike', 'jordan', 'adidas', 'new balance', 'puma', 'asics', 'reebok', 'timberland', 'vans', 'converse', 'yeezy', 'onitsuka', 'hoka', 'salomon'];
   const hasBrand = brands.some(b => new RegExp(`\\b${b}\\b`, 'i').test(text));
-  const hasShoppingKeywords = ['shoe', 'shoes', 'sneaker', 'sneakers', 'pair', 'kicks', 'boot', 'boots', 'dunk', 'force', 'trainer', 'trainers', 'footwear'].some(k => text.includes(k));
+  const shoppingWords = [
+    'shoe', 'shoes', 'sneaker', 'sneakers', 'pair', 'pairs', 'kicks', 'boot', 'boots',
+    'dunk', 'force', 'trainer', 'trainers', 'footwear', 'deal', 'deals', 'pick', 'picks',
+    'find', 'show', 'recommend', 'recommendation', 'recommendations', 'collection', 'catalog',
+    'discount', 'sale', 'trending', 'popular', 'suggest', 'buy', 'shop', 'browse'
+  ];
+  const hasShoppingKeywords = shoppingWords.some(k => new RegExp(`\\b${k}\\b`, 'i').test(text));
   const hasPrice = /(?:under|below|max|maximum|budget|within|around|upto|less than)?\s*(?:rs\.?|pkr\.?)?\s*(\d+(?:\.\d+)?\s*k|\d{4,6}|\d+\s*hazar)/i.test(text) || text.includes('cheap') || text.includes('budget') || text.includes('rupees') || text.includes('price');
   const hasExplicitSize = /\b(?:size|uk|eu|us)\s*[:#\-]?\s*(4[0-6]|1[0-3]|[5-9](?:\.5)?)\b/i.test(text);
   const hasColor = ['black', 'white', 'red', 'blue', 'green', 'grey', 'gray', 'wheat', 'brown', 'yellow', 'pink'].some(c => new RegExp(`\\b${c}\\b`, 'i').test(text));
 
   if (hasShoppingKeywords || hasPrice || hasBrand || hasExplicitSize || hasColor) {
-    if (text === 'something good' || text === 'i need something good' || text === 'shoes' || text === 'sneakers') {
+    if (text === 'something good' || text === 'i need something good') {
       return { intent: 'VAGUE_SHOPPING', subType: 'VAGUE' };
+    }
+    if (text.includes('deal') || text.includes('best deal')) {
+      return { intent: 'PRODUCT_SEARCH', subType: 'DEALS', sortBy: 'price', sortOrder: 'asc' };
     }
     return { intent: 'PRODUCT_SEARCH', subType: 'SPECIFIC' };
   }
 
-  // 7. Casual Greetings ONLY if no shopping intent detected
+  // 7. Casual Greetings ONLY if strictly greeting phrases
   const greetingPhrases = [
     'hi', 'hello', 'hey', 'how are you', 'how r u', 'are you okay', 'are u ok', 'are you ok',
     'whatsup', "what's up", 'good morning', 'good evening', 'good afternoon', 'thanks', 'thank you',
@@ -104,7 +113,7 @@ export function detectUserIntent(userMessage = '') {
   ];
 
   const isPureGreeting = greetingPhrases.some(g => text === g || text === `${g}!` || text === `${g}?` || text === `${g}.`);
-  if (isPureGreeting || text.startsWith('how are you') || text.startsWith('are you ok') || text === 'hi' || text === 'hello' || text === 'hey' || text === 'thanks') {
+  if (isPureGreeting || /^(hi|hello|hey|greetings|thanks|thank you)\b/i.test(text)) {
     let subType = 'GREETING';
     if (text.includes('are you ok') || text.includes('are u ok') || text.includes('are you okay')) {
       subType = 'ARE_YOU_OKAY';
@@ -116,7 +125,7 @@ export function detectUserIntent(userMessage = '') {
     return { intent: 'GREETING', subType };
   }
 
-  return { intent: 'GREETING', subType: 'CASUAL_CHAT' };
+  return { intent: 'PRODUCT_SEARCH', subType: 'GENERAL' };
 }
 
 /**
