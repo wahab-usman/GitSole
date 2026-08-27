@@ -1,62 +1,116 @@
-// Real-time Cloud Database Service for Gitsole
-// Powered by restful-api cloud REST container for instant multi-device sync
+// Real-time Cloud Database Service for GitSole Orders
+// Powered by Supabase integration with automatic offline caching
 
-const CLOUD_CONTAINER_ID = 'ff8081819ff5b11001a03ca2ee9c2319';
-const CLOUD_DB_URL = `https://api.restful-api.dev/objects/${CLOUD_CONTAINER_ID}`;
+import { supabase, isSupabaseConfigured } from './supabaseClient.js';
 
 /**
- * Fetch all orders from Cloud DB
+ * Format DB snake_case record to Frontend camelCase object
+ */
+export function formatDbOrderToApp(dbRecord) {
+  if (!dbRecord) return null;
+  return {
+    id: dbRecord.id,
+    date: dbRecord.date || dbRecord.created_at || new Date().toISOString(),
+    customer: typeof dbRecord.customer === 'string' ? JSON.parse(dbRecord.customer) : (dbRecord.customer || {}),
+    paymentMethod: dbRecord.payment_method || dbRecord.paymentMethod || 'cod',
+    items: typeof dbRecord.items === 'string' ? JSON.parse(dbRecord.items) : (Array.isArray(dbRecord.items) ? dbRecord.items : []),
+    subtotal: Number(dbRecord.subtotal) || 0,
+    delivery: Number(dbRecord.delivery) || 0,
+    codFee: Number(dbRecord.cod_fee ?? dbRecord.codFee) || 0,
+    total: Number(dbRecord.total) || 0,
+    courier: dbRecord.courier || 'Trax / TCS Express',
+    trackingNumber: dbRecord.tracking_number || dbRecord.trackingNumber || `TRX-${dbRecord.id}-PK`,
+    status: dbRecord.status || 'placed',
+    timeline: typeof dbRecord.timeline === 'string' ? JSON.parse(dbRecord.timeline) : (Array.isArray(dbRecord.timeline) ? dbRecord.timeline : [])
+  };
+}
+
+/**
+ * Format Frontend camelCase object to DB snake_case record
+ */
+export function formatAppOrderToDb(appOrder) {
+  if (!appOrder || !appOrder.id) return null;
+  return {
+    id: appOrder.id,
+    date: appOrder.date || new Date().toISOString(),
+    customer: appOrder.customer || {},
+    payment_method: appOrder.paymentMethod || 'cod',
+    items: appOrder.items || [],
+    subtotal: Number(appOrder.subtotal) || 0,
+    delivery: Number(appOrder.delivery) || 0,
+    cod_fee: Number(appOrder.codFee) || 0,
+    total: Number(appOrder.total) || 0,
+    courier: appOrder.courier || 'Trax / TCS Express',
+    tracking_number: appOrder.trackingNumber || `TRX-${appOrder.id}-PK`,
+    status: appOrder.status || 'placed',
+    timeline: appOrder.timeline || []
+  };
+}
+
+/**
+ * Fetch all orders from Cloud Database (Supabase)
  */
 export async function fetchCloudOrders() {
-  try {
-    const res = await fetch(CLOUD_DB_URL);
-    if (!res.ok) throw new Error(`Cloud DB HTTP error ${res.status}`);
-    const json = await res.json();
-    if (!json || !json.data || !Array.isArray(json.data.orders)) return [];
-    
-    const orders = [...json.data.orders];
-    orders.sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
-    return orders;
-  } catch (err) {
-    console.warn('[Cloud DB] Could not fetch cloud orders:', err.message);
-    return null;
+  if (isSupabaseConfigured() && supabase) {
+    try {
+      const { data, error } = await supabase
+        .from('orders')
+        .select('*')
+        .order('date', { ascending: false });
+
+      if (!error && Array.isArray(data)) {
+        return data.map(formatDbOrderToApp);
+      }
+
+      if (error) {
+        console.warn('[Supabase Orders Fetch Warning]:', error.message || error);
+      }
+    } catch (err) {
+      console.warn('[Supabase Orders Fetch Error]:', err.message);
+    }
   }
+
+  // Fallback to local storage
+  try {
+    const saved = localStorage.getItem('gitsole_orders');
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed)) return parsed;
+    }
+  } catch (_) {}
+
+  return null;
 }
 
 /**
- * Replace entire orders container in Cloud DB
- */
-export async function saveAllCloudOrders(ordersArray) {
-  if (!Array.isArray(ordersArray)) return false;
-  try {
-    const res = await fetch(CLOUD_DB_URL, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        name: 'gitsole_master_orders_store_v1',
-        data: {
-          orders: ordersArray,
-          lastUpdated: new Date().toISOString()
-        }
-      })
-    });
-    return res.ok;
-  } catch (err) {
-    console.warn('[Cloud DB] Failed to sync orders array:', err.message);
-    return false;
-  }
-}
-
-/**
- * Save or insert a single order into Cloud DB
+ * Save or insert a single order into Cloud DB (Supabase)
  */
 export async function saveCloudOrder(newOrder) {
   if (!newOrder || !newOrder.id) return false;
+
+  let success = false;
+
+  if (isSupabaseConfigured() && supabase) {
+    try {
+      const dbRecord = formatAppOrderToDb(newOrder);
+      const { error } = await supabase
+        .from('orders')
+        .upsert(dbRecord, { onConflict: 'id' });
+
+      if (!error) {
+        success = true;
+      } else {
+        console.warn('[Supabase Save Order Warning]:', error.message || error);
+      }
+    } catch (err) {
+      console.warn('[Supabase Save Order Error]:', err.message);
+    }
+  }
+
+  // Always update local storage as backup
   try {
-    const currentOrders = await fetchCloudOrders();
-    const existing = Array.isArray(currentOrders) ? currentOrders : [];
-    
-    // Check if order already exists
+    const saved = localStorage.getItem('gitsole_orders');
+    const existing = saved ? JSON.parse(saved) : [];
     const index = existing.findIndex(o => o.id === newOrder.id);
     let updated;
     if (index >= 0) {
@@ -65,50 +119,89 @@ export async function saveCloudOrder(newOrder) {
     } else {
       updated = [newOrder, ...existing];
     }
-    
-    return await saveAllCloudOrders(updated);
-  } catch (err) {
-    console.warn(`[Cloud DB] Failed to save order ${newOrder.id}:`, err.message);
-    return false;
-  }
+    localStorage.setItem('gitsole_orders', JSON.stringify(updated));
+  } catch (_) {}
+
+  return success;
 }
 
 /**
- * Update partial fields of an order in Cloud DB
+ * Update partial fields of an order in Cloud DB (Supabase)
  */
 export async function updateCloudOrderFields(orderId, fields) {
   if (!orderId) return false;
-  try {
-    const currentOrders = await fetchCloudOrders();
-    if (!Array.isArray(currentOrders)) return false;
 
-    const updated = currentOrders.map(order => {
-      if (order.id === orderId) {
-        return { ...order, ...fields };
+  let success = false;
+
+  if (isSupabaseConfigured() && supabase) {
+    try {
+      const updatePayload = {};
+      if (fields.status) updatePayload.status = fields.status;
+      if (fields.courier) updatePayload.courier = fields.courier;
+      if (fields.trackingNumber) updatePayload.tracking_number = fields.trackingNumber;
+      if (fields.timeline) updatePayload.timeline = fields.timeline;
+      if (fields.customer) updatePayload.customer = fields.customer;
+
+      const { error } = await supabase
+        .from('orders')
+        .update(updatePayload)
+        .eq('id', orderId);
+
+      if (!error) {
+        success = true;
+      } else {
+        console.warn('[Supabase Update Order Warning]:', error.message || error);
       }
-      return order;
-    });
-
-    return await saveAllCloudOrders(updated);
-  } catch (err) {
-    console.warn(`[Cloud DB] Failed to update order ${orderId}:`, err.message);
-    return false;
+    } catch (err) {
+      console.warn('[Supabase Update Order Error]:', err.message);
+    }
   }
+
+  // Update local storage
+  try {
+    const saved = localStorage.getItem('gitsole_orders');
+    if (saved) {
+      const existing = JSON.parse(saved);
+      const updated = existing.map(o => o.id === orderId ? { ...o, ...fields } : o);
+      localStorage.setItem('gitsole_orders', JSON.stringify(updated));
+    }
+  } catch (_) {}
+
+  return success;
 }
 
 /**
- * Delete an order from Cloud DB
+ * Delete an order from Cloud DB (Supabase)
  */
 export async function deleteCloudOrder(orderId) {
   if (!orderId) return false;
-  try {
-    const currentOrders = await fetchCloudOrders();
-    if (!Array.isArray(currentOrders)) return false;
 
-    const filtered = currentOrders.filter(o => o.id !== orderId);
-    return await saveAllCloudOrders(filtered);
-  } catch (err) {
-    console.warn(`[Cloud DB] Failed to delete order ${orderId}:`, err.message);
-    return false;
+  let success = false;
+
+  if (isSupabaseConfigured() && supabase) {
+    try {
+      const { error } = await supabase
+        .from('orders')
+        .delete()
+        .eq('id', orderId);
+
+      if (!error) {
+        success = true;
+      }
+    } catch (err) {
+      console.warn('[Supabase Delete Order Error]:', err.message);
+    }
   }
+
+  // Update local storage
+  try {
+    const saved = localStorage.getItem('gitsole_orders');
+    if (saved) {
+      const existing = JSON.parse(saved);
+      const updated = existing.filter(o => o.id !== orderId);
+      localStorage.setItem('gitsole_orders', JSON.stringify(updated));
+    }
+  } catch (_) {}
+
+  return success;
 }

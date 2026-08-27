@@ -218,14 +218,14 @@ export function OrderProvider({ children }) {
     }
   }, []);
 
-  // Initial cloud fetch and 5-second polling loop for real-time live sync
+  // Initial cloud fetch and 4-second polling loop for real-time live sync
   useEffect(() => {
     syncWithCloud();
-    const interval = setInterval(syncWithCloud, 5000);
+    const interval = setInterval(syncWithCloud, 4000);
     return () => clearInterval(interval);
   }, [syncWithCloud]);
 
-  const placeOrder = (orderData) => {
+  const placeOrder = async (orderData) => {
     const orderId = `GS-${Math.floor(10000 + Math.random() * 90000)}`;
     const trackingCode = `TRX-${Math.floor(100000 + Math.random() * 900000)}-PK`;
 
@@ -250,18 +250,22 @@ export function OrderProvider({ children }) {
       ]
     };
 
-    // 1. Instant local update
-    setOrders(prev => [newOrder, ...prev]);
+    // 1. Instant local state update
+    setOrders(prev => [newOrder, ...prev.filter(o => o.id !== orderId)]);
 
-    // 2. Push to Cloud Database
-    saveCloudOrder(newOrder).then(() => {
+    // 2. Push to Supabase Cloud Database
+    try {
+      await saveCloudOrder(newOrder);
       setLastSyncedAt(new Date());
-    });
+      setIsCloudConnected(true);
+    } catch (err) {
+      console.warn('[OrderContext] Could not push order to Supabase:', err.message);
+    }
 
     return newOrder;
   };
 
-  const addManualOrder = (manualOrder) => {
+  const addManualOrder = async (manualOrder) => {
     const orderId = manualOrder.id || `GS-${Math.floor(10000 + Math.random() * 90000)}`;
     const trackingCode = `TRX-${Math.floor(100000 + Math.random() * 900000)}-PK`;
 

@@ -24,6 +24,7 @@ export default function Checkout() {
   const [conditionAcknowledged, setConditionAcknowledged] = useState(false);
   const [advanceAcknowledged, setAdvanceAcknowledged] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   if (cart.length === 0) {
     return (
@@ -37,8 +38,9 @@ export default function Checkout() {
 
   const finalTotal = paymentMethod === 'bank_transfer' ? Math.round(subtotal * 0.97) : subtotal;
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    if (isSubmitting) return;
     setErrorMessage('');
 
     // Validate Pakistani mobile number: 03XX XXXXXXX
@@ -62,47 +64,56 @@ export default function Checkout() {
       return;
     }
 
-    // Place order
-    const newOrder = placeOrder({
-      customer: {
-        ...formData,
-        address: `${formData.address}${formData.landmark ? `, Near ${formData.landmark}` : ''}`
-      },
-      paymentMethod,
-      items: cart,
-      subtotal
-    });
+    setIsSubmitting(true);
 
-    // Build WhatsApp message with full order details
-    const itemLines = cart.map(item =>
-      `• ${item.model} (UK ${item.sizeUK}) — ${formatPrice(item.price)} [${item.score}/10 ${item.tier}]`
-    ).join('\n');
+    try {
+      // Place order in Supabase Cloud DB
+      const newOrder = await placeOrder({
+        customer: {
+          ...formData,
+          address: `${formData.address}${formData.landmark ? `, Near ${formData.landmark}` : ''}`
+        },
+        paymentMethod,
+        items: cart,
+        subtotal
+      });
 
-    const whatsAppMsg = paymentMethod === 'cod'
-      ? `🛒 *New Gitsole Order #${newOrder.id}*\n\n` +
-        `👤 *Customer:* ${formData.name}\n` +
-        `📱 *WhatsApp:* ${formData.whatsapp}\n` +
-        `📍 *Address:* ${formData.address}${formData.landmark ? `, Near ${formData.landmark}` : ''}, ${formData.city}, ${formData.province}\n\n` +
-        `👟 *Items:*\n${itemLines}\n\n` +
-        `💰 *Total:* ${formatPrice(finalTotal)}\n` +
-        `💳 *Payment:* Cash on Delivery\n` +
-        `🔒 *Advance Required:* PKR 300\n` +
-        `📦 *Remaining COD:* ${formatPrice(finalTotal - 300)}\n\n` +
-        `Please send me the payment details for the PKR 300 advance (JazzCash / EasyPaisa / Bank Transfer) so I can confirm my order. ✅`
-      : `🛒 *New Gitsole Order #${newOrder.id}*\n\n` +
-        `👤 *Customer:* ${formData.name}\n` +
-        `📱 *WhatsApp:* ${formData.whatsapp}\n` +
-        `📍 *Address:* ${formData.address}${formData.landmark ? `, Near ${formData.landmark}` : ''}, ${formData.city}, ${formData.province}\n\n` +
-        `👟 *Items:*\n${itemLines}\n\n` +
-        `💰 *Total:* ${formatPrice(finalTotal)} (3% discount applied)\n` +
-        `💳 *Payment:* Bank Transfer / EasyPaisa / JazzCash (Full Prepaid)\n\n` +
-        `Please send me the payment details so I can transfer the full amount. ✅`;
+      // Build WhatsApp message with full order details
+      const itemLines = cart.map(item =>
+        `• ${item.model} (UK ${item.sizeUK}) — ${formatPrice(item.price)} [${item.score}/10 ${item.tier}]`
+      ).join('\n');
 
-    // Auto-open WhatsApp with the order message
-    window.open(buildWhatsAppUrl(whatsAppMsg), '_blank');
+      const whatsAppMsg = paymentMethod === 'cod'
+        ? `🛒 *New Gitsole Order #${newOrder.id}*\n\n` +
+          `👤 *Customer:* ${formData.name}\n` +
+          `📱 *WhatsApp:* ${formData.whatsapp}\n` +
+          `📍 *Address:* ${formData.address}${formData.landmark ? `, Near ${formData.landmark}` : ''}, ${formData.city}, ${formData.province}\n\n` +
+          `👟 *Items:*\n${itemLines}\n\n` +
+          `💰 *Total:* ${formatPrice(finalTotal)}\n` +
+          `💳 *Payment:* Cash on Delivery\n` +
+          `🔒 *Advance Required:* PKR 300\n` +
+          `📦 *Remaining COD:* ${formatPrice(finalTotal - 300)}\n\n` +
+          `Please send me the payment details for the PKR 300 advance (JazzCash / EasyPaisa / Bank Transfer) so I can confirm my order. ✅`
+        : `🛒 *New Gitsole Order #${newOrder.id}*\n\n` +
+          `👤 *Customer:* ${formData.name}\n` +
+          `📱 *WhatsApp:* ${formData.whatsapp}\n` +
+          `📍 *Address:* ${formData.address}${formData.landmark ? `, Near ${formData.landmark}` : ''}, ${formData.city}, ${formData.province}\n\n` +
+          `👟 *Items:*\n${itemLines}\n\n` +
+          `💰 *Total:* ${formatPrice(finalTotal)} (3% discount applied)\n` +
+          `💳 *Payment:* Bank Transfer / EasyPaisa / JazzCash (Full Prepaid)\n\n` +
+          `Please send me the payment details so I can transfer the full amount. ✅`;
 
-    clearCart();
-    navigate(`/order/${newOrder.id}`);
+      // Auto-open WhatsApp with the order message
+      window.open(buildWhatsAppUrl(whatsAppMsg), '_blank');
+
+      clearCart();
+      navigate(`/order/${newOrder.id}`);
+    } catch (err) {
+      console.error('[Checkout Placement Error]:', err);
+      setErrorMessage('Could not complete order. Please check your internet connection and try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -389,12 +400,22 @@ export default function Checkout() {
 
             <button
               type="submit"
+              disabled={isSubmitting}
               className="btn btn-oxblood"
-              style={{ padding: '18px', fontSize: '16px', fontWeight: 600 }}
+              style={{
+                padding: '18px',
+                fontSize: '16px',
+                fontWeight: 600,
+                cursor: isSubmitting ? 'not-allowed' : 'pointer',
+                opacity: isSubmitting ? 0.75 : 1
+              }}
             >
-              {paymentMethod === 'cod'
-                ? `Place Order · PKR 300 Advance + ${formatPrice(finalTotal - 300)} COD`
-                : `Place Order (${formatPrice(finalTotal)}) · Free Delivery`
+              {isSubmitting
+                ? 'Processing & Confirming Order...'
+                : (paymentMethod === 'cod'
+                    ? `Place Order · PKR 300 Advance + ${formatPrice(finalTotal - 300)} COD`
+                    : `Place Order (${formatPrice(finalTotal)}) · Free Delivery`
+                  )
               }
             </button>
           </div>
