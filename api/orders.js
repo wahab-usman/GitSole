@@ -50,7 +50,7 @@ function formatDbOrderToApp(dbRecord) {
 function formatAppOrderToDb(appOrder) {
   if (!appOrder || !appOrder.id) return null;
   return {
-    id: appOrder.id,
+    id: String(appOrder.id).trim().toUpperCase(),
     date: appOrder.date || new Date().toISOString(),
     customer: appOrder.customer || {},
     payment_method: appOrder.paymentMethod || 'cod',
@@ -80,57 +80,49 @@ export default async function handler(req, res) {
   const supabase = getSupabaseClient();
 
   // ==========================================
-  // POST: Customer Order Placement (Public Checkout)
+  // GET: Single Order Lookup (Customer / Tracking) OR All Orders (Admin Only)
   // ==========================================
-  if (req.method === 'POST') {
-    const payload = req.body || {};
+  if (req.method === 'GET') {
+    const requestedId = (req.query.id || req.query.trackingNumber || '').trim().toUpperCase();
 
-    if (!payload.id || !payload.customer || !payload.items) {
-      return res.status(400).json({
+    // 1. Single Order Lookup by ID or Tracking Code (Public/Customer Tracking)
+    if (requestedId) {
+      if (supabase) {
+        try {
+          const { data, error } = await supabase
+            .from('orders')
+            .select('*')
+            .or(`id.ilike.${requestedId},tracking_number.ilike.${requestedId}`)
+            .maybeSingle();
+
+          if (!error && data) {
+            return res.status(200).json({
+              success: true,
+              source: 'supabase',
+              order: formatDbOrderToApp(data)
+            });
+          } else if (error) {
+            console.warn(`[API GET /orders?id=${requestedId}] Supabase query notice:`, error.message);
+          }
+        } catch (err) {
+          console.error(`[API GET /orders?id=${requestedId}] Exception:`, err.message);
+        }
+      }
+
+      return res.status(404).json({
         success: false,
-        error: 'Invalid order payload: id, customer, and items are required.'
+        error: `Order "${requestedId}" not found.`
       });
     }
 
-    const dbRecord = formatAppOrderToDb(payload);
-
-    if (supabase) {
-      try {
-        const { data, error } = await supabase
-          .from('orders')
-          .insert([dbRecord])
-          .select()
-          .single();
-
-        if (error) throw error;
-
-        return res.status(201).json({
-          success: true,
-          order: formatDbOrderToApp(data || dbRecord)
-        });
-      } catch (err) {
-        console.error('[API POST /orders] Error inserting order:', err.message);
-        return res.status(500).json({ success: false, error: err.message });
-      }
+    // 2. Fetch All Orders (Strict Admin Auth Required)
+    if (!verifyAdminAuth(req)) {
+      return res.status(401).json({
+        success: false,
+        error: 'Unauthorized: Admin authentication required to list all orders.'
+      });
     }
 
-    return res.status(500).json({ success: false, error: 'Database unavailable' });
-  }
-
-  // ==========================================
-  // SENSITIVE READ/UPDATE/DELETE: ADMIN AUTH REQUIRED
-  // ==========================================
-  if (!verifyAdminAuth(req)) {
-    return res.status(401).json({
-      success: false,
-      error: 'Unauthorized: Admin authentication required to access customer orders.'
-    });
-  }
-
-  // ==========================================
-  // GET: Admin Fetch Orders
-  // ==========================================
-  if (req.method === 'GET') {
     if (supabase) {
       try {
         const { data, error } = await supabase
@@ -154,11 +146,62 @@ export default async function handler(req, res) {
   }
 
   // ==========================================
-  // PUT: Admin Update Order (Status, Courier, Tracking)
+  // POST: Customer Order Placement (Public Checkout)
+  // ==========================================
+  if (req.method === 'POST') {
+    const payload = req.body || {};
+
+    if (!payload.id || !payload.customer || !payload.items) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid order payload: id, customer, and items are required.'
+      });
+    }
+
+    const cleanId = String(payload.id).trim().toUpperCase();
+    const dbRecord = formatAppOrderToDb({ ...payload, id: cleanId });
+
+    if (supabase) {
+      try {
+        const { data, error } = await supabase
+          .from('orders')
+          .upsert(dbRecord, { onConflict: 'id' })
+          .select()
+          .single();
+
+        if (error) throw error;
+
+        console.log(`[API POST /orders] Successfully created order ${cleanId}`);
+
+        return res.status(201).json({
+          success: true,
+          order: formatDbOrderToApp(data || dbRecord)
+        });
+      } catch (err) {
+        console.error('[API POST /orders] Error inserting order:', err.message);
+        return res.status(500).json({ success: false, error: err.message });
+      }
+    }
+
+    return res.status(500).json({ success: false, error: 'Database unavailable' });
+  }
+
+  // ==========================================
+  // SENSITIVE MUTATIONS: ADMIN AUTH REQUIRED
+  // ==========================================
+  if (!verifyAdminAuth(req)) {
+    return res.status(401).json({
+      success: false,
+      error: 'Unauthorized: Admin authentication required.'
+    });
+  }
+
+  // ==========================================
+  // PUT: Admin Update Order (Status, Courier, Tracking, Timeline)
   // ==========================================
   if (req.method === 'PUT') {
     const { id, ...fields } = req.body || {};
-    const orderId = id || req.query.id;
+    const orderId = String(id || req.query.id || '').trim().toUpperCase();
 
     if (!orderId) {
       return res.status(400).json({ success: false, error: 'Order ID is required' });
@@ -182,12 +225,14 @@ export default async function handler(req, res) {
 
         if (error) throw error;
 
+        console.log(`[API PUT /orders] Successfully updated order ${orderId} to status: ${fields.status}`);
+
         return res.status(200).json({
           success: true,
           order: formatDbOrderToApp(data)
         });
       } catch (err) {
-        console.error('[API PUT /orders] Error updating order:', err.message);
+        console.error(`[API PUT /orders] Error updating order ${orderId}:`, err.message);
         return res.status(500).json({ success: false, error: err.message });
       }
     }
@@ -199,7 +244,7 @@ export default async function handler(req, res) {
   // DELETE: Admin Delete Order
   // ==========================================
   if (req.method === 'DELETE') {
-    const orderId = req.query.id || req.body?.id;
+    const orderId = String(req.query.id || req.body?.id || '').trim().toUpperCase();
 
     if (!orderId) {
       return res.status(400).json({ success: false, error: 'Order ID is required' });
@@ -214,12 +259,14 @@ export default async function handler(req, res) {
 
         if (error) throw error;
 
+        console.log(`[API DELETE /orders] Successfully deleted order ${orderId}`);
+
         return res.status(200).json({
           success: true,
           message: `Order ${orderId} successfully deleted.`
         });
       } catch (err) {
-        console.error('[API DELETE /orders] Error deleting order:', err.message);
+        console.error(`[API DELETE /orders] Error deleting order ${orderId}:`, err.message);
         return res.status(500).json({ success: false, error: err.message });
       }
     }

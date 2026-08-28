@@ -1,7 +1,9 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { fetchCloudOrders, saveCloudOrder, updateCloudOrderFields, deleteCloudOrder } from '../services/cloudDb';
+import { fetchCloudOrders, fetchSingleCloudOrder, saveCloudOrder, updateCloudOrderFields, deleteCloudOrder } from '../services/cloudDb';
 
 const OrderContext = createContext();
+
+const STORAGE_ORDERS_KEY = 'gitsole_orders_cache_v2';
 
 const INITIAL_ORDERS = [
   {
@@ -152,17 +154,15 @@ const INITIAL_ORDERS = [
 export function OrderProvider({ children }) {
   const [orders, setOrders] = useState(() => {
     try {
-      const saved = localStorage.getItem('gitsole_orders');
+      const saved = localStorage.getItem(STORAGE_ORDERS_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length >= INITIAL_ORDERS.length) {
+        if (Array.isArray(parsed) && parsed.length > 0) {
           return parsed;
         }
       }
-      return INITIAL_ORDERS;
-    } catch {
-      return INITIAL_ORDERS;
-    }
+    } catch {}
+    return INITIAL_ORDERS;
   });
 
   const [isCloudConnected, setIsCloudConnected] = useState(true);
@@ -177,24 +177,20 @@ export function OrderProvider({ children }) {
     }
   });
 
-  // Sync state to local storage
+  // Sync state to local storage cache for fast rendering
   useEffect(() => {
     try {
-      localStorage.setItem('gitsole_orders', JSON.stringify(orders));
-    } catch (e) {
-      console.error(e);
-    }
+      localStorage.setItem(STORAGE_ORDERS_KEY, JSON.stringify(orders));
+    } catch (e) {}
   }, [orders]);
 
   useEffect(() => {
     try {
       localStorage.setItem('gitsole_size_alerts', JSON.stringify(sizeAlerts));
-    } catch (e) {
-      console.error(e);
-    }
+    } catch (e) {}
   }, [sizeAlerts]);
 
-  // Sync with Cloud DB function
+  // Sync with Cloud DB (Admin will fetch all orders; customers will skip)
   const syncWithCloud = useCallback(async () => {
     const cloudOrders = await fetchCloudOrders();
     if (cloudOrders && Array.isArray(cloudOrders)) {
@@ -203,28 +199,29 @@ export function OrderProvider({ children }) {
 
       setOrders(prev => {
         const map = new Map();
-        // Add default initial orders
-        INITIAL_ORDERS.forEach(o => map.set(o.id, o));
-        // Add existing local orders
-        prev.forEach(o => map.set(o.id, o));
-        // Add cloud orders
-        cloudOrders.forEach(o => map.set(o.id, o));
+        // Base initial orders
+        INITIAL_ORDERS.forEach(o => map.set(o.id.toUpperCase(), o));
+        // Previous local orders
+        prev.forEach(o => map.set(o.id.toUpperCase(), o));
+        // Server authoritative orders
+        cloudOrders.forEach(o => map.set(o.id.toUpperCase(), o));
         const merged = Array.from(map.values());
         merged.sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
         return merged;
       });
-    } else {
-      setIsCloudConnected(false);
     }
   }, []);
 
-  // Initial cloud fetch and 4-second polling loop for real-time live sync
+  // Periodic admin sync loop
   useEffect(() => {
     syncWithCloud();
-    const interval = setInterval(syncWithCloud, 4000);
+    const interval = setInterval(syncWithCloud, 6000);
     return () => clearInterval(interval);
   }, [syncWithCloud]);
 
+  /**
+   * Place an order from Customer Checkout
+   */
   const placeOrder = async (orderData) => {
     const orderId = `GS-${Math.floor(10000 + Math.random() * 90000)}`;
     const trackingCode = `TRX-${Math.floor(100000 + Math.random() * 900000)}-PK`;
@@ -250,21 +247,26 @@ export function OrderProvider({ children }) {
       ]
     };
 
-    // 1. Instant local state update
-    setOrders(prev => [newOrder, ...prev.filter(o => o.id !== orderId)]);
+    // 1. Optimistic local update
+    setOrders(prev => [newOrder, ...prev.filter(o => o.id.toUpperCase() !== orderId.toUpperCase())]);
 
-    // 2. Push to Supabase Cloud Database
+    // 2. Save directly to Supabase via serverless API
     try {
-      await saveCloudOrder(newOrder);
-      setLastSyncedAt(new Date());
-      setIsCloudConnected(true);
+      const res = await saveCloudOrder(newOrder);
+      if (res && res.success) {
+        setLastSyncedAt(new Date());
+        setIsCloudConnected(true);
+      }
     } catch (err) {
-      console.warn('[OrderContext] Could not push order to Supabase:', err.message);
+      console.warn('[OrderContext] Save order error:', err.message);
     }
 
     return newOrder;
   };
 
+  /**
+   * Admin: Log Order Manually
+   */
   const addManualOrder = async (manualOrder) => {
     const orderId = manualOrder.id || `GS-${Math.floor(10000 + Math.random() * 90000)}`;
     const trackingCode = `TRX-${Math.floor(100000 + Math.random() * 900000)}-PK`;
@@ -305,14 +307,44 @@ export function OrderProvider({ children }) {
       ]
     };
 
-    setOrders(prev => [newOrder, ...prev.filter(o => o.id !== orderId)]);
-    saveCloudOrder(newOrder);
+    setOrders(prev => [newOrder, ...prev.filter(o => o.id.toUpperCase() !== orderId.toUpperCase())]);
+    await saveCloudOrder(newOrder);
     return newOrder;
   };
 
+  /**
+   * Fetch real-time live order from Supabase by ID or Tracking Code
+   */
+  const fetchLiveOrder = useCallback(async (idOrTracking) => {
+    if (!idOrTracking) return null;
+    const cleanId = String(idOrTracking).trim().toUpperCase();
+
+    // Query live from serverless Supabase API
+    const liveOrder = await fetchSingleCloudOrder(cleanId);
+    if (liveOrder) {
+      setOrders(prev => {
+        const index = prev.findIndex(o => o.id.toUpperCase() === liveOrder.id.toUpperCase() || o.trackingNumber.toUpperCase() === liveOrder.trackingNumber.toUpperCase());
+        if (index >= 0) {
+          const updated = [...prev];
+          updated[index] = liveOrder;
+          return updated;
+        } else {
+          return [liveOrder, ...prev];
+        }
+      });
+      return liveOrder;
+    }
+
+    // Fallback to local memory
+    return orders.find(o => o.id.toUpperCase() === cleanId || o.trackingNumber.toUpperCase() === cleanId) || null;
+  }, [orders]);
+
+  /**
+   * Synchronous get order by ID (Memory lookup)
+   */
   const getOrderById = (id) => {
     if (!id) return null;
-    const cleanId = id.trim().toUpperCase();
+    const cleanId = String(id).trim().toUpperCase();
     return orders.find(o => o.id.toUpperCase() === cleanId || o.trackingNumber.toUpperCase() === cleanId) || null;
   };
 
@@ -321,59 +353,79 @@ export function OrderProvider({ children }) {
     return true;
   };
 
-  const updateOrderStatus = (orderId, newStatus) => {
-    let updatedOrderObj = null;
+  /**
+   * Admin: Update order status (Persists directly to Supabase)
+   */
+  const updateOrderStatus = async (orderId, newStatus) => {
+    if (!orderId) return;
+    const cleanId = String(orderId).trim().toUpperCase();
 
+    const existingOrder = orders.find(o => o.id.toUpperCase() === cleanId);
+    const existingTimeline = existingOrder?.timeline || [
+      { step: "Order Placed", time: "Just now", done: true, desc: "Order details received." }
+    ];
+
+    const statusLabels = {
+      placed: 'Order Placed',
+      advance_paid: 'Advance Received (PKR 300)',
+      confirmed: 'Confirmed on WhatsApp',
+      preparing: 'Prepared & Inspected',
+      shipped: 'Dispatched with Courier',
+      delivered: 'Delivered',
+      cancelled: 'Cancelled'
+    };
+
+    const now = new Date().toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+
+    // Mark previous steps as done and append new step
+    const updatedTimeline = existingTimeline.map(t => ({ ...t, done: true }));
+    const stepLabel = statusLabels[newStatus] || newStatus;
+    const stepExists = updatedTimeline.some(t => t.step.toLowerCase() === stepLabel.toLowerCase());
+
+    if (!stepExists) {
+      updatedTimeline.push({
+        step: stepLabel,
+        time: now,
+        done: true,
+        desc: `Status updated to "${stepLabel}".`
+      });
+    }
+
+    // 1. Optimistic local update
     setOrders(prev => prev.map(order => {
-      if (order.id !== orderId) return order;
-
-      const statusLabels = {
-        placed: 'Order Placed',
-        advance_paid: 'Advance Received (PKR 300)',
-        confirmed: 'Confirmed on WhatsApp',
-        preparing: 'Prepared & Inspected',
-        shipped: 'Dispatched with Courier',
-        delivered: 'Delivered',
-        cancelled: 'Cancelled'
-      };
-
-      const now = new Date().toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-
-      // Update timeline
-      const updatedTimeline = order.timeline.map(t => ({ ...t, done: true }));
-      
-      // Add new step if not already there
-      const stepExists = updatedTimeline.some(t => t.step === statusLabels[newStatus]);
-      if (!stepExists) {
-        updatedTimeline.push({
-          step: statusLabels[newStatus],
-          time: now,
-          done: true,
-          desc: `Status updated to "${statusLabels[newStatus]}".`
-        });
+      if (order.id.toUpperCase() === cleanId) {
+        return {
+          ...order,
+          status: newStatus,
+          timeline: updatedTimeline
+        };
       }
-
-      updatedOrderObj = {
-        ...order,
-        status: newStatus,
-        timeline: updatedTimeline
-      };
-
-      return updatedOrderObj;
+      return order;
     }));
 
-    // Update Cloud DB
-    if (updatedOrderObj) {
-      updateCloudOrderFields(orderId, {
-        status: updatedOrderObj.status,
-        timeline: updatedOrderObj.timeline
+    // 2. Persist to Supabase Cloud Database via Authenticated API
+    try {
+      const res = await updateCloudOrderFields(cleanId, {
+        status: newStatus,
+        timeline: updatedTimeline
       });
+      if (res && res.success) {
+        setLastSyncedAt(new Date());
+      }
+    } catch (err) {
+      console.error('[OrderContext] Update status error:', err);
     }
   };
 
-  const deleteOrder = (orderId) => {
-    setOrders(prev => prev.filter(order => order.id !== orderId));
-    deleteCloudOrder(orderId);
+  /**
+   * Admin: Delete order
+   */
+  const deleteOrder = async (orderId) => {
+    if (!orderId) return;
+    const cleanId = String(orderId).trim().toUpperCase();
+
+    setOrders(prev => prev.filter(order => order.id.toUpperCase() !== cleanId));
+    await deleteCloudOrder(cleanId);
   };
 
   return (
@@ -382,6 +434,7 @@ export function OrderProvider({ children }) {
       placeOrder,
       addManualOrder,
       getOrderById,
+      fetchLiveOrder,
       updateOrderStatus,
       deleteOrder,
       registerSizeAlert,

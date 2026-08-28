@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useOrder } from '../context/OrderContext';
 import { formatPrice, buildWhatsAppUrl } from '../data/products';
@@ -6,9 +6,8 @@ import { CheckCircle2, MessageSquare, Package, Truck, ArrowRight } from 'lucide-
 
 export default function OrderConfirmation() {
   const { id } = useParams();
-  const { getOrderById } = useOrder();
-
-  const order = getOrderById(id) || {
+  const { getOrderById, fetchLiveOrder } = useOrder();
+  const [order, setOrder] = useState(() => getOrderById(id) || {
     id: id || "GS-89102",
     date: new Date().toISOString(),
     customer: {
@@ -21,7 +20,15 @@ export default function OrderConfirmation() {
     items: [],
     total: 8900,
     trackingNumber: "TRX-994821-PK"
-  };
+  });
+
+  useEffect(() => {
+    if (id) {
+      fetchLiveOrder(id).then(live => {
+        if (live) setOrder(live);
+      });
+    }
+  }, [id, fetchLiveOrder]);
 
   const isCOD = order.paymentMethod === 'cod';
   const whatsAppConfirmationText = isCOD

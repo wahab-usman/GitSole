@@ -1,7 +1,6 @@
 // Real-time Cloud Database Service for GitSole Orders
 // Powered by Supabase integration with serverless security protection
 
-import { supabase, isSupabaseConfigured } from './supabaseClient.js';
 import { getAdminAuthHeaders } from '../context/AdminAuthContext.jsx';
 
 /**
@@ -10,7 +9,7 @@ import { getAdminAuthHeaders } from '../context/AdminAuthContext.jsx';
 export function formatDbOrderToApp(dbRecord) {
   if (!dbRecord) return null;
   return {
-    id: dbRecord.id,
+    id: String(dbRecord.id || '').trim().toUpperCase(),
     date: dbRecord.date || dbRecord.created_at || new Date().toISOString(),
     customer: typeof dbRecord.customer === 'string' ? JSON.parse(dbRecord.customer) : (dbRecord.customer || {}),
     paymentMethod: dbRecord.payment_method || dbRecord.paymentMethod || 'cod',
@@ -32,7 +31,7 @@ export function formatDbOrderToApp(dbRecord) {
 export function formatAppOrderToDb(appOrder) {
   if (!appOrder || !appOrder.id) return null;
   return {
-    id: appOrder.id,
+    id: String(appOrder.id || '').trim().toUpperCase(),
     date: appOrder.date || new Date().toISOString(),
     customer: appOrder.customer || {},
     payment_method: appOrder.paymentMethod || 'cod',
@@ -46,6 +45,28 @@ export function formatAppOrderToDb(appOrder) {
     status: appOrder.status || 'placed',
     timeline: appOrder.timeline || []
   };
+}
+
+/**
+ * Fetch a single order live from Supabase / API by ID or Tracking Code (Public/Customer Access)
+ */
+export async function fetchSingleCloudOrder(idOrTracking) {
+  if (!idOrTracking) return null;
+  const cleanId = String(idOrTracking).trim().toUpperCase();
+
+  try {
+    const res = await fetch(`/api/orders?id=${encodeURIComponent(cleanId)}`);
+    if (res.ok) {
+      const json = await res.json();
+      if (json && json.success && json.order) {
+        return json.order;
+      }
+    }
+  } catch (err) {
+    console.warn(`[Orders API] Fetch single order error for ${cleanId}:`, err.message);
+  }
+
+  return null;
 }
 
 /**
@@ -68,17 +89,8 @@ export async function fetchCloudOrders() {
       }
     }
   } catch (apiErr) {
-    console.warn('[Orders API] Fetch notice:', apiErr.message);
+    console.warn('[Orders API] Fetch all orders notice:', apiErr.message);
   }
-
-  // Fallback to local storage
-  try {
-    const saved = localStorage.getItem('gitsole_orders');
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      if (Array.isArray(parsed)) return parsed;
-    }
-  } catch (_) {}
 
   return null;
 }
@@ -87,12 +99,10 @@ export async function fetchCloudOrders() {
  * Save or insert a single order into Cloud DB (Customer Checkout)
  */
 export async function saveCloudOrder(newOrder) {
-  if (!newOrder || !newOrder.id) return false;
+  if (!newOrder || !newOrder.id) return { success: false, error: 'Invalid order payload' };
 
-  let success = false;
   const dbRecord = formatAppOrderToDb(newOrder);
 
-  // 1. Save via /api/orders POST
   try {
     const res = await fetch('/api/orders', {
       method: 'POST',
@@ -100,119 +110,80 @@ export async function saveCloudOrder(newOrder) {
       body: JSON.stringify(dbRecord)
     });
 
-    if (res.ok) {
-      const json = await res.json();
-      if (json && json.success) {
-        success = true;
-      }
+    const json = await res.json();
+    if (res.ok && json.success) {
+      return { success: true, order: json.order || newOrder };
+    } else if (json.error) {
+      return { success: false, error: json.error };
     }
   } catch (apiErr) {
     console.warn('[Orders API] Save notice:', apiErr.message);
+    return { success: false, error: apiErr.message };
   }
 
-  // 2. Direct Supabase insert (allowed by RLS: Customer Insert Orders)
-  if (!success && isSupabaseConfigured() && supabase) {
-    try {
-      const { error } = await supabase
-        .from('orders')
-        .insert([dbRecord]);
-
-      if (!error) success = true;
-    } catch (err) {}
-  }
-
-  // Update local storage backup
-  try {
-    const saved = localStorage.getItem('gitsole_orders');
-    const existing = saved ? JSON.parse(saved) : [];
-    const index = existing.findIndex((o) => o.id === newOrder.id);
-    let updated;
-    if (index >= 0) {
-      updated = [...existing];
-      updated[index] = newOrder;
-    } else {
-      updated = [newOrder, ...existing];
-    }
-    localStorage.setItem('gitsole_orders', JSON.stringify(updated));
-  } catch (_) {}
-
-  return success;
+  return { success: false, error: 'Failed to create order' };
 }
 
 /**
  * Update partial fields of an order in Cloud DB (Admin Only via Authenticated /api/orders)
  */
 export async function updateCloudOrderFields(orderId, fields) {
-  if (!orderId) return false;
+  if (!orderId) return { success: false, error: 'Order ID is required' };
 
-  let success = false;
+  const cleanId = String(orderId).trim().toUpperCase();
   const authHeaders = getAdminAuthHeaders();
 
   try {
-    const res = await fetch(`/api/orders?id=${encodeURIComponent(orderId)}`, {
+    const res = await fetch(`/api/orders?id=${encodeURIComponent(cleanId)}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
         ...authHeaders
       },
-      body: JSON.stringify({ id: orderId, ...fields })
+      body: JSON.stringify({ id: cleanId, ...fields })
     });
 
-    if (res.ok) {
-      const json = await res.json();
-      if (json && json.success) success = true;
+    const json = await res.json();
+    if (res.ok && json.success) {
+      return { success: true, order: json.order };
+    } else if (json.error) {
+      return { success: false, error: json.error };
     }
   } catch (apiErr) {
-    console.warn('[Orders API] Update notice:', apiErr.message);
+    console.warn(`[Orders API] Update error for ${cleanId}:`, apiErr.message);
+    return { success: false, error: apiErr.message };
   }
 
-  // Update local storage
-  try {
-    const saved = localStorage.getItem('gitsole_orders');
-    if (saved) {
-      const existing = JSON.parse(saved);
-      const updated = existing.map((o) => (o.id === orderId ? { ...o, ...fields } : o));
-      localStorage.setItem('gitsole_orders', JSON.stringify(updated));
-    }
-  } catch (_) {}
-
-  return success;
+  return { success: false, error: 'Failed to update order' };
 }
 
 /**
  * Delete an order from Cloud DB (Admin Only via Authenticated /api/orders)
  */
 export async function deleteCloudOrder(orderId) {
-  if (!orderId) return false;
+  if (!orderId) return { success: false, error: 'Order ID is required' };
 
-  let success = false;
+  const cleanId = String(orderId).trim().toUpperCase();
   const authHeaders = getAdminAuthHeaders();
 
   try {
-    const res = await fetch(`/api/orders?id=${encodeURIComponent(orderId)}`, {
+    const res = await fetch(`/api/orders?id=${encodeURIComponent(cleanId)}`, {
       method: 'DELETE',
       headers: {
         ...authHeaders
       }
     });
 
-    if (res.ok) {
-      const json = await res.json();
-      if (json && json.success) success = true;
+    const json = await res.json();
+    if (res.ok && json.success) {
+      return { success: true };
+    } else if (json.error) {
+      return { success: false, error: json.error };
     }
   } catch (apiErr) {
-    console.warn('[Orders API] Delete notice:', apiErr.message);
+    console.warn(`[Orders API] Delete error for ${cleanId}:`, apiErr.message);
+    return { success: false, error: apiErr.message };
   }
 
-  // Update local storage
-  try {
-    const saved = localStorage.getItem('gitsole_orders');
-    if (saved) {
-      const existing = JSON.parse(saved);
-      const updated = existing.filter((o) => o.id !== orderId);
-      localStorage.setItem('gitsole_orders', JSON.stringify(updated));
-    }
-  } catch (_) {}
-
-  return success;
+  return { success: false, error: 'Failed to delete order' };
 }

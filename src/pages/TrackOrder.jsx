@@ -8,22 +8,45 @@ export default function TrackOrder() {
   const [searchParams] = useSearchParams();
   const initialId = searchParams.get('id') || 'GS-89102';
   const [searchId, setSearchId] = useState(initialId);
-  const { getOrderById } = useOrder();
+  const { getOrderById, fetchLiveOrder } = useOrder();
   const [activeOrder, setActiveOrder] = useState(() => getOrderById(initialId));
+  const [isSearching, setIsSearching] = useState(false);
 
+  // Fetch live order from database on searchId change + auto poll every 5 seconds for live status changes
   useEffect(() => {
-    const id = searchParams.get('id');
-    if (id) {
-      setSearchId(id);
-      setActiveOrder(getOrderById(id));
-    }
-  }, [searchParams]);
+    const targetId = searchParams.get('id') || searchId;
+    if (targetId && targetId.trim()) {
+      const clean = targetId.trim();
+      // 1. Instant state update from memory if present
+      const cached = getOrderById(clean);
+      if (cached) setActiveOrder(cached);
 
-  const handleTrackSubmit = (e) => {
+      // 2. Fetch live data from Supabase API
+      const loadLive = async () => {
+        const live = await fetchLiveOrder(clean);
+        if (live) {
+          setActiveOrder(live);
+        }
+      };
+
+      loadLive();
+      const pollInterval = setInterval(loadLive, 5000);
+      return () => clearInterval(pollInterval);
+    }
+  }, [searchParams, searchId, fetchLiveOrder, getOrderById]);
+
+  const handleTrackSubmit = async (e) => {
     e.preventDefault();
     if (searchId.trim()) {
-      const found = getOrderById(searchId.trim());
-      setActiveOrder(found);
+      setIsSearching(true);
+      const clean = searchId.trim();
+      const live = await fetchLiveOrder(clean);
+      if (live) {
+        setActiveOrder(live);
+      } else {
+        setActiveOrder(getOrderById(clean));
+      }
+      setIsSearching(false);
     }
   };
 
