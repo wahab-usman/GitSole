@@ -200,9 +200,13 @@ export default async function handler(req, res) {
         });
       } catch (sbErr) {
         console.error('[API POST /products] Database error:', sbErr.message);
+        let errorMsg = sbErr.message;
+        if (errorMsg.includes('row-level security policy')) {
+          errorMsg = 'Database permission notice: Please add SUPABASE_SERVICE_ROLE_KEY to your Vercel Environment Variables (from Supabase Settings -> API -> service_role secret).';
+        }
         return res.status(500).json({
           success: false,
-          error: `Database error: ${sbErr.message}`
+          error: errorMsg
         });
       }
     }
