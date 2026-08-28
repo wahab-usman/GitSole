@@ -226,50 +226,6 @@ export default function ProductDetail() {
               </div>
             ))}
           </div>
-
-          {/* Flaw Close-Up Disclosure Section */}
-          {product.flaws && product.flaws.length > 0 && (
-            <div style={{ marginTop: '8px' }}>
-              <div style={{
-                fontFamily: 'var(--font-mono)',
-                fontSize: '10.5px',
-                letterSpacing: '0.14em',
-                textTransform: 'uppercase',
-                color: 'var(--color-oxblood)',
-                marginBottom: '8px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px'
-              }}>
-                <AlertCircle size={14} />
-                <span>Flaw Close-Up & Condition Transparency</span>
-              </div>
-              <div className="flaw-photo-frame" style={{
-                aspectRatio: '16 / 7',
-                backgroundColor: 'var(--color-image-bg)',
-                position: 'relative',
-                overflow: 'hidden'
-              }}>
-                <img
-                  src={product.flaws[0].photo}
-                  alt="Flaw inspection close up"
-                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                />
-              </div>
-              <p style={{
-                fontFamily: 'var(--font-mono)',
-                fontSize: '11.5px',
-                color: 'var(--color-body)',
-                marginTop: '8px',
-                lineHeight: 1.5,
-                backgroundColor: 'var(--color-card)',
-                padding: '10px 12px',
-                border: '1px solid var(--color-line)'
-              }}>
-                <strong>Inspection Note:</strong> {product.flaws[0].caption}
-              </p>
-            </div>
-          )}
         </div>
 
         {/* Right Buy Column */}
