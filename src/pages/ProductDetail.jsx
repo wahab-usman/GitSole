@@ -227,7 +227,7 @@ export default function ProductDetail() {
             ))}
           </div>
 
-          {/* Flaw Close-Up Disclosure Section (Spec #4: 16:7 with oxblood border) */}
+          {/* Flaw Close-Up Disclosure Section */}
           {product.flaws && product.flaws.length > 0 && (
             <div style={{ marginTop: '8px' }}>
               <div style={{
@@ -302,85 +302,59 @@ export default function ProductDetail() {
             {product.model}
           </h1>
 
-          {/* Pricing & Discount */}
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: '10px', flexWrap: 'wrap' }}>
-            <div style={{
+          {/* Price (Spec #4: 36px font-display) */}
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: '10px' }}>
+            <span style={{
               fontFamily: 'var(--font-display)',
               fontWeight: 800,
-              fontSize: 'clamp(26px, 3vw, 32px)',
-              color: isSold ? 'var(--color-faint)' : 'var(--color-ink)'
+              fontSize: 'clamp(28px, 4vw, 36px)',
+              letterSpacing: '-0.02em',
+              color: 'var(--color-ink)'
             }}>
               {formatPrice(product.price)}
-            </div>
-            {product.retailPrice && (
-              <div style={{
-                fontFamily: 'var(--font-mono)',
-                fontSize: '14px',
-                color: 'var(--color-faint)',
-                textDecoration: 'line-through'
-              }}>
-                Retail {formatPrice(product.retailPrice)}
-              </div>
-            )}
-            {product.discountPercent && !isSold && (
-              <div style={{
-                backgroundColor: 'var(--color-card)',
-                border: '1px solid var(--color-oxblood)',
-                color: 'var(--color-oxblood)',
-                fontFamily: 'var(--font-mono)',
-                fontSize: '11px',
-                fontWeight: 600,
-                padding: '3px 8px',
-                borderRadius: '999px'
-              }}>
-                {product.discountPercent}% below retail
-              </div>
-            )}
+            </span>
           </div>
 
-          {/* Condition Grading Panel */}
-          <ConditionBar
-            score={product.score}
-            tier={product.tier}
-            notes={product.conditionNotes}
-          />
-
-          {/* Size Section (1 of 1 single pair) */}
+          {/* Condition Bar (Spec #4 & #6) */}
           <div>
-            <div style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              fontFamily: 'var(--font-mono)',
-              fontSize: '11px',
-              textTransform: 'uppercase',
-              marginBottom: '8px'
-            }}>
-              <span style={{ color: 'var(--color-faint)' }}>Available Size (Single Piece)</span>
-              <span style={{ color: 'var(--color-ink)', fontWeight: 600 }}>Insole: {product.insoleCm} cm</span>
+            <ConditionBar score={product.score} tier={product.tier} />
+          </div>
+
+          {/* Available Size Section (Spec #4: Single size badge with EU, UK, US) */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '10.5px', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--color-muted)' }}>
+                Available Size (Single Piece)
+              </span>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--color-ink)', fontWeight: 700 }}>
+                Insole: {product.insoleCm} cm
+              </span>
             </div>
 
-            <div style={{ display: 'flex', gap: '8px' }}>
-              <div style={{
-                padding: '10px 18px',
-                backgroundColor: isSold ? 'var(--color-disabled)' : 'var(--color-ink)',
-                color: 'var(--color-paper)',
-                fontFamily: 'var(--font-mono)',
-                fontSize: '14px',
-                fontWeight: 600,
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '8px'
-              }}>
-                <span>EU {product.sizeEU || getEuFromUk(product.sizeUK) || '44'} · UK {product.sizeUK} · US {product.sizeUS || ''}</span>
-                <span style={{ fontSize: '10px', opacity: 0.8 }}>(1 of 1)</span>
+            <div style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              backgroundColor: 'var(--color-ink)',
+              color: 'var(--color-paper)',
+              padding: '12px 18px',
+              fontFamily: 'var(--font-mono)',
+              fontSize: '13px',
+              fontWeight: 600
+            }}>
+              <div>
+                EU {product.sizeEU || getEuFromUk(product.sizeUK)} · UK {product.sizeUK} · US {product.sizeUS || (Number(product.sizeUK) + 1)}
+              </div>
+              <div style={{ fontSize: '11px', color: 'var(--color-on-ink)', letterSpacing: '0.1em' }}>
+                (1 of 1)
               </div>
             </div>
-            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10.5px', color: 'var(--color-muted)', marginTop: '6px' }}>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10.5px', color: 'var(--color-muted)', margin: 0 }}>
               * Stock is strictly one pair. No other sizes available.
             </p>
           </div>
 
-          {/* Desktop Buy Buttons */}
+          {/* Desktop Buy Actions */}
           {!isSold ? (
             <div className="desktop-buy-actions" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
               <button
@@ -388,7 +362,7 @@ export default function ProductDetail() {
                 className="btn btn-oxblood"
                 style={{ padding: '16px', fontSize: '15px', fontWeight: 600 }}
               >
-                {inCart ? 'View in Cart (Reserved)' : 'Add to Cart — Reserve for 30 Min'}
+                {inCart ? 'View in Cart' : 'Add to Cart — Reserve for 30 Min'}
               </button>
 
               <a
@@ -492,19 +466,44 @@ export default function ProductDetail() {
         </div>
       </div>
 
-      {/* Related Shoes Section */}
-      <section style={{ padding: '36px clamp(16px, 3vw, 40px)' }}>
-        <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '22px', color: 'var(--color-ink)', marginBottom: '16px' }}>
-          More curated pairs
-        </h2>
-        <div className="product-grid-responsive">
-          {relatedProducts.map(p => (
-            <ProductCard key={p.code} product={p} />
-          ))}
-        </div>
-      </section>
+      {/* From the GitSole Drop Section */}
+      {relatedProducts.length > 0 && (
+        <section style={{
+          maxWidth: '1400px',
+          margin: '0 auto',
+          padding: '40px clamp(16px, 3vw, 40px) 20px',
+          width: '100%'
+        }}>
+          <div style={{
+            display: 'flex',
+            alignItems: 'baseline',
+            justifyContent: 'space-between',
+            marginBottom: '24px',
+            borderBottom: '1px solid var(--color-line)',
+            paddingBottom: '14px'
+          }}>
+            <div>
+              <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 'clamp(22px, 3vw, 28px)', color: 'var(--color-ink)', margin: 0 }}>
+                From the GitSole Drop
+              </h2>
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', color: 'var(--color-muted)', margin: '4px 0 0' }}>
+                Each pair is 1-of-1 · One size only.
+              </p>
+            </div>
+            <Link to="/shop" style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--color-oxblood)', fontWeight: 700, textDecoration: 'none' }}>
+              View All Pairs →
+            </Link>
+          </div>
 
-      {/* Mobile Fixed Bottom Bar (Spec #4: Add to Cart + 56x52 WhatsApp icon button) */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '20px' }}>
+            {relatedProducts.map(relProduct => (
+              <ProductCard key={relProduct.code} product={relProduct} />
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Mobile Fixed Bottom Bar */}
       <div className="mobile-fixed-bottom-bar" style={{
         position: 'fixed',
         left: 0,
