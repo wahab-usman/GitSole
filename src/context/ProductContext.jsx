@@ -10,123 +10,242 @@ import {
 
 const ProductContext = createContext();
 
-const STORAGE_KEY = 'gitsole_products_v1';
+const STORAGE_CACHE_KEY = 'gitsole_products_cache_v2';
 
 export function ProductProvider({ children }) {
+  // Start with cached products if available, or default catalog
   const [products, setProducts] = useState(() => {
     try {
-      const saved = localStorage.getItem(STORAGE_KEY);
+      const saved = localStorage.getItem(STORAGE_CACHE_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) {
           return parsed;
         }
       }
-    } catch (e) {
-      console.error('Failed to load products from localStorage', e);
-    }
+    } catch (e) {}
     return INITIAL_PRODUCTS;
   });
 
+  const [isLoading, setIsLoading] = useState(true);
   const [isCloudSynced, setIsCloudSynced] = useState(false);
   const [lastProductSync, setLastProductSync] = useState(null);
+  const [syncError, setSyncError] = useState(null);
 
-  // Sync to local storage for offline / quick reload caching
+  // Cache to localStorage for fast initial paint
   useEffect(() => {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(products));
-    } catch (e) {
-      console.error('Failed to save products to localStorage', e);
-    }
+      if (Array.isArray(products) && products.length > 0) {
+        localStorage.setItem(STORAGE_CACHE_KEY, JSON.stringify(products));
+      }
+    } catch (e) {}
   }, [products]);
 
-  // Sync products from Cloud DB (Supabase / Cloud Container)
-  const syncProductsFromCloud = useCallback(async () => {
+  // Sync products from Cloud DB (Supabase / Backend API)
+  const syncProductsFromCloud = useCallback(async (isSilent = false) => {
+    if (!isSilent) setIsLoading(true);
     try {
-      const cloudData = await fetchCloudProducts();
-      if (cloudData && Array.isArray(cloudData) && cloudData.length > 0) {
-        setProducts((prev) => {
-          // Merge preserving any immediate unsaved changes
-          const map = new Map();
-          // Seed defaults
-          INITIAL_PRODUCTS.forEach(p => map.set(p.code, p));
-          // Overwrite with cloud data (source of truth across devices)
-          cloudData.forEach(p => map.set(p.code, p));
-          return Array.from(map.values());
-        });
+      const result = await fetchCloudProducts();
+      if (result && result.success && Array.isArray(result.products) && result.products.length > 0) {
+        setProducts(result.products);
         setIsCloudSynced(true);
         setLastProductSync(new Date());
+        setSyncError(null);
+      } else {
+        // If DB returned nothing or error, keep existing products but record status
+        setIsCloudSynced(false);
       }
     } catch (err) {
-      console.warn('[ProductContext] Cloud sync warning:', err.message);
+      console.warn('[ProductContext] Sync warning:', err.message);
+      setSyncError(err.message);
+      setIsCloudSynced(false);
+    } finally {
+      setIsLoading(false);
     }
   }, []);
 
-  // Sync on mount and background poll every 8 seconds for real-time multi-device freshness
+  // Sync on mount + background periodic sync + tab focus sync
   useEffect(() => {
-    syncProductsFromCloud();
-    const interval = setInterval(syncProductsFromCloud, 8000);
-    return () => clearInterval(interval);
+    syncProductsFromCloud(false);
+
+    // Background interval: poll every 10 seconds for real-time freshness across all devices
+    const interval = setInterval(() => {
+      syncProductsFromCloud(true);
+    }, 10000);
+
+    // Sync immediately when user switches back to browser tab (e.g. switching between mobile and laptop)
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        syncProductsFromCloud(true);
+      }
+    };
+
+    window.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', handleVisibilityChange);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', handleVisibilityChange);
+    };
   }, [syncProductsFromCloud]);
 
-  const addProduct = (newProduct) => {
+  // Auto-migrate legacy products from previous session into Supabase Cloud Database
+  useEffect(() => {
+    try {
+      const oldStorage = localStorage.getItem('gitsole_products_v1');
+      if (oldStorage) {
+        const oldProducts = JSON.parse(oldStorage);
+        if (Array.isArray(oldProducts) && oldProducts.length > 0) {
+          const defaultCodes = ['GS-0428', 'GS-0429', 'GS-0430', 'GS-0431', 'GS-0432', 'GS-0433', 'GS-0434', 'GS-0435', 'GS-0436', 'GS-0437', 'GS-0438', 'GS-0439', 'GS-0440', 'GS-0441', 'GS-0442'];
+          const customAdded = oldProducts.filter((op) => !defaultCodes.includes(op.code));
+          if (customAdded.length > 0) {
+            console.log(`[Auto-Migration] Syncing ${customAdded.length} previously added products to Supabase...`);
+            Promise.all(customAdded.map((p) => insertCloudProduct(p))).then(() => {
+              syncProductsFromCloud(true);
+            });
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('[Auto-Migration] Notice:', e);
+    }
+  }, [syncProductsFromCloud]);
+
+  /**
+   * Add a new product to Centralized Database
+   */
+  const addProduct = async (newProduct) => {
     // 1. Optimistic UI update
-    setProducts((prev) => [newProduct, ...prev.filter(p => p.code !== newProduct.code)]);
-    // 2. Cloud DB push
-    insertCloudProduct(newProduct);
+    setProducts((prev) => [newProduct, ...prev.filter((p) => p.code !== newProduct.code)]);
+
+    // 2. Cloud DB Insert
+    try {
+      const result = await insertCloudProduct(newProduct);
+      if (result.success) {
+        setIsCloudSynced(true);
+        setLastProductSync(new Date());
+        // Re-sync with authoritative database record
+        syncProductsFromCloud(true);
+        return { success: true, product: result.product || newProduct };
+      } else {
+        // If failed, log and inform caller
+        console.error('[ProductContext] Cloud DB addProduct error:', result.error);
+        return { success: false, error: result.error || 'Failed to save product to cloud database' };
+      }
+    } catch (err) {
+      console.error('[ProductContext] Add product exception:', err);
+      return { success: false, error: err.message };
+    }
   };
 
-  const updateProduct = (code, updatedData) => {
+  /**
+   * Update an existing product in Centralized Database
+   */
+  const updateProduct = async (code, updatedData) => {
     // 1. Optimistic UI update
     setProducts((prev) =>
       prev.map((p) => (p.code === code ? { ...p, ...updatedData } : p))
     );
-    // 2. Cloud DB push
-    updateCloudProductDb(code, updatedData);
+
+    // 2. Cloud DB Update
+    try {
+      const result = await updateCloudProductDb(code, updatedData);
+      if (result.success) {
+        setIsCloudSynced(true);
+        setLastProductSync(new Date());
+        syncProductsFromCloud(true);
+        return { success: true, product: result.product };
+      } else {
+        console.error('[ProductContext] Cloud DB updateProduct error:', result.error);
+        return { success: false, error: result.error || 'Failed to update product in cloud database' };
+      }
+    } catch (err) {
+      console.error('[ProductContext] Update product exception:', err);
+      return { success: false, error: err.message };
+    }
   };
 
-  const deleteProduct = (code) => {
+  /**
+   * Delete a product from Centralized Database
+   */
+  const deleteProduct = async (code) => {
     // 1. Optimistic UI update
     setProducts((prev) => prev.filter((p) => p.code !== code));
-    // 2. Cloud DB push
-    deleteCloudProductDb(code);
+
+    // 2. Cloud DB Delete
+    try {
+      const result = await deleteCloudProductDb(code);
+      if (result.success) {
+        setIsCloudSynced(true);
+        setLastProductSync(new Date());
+        syncProductsFromCloud(true);
+        return { success: true };
+      } else {
+        console.error('[ProductContext] Cloud DB deleteProduct error:', result.error);
+        return { success: false, error: result.error || 'Failed to delete product from cloud database' };
+      }
+    } catch (err) {
+      console.error('[ProductContext] Delete product exception:', err);
+      return { success: false, error: err.message };
+    }
   };
 
-  const toggleSoldStatus = (code) => {
+  /**
+   * Toggle Sold Status
+   */
+  const toggleSoldStatus = async (code) => {
     let nextStatus = 'sold';
     let listedAt = 'Just Sold';
 
+    const currentProduct = products.find((p) => p.code === code);
+    if (currentProduct) {
+      nextStatus = currentProduct.status === 'sold' ? 'available' : 'sold';
+      listedAt = nextStatus === 'sold' ? 'Just Sold' : 'Available now';
+    }
+
+    // 1. Optimistic UI update
     setProducts((prev) =>
       prev.map((p) => {
         if (p.code === code) {
-          nextStatus = p.status === 'sold' ? 'available' : 'sold';
-          listedAt = nextStatus === 'sold' ? 'Just Sold' : 'Available now';
           return { ...p, status: nextStatus, listedAt };
         }
         return p;
       })
     );
 
-    toggleCloudProductSold(code, nextStatus, listedAt);
+    // 2. Cloud DB toggle
+    try {
+      await toggleCloudProductSold(code, nextStatus, listedAt);
+      syncProductsFromCloud(true);
+    } catch (err) {
+      console.error('[ProductContext] Toggle sold exception:', err);
+    }
   };
 
-  const resetToDefault = () => {
-    setProducts(INITIAL_PRODUCTS);
-    localStorage.removeItem(STORAGE_KEY);
-    syncProductsFromCloud();
+  /**
+   * Reset local catalog cache and refresh from cloud
+   */
+  const resetToDefault = async () => {
+    try {
+      localStorage.removeItem(STORAGE_CACHE_KEY);
+      await syncProductsFromCloud(false);
+    } catch (e) {}
   };
 
   return (
     <ProductContext.Provider
       value={{
         products,
+        isLoading,
+        isCloudSynced,
+        lastProductSync,
+        syncError,
         addProduct,
         updateProduct,
         deleteProduct,
         toggleSoldStatus,
         resetToDefault,
-        isCloudSynced,
-        lastProductSync,
         syncProductsFromCloud
       }}
     >

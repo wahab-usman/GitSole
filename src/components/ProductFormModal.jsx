@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { BRANDS, SIZES_UK, SIZES_EU, convertEuSizeToAll, getEuFromUk, TIERS } from '../data/products';
 import { X, Plus, Trash2, Image, UploadCloud, AlertCircle, Sparkles, Loader2, Check, Zap } from 'lucide-react';
 import { analyzeShoeImagesWithAI } from '../services/aiProductAnalyzer';
+import { uploadProductImage } from '../services/imageStorageService';
 
 export default function ProductFormModal({ isOpen, onClose, onSubmit, initialData = null }) {
   const [formData, setFormData] = useState({
@@ -33,6 +34,9 @@ export default function ProductFormModal({ isOpen, onClose, onSubmit, initialDat
   const [hasAiGenerated, setHasAiGenerated] = useState(false);
   const [aiGeneratedMap, setAiGeneratedMap] = useState({});
   const [showApiKeyInput, setShowApiKeyInput] = useState(false);
+  const [isUploadingImages, setIsUploadingImages] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [formError, setFormError] = useState('');
   const [userApiKey, setUserApiKey] = useState(() => {
     const k = (localStorage.getItem('gitsole_gemini_api_key') || '').trim();
     if (k && !k.startsWith('AIzaSy') && !k.startsWith('AQ.') && k.length < 20) {
@@ -184,6 +188,7 @@ export default function ProductFormModal({ isOpen, onClose, onSubmit, initialDat
       setHasAiGenerated(false);
       setAiGeneratedMap({});
       setScanMessage('');
+      setFormError('');
     }
   }, [initialData, isOpen]);
 
@@ -221,28 +226,34 @@ export default function ProductFormModal({ isOpen, onClose, onSubmit, initialDat
     }));
   };
 
-  // Upload product photos from device
-  const handleDevicePhotosUpload = (e) => {
+  // Upload product photos from device to Cloud Storage
+  const handleDevicePhotosUpload = async (e) => {
     const files = Array.from(e.target.files || []);
     const validImageFiles = files.filter((file) => file.type.startsWith('image/'));
     if (validImageFiles.length === 0) return;
 
-    const readPromises = validImageFiles.map((file) => {
-      return new Promise((resolve) => {
-        const reader = new FileReader();
-        reader.onload = (event) => resolve(event.target.result);
-        reader.readAsDataURL(file);
+    setIsUploadingImages(true);
+    setScanMessage('Compressing and uploading images to cloud...');
+
+    try {
+      const uploadPromises = validImageFiles.map(async (file, idx) => {
+        const uploadedUrl = await uploadProductImage(file, `${formData.code || 'shoe'}-${idx + 1}`);
+        return uploadedUrl;
       });
-    });
 
-    Promise.all(readPromises).then((newPhotos) => {
-      if (newPhotos.length > 0) {
-        setPhotos((prev) => [...prev, ...newPhotos]);
-        handleAIShoeScan(newPhotos[0]);
+      const newPhotoUrls = await Promise.all(uploadPromises);
+      const filteredUrls = newPhotoUrls.filter(Boolean);
+
+      if (filteredUrls.length > 0) {
+        setPhotos((prev) => [...prev, ...filteredUrls]);
+        handleAIShoeScan(filteredUrls[0]);
       }
-    });
-
-    e.target.value = '';
+    } catch (err) {
+      console.error('Failed to upload image:', err);
+    } finally {
+      setIsUploadingImages(false);
+      e.target.value = '';
+    }
   };
 
   // Remove photo thumbnail
@@ -258,51 +269,106 @@ export default function ProductFormModal({ isOpen, onClose, onSubmit, initialDat
     }
   };
 
-  // Upload flaw photo from device
-  const handleDeviceFlawUpload = (e) => {
+  // Upload flaw photo from device to Cloud Storage
+  const handleDeviceFlawUpload = async (e) => {
     const file = e.target.files?.[0];
     if (file && file.type.startsWith('image/')) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        setFlawPhoto(event.target.result);
-      };
-      reader.readAsDataURL(file);
+      setIsUploadingImages(true);
+      try {
+        const uploadedFlawUrl = await uploadProductImage(file, `${formData.code || 'shoe'}-flaw`);
+        if (uploadedFlawUrl) {
+          setFlawPhoto(uploadedFlawUrl);
+        }
+      } catch (err) {
+        console.error('Failed to upload flaw image:', err);
+      } finally {
+        setIsUploadingImages(false);
+      }
     }
     e.target.value = '';
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setFormError('');
 
+    const cleanCode = (formData.code || '').trim().toUpperCase();
+    const cleanBrand = (formData.brand || '').trim();
+    const cleanModel = (formData.model || '').trim();
     const price = Number(formData.price) || 0;
+
+    // Strict validation
+    if (!cleanCode) {
+      setFormError('Product SKU / Code is required.');
+      return;
+    }
+    if (!cleanBrand) {
+      setFormError('Brand is required.');
+      return;
+    }
+    if (!cleanModel) {
+      setFormError('Shoe Model / Article name is required.');
+      return;
+    }
+    if (price <= 0) {
+      setFormError('Price (PKR) must be greater than 0.');
+      return;
+    }
+
     const retailPrice = Number(formData.retailPrice) || price;
     const discountPercent = retailPrice > price ? Math.round(((retailPrice - price) / retailPrice) * 100) : 0;
 
-    const productPayload = {
-      code: formData.code.trim().toUpperCase(),
-      brand: formData.brand,
-      model: formData.model.trim(),
-      colourway: formData.colourway.trim() || 'Original Colourway',
-      sizeEU: String(formData.sizeEU || getEuFromUk(formData.sizeUK) || '44'),
-      sizeUK: String(formData.sizeUK),
-      sizeUS: String(formData.sizeUS),
-      insoleCm: Number(formData.insoleCm) || 28.0,
-      score: Number(formData.score) || 9.0,
-      tier: formData.tier,
-      price: price,
-      retailPrice: retailPrice,
-      discountPercent: discountPercent,
-      boxIncluded: formData.boxIncluded,
-      status: formData.status,
-      conditionNotes: formData.conditionNotes,
-      listedAt: initialData ? initialData.listedAt : 'Just listed',
-      featured: formData.featured,
-      photos: photos.length > 0 ? photos : ['https://images.unsplash.com/photo-1552346154-21d32810aba3?auto=format&fit=crop&w=800&q=80'],
-      flaws: flawPhoto ? [{ photo: flawPhoto, caption: formData.flawCaption.trim() || 'Minor flaw photographed.' }] : [],
-    };
+    setIsSaving(true);
 
-    onSubmit(productPayload);
-    onClose();
+    try {
+      // Ensure any remaining raw base64 photos are uploaded to cloud
+      let finalPhotos = [...photos];
+      if (finalPhotos.length > 0) {
+        const processedPhotos = await Promise.all(
+          finalPhotos.map((p, idx) => uploadProductImage(p, `${cleanCode}-${idx + 1}`))
+        );
+        finalPhotos = processedPhotos.filter(Boolean);
+      }
+
+      let finalFlawPhoto = flawPhoto;
+      if (finalFlawPhoto && (finalFlawPhoto.startsWith('data:') || finalFlawPhoto.startsWith('blob:'))) {
+        finalFlawPhoto = await uploadProductImage(finalFlawPhoto, `${cleanCode}-flaw`);
+      }
+
+      const productPayload = {
+        code: cleanCode,
+        brand: cleanBrand,
+        model: cleanModel,
+        colourway: formData.colourway.trim() || 'Original Colourway',
+        sizeEU: String(formData.sizeEU || getEuFromUk(formData.sizeUK) || '44'),
+        sizeUK: String(formData.sizeUK || '9'),
+        sizeUS: String(formData.sizeUS || '10'),
+        insoleCm: Number(formData.insoleCm) || 28.0,
+        score: Number(formData.score) || 9.0,
+        tier: formData.tier || 'Excellent',
+        price: price,
+        retailPrice: retailPrice,
+        discountPercent: discountPercent,
+        boxIncluded: Boolean(formData.boxIncluded),
+        status: formData.status || 'available',
+        conditionNotes: formData.conditionNotes || '',
+        listedAt: initialData ? initialData.listedAt : 'Just listed',
+        featured: Boolean(formData.featured),
+        photos: finalPhotos.length > 0 ? finalPhotos : ['https://images.unsplash.com/photo-1552346154-21d32810aba3?auto=format&fit=crop&w=800&q=80'],
+        flaws: finalFlawPhoto ? [{ photo: finalFlawPhoto, caption: formData.flawCaption.trim() || 'Minor flaw photographed.' }] : [],
+      };
+
+      const result = await onSubmit(productPayload);
+      if (result && result.success === false) {
+        setFormError(result.error || 'Failed to save product to database');
+      } else {
+        onClose();
+      }
+    } catch (err) {
+      setFormError(err.message || 'An unexpected error occurred while saving product');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -942,22 +1008,50 @@ export default function ProductFormModal({ isOpen, onClose, onSubmit, initialDat
             </label>
           </div>
 
+          {/* Form Error Banner */}
+          {formError && (
+            <div style={{
+              backgroundColor: '#FFEBEE',
+              border: '1px solid #EF5350',
+              padding: '12px 16px',
+              borderRadius: '4px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+              color: '#C62828',
+              fontSize: '13.5px',
+              fontWeight: 500
+            }}>
+              <AlertCircle size={18} />
+              <span>{formError}</span>
+            </div>
+          )}
+
           {/* Form Actions */}
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '10px' }}>
             <button
               type="button"
               onClick={onClose}
+              disabled={isSaving || isUploadingImages}
               className="btn btn-outline"
-              style={{ padding: '10px 20px', minHeight: '42px' }}
+              style={{ padding: '10px 20px', minHeight: '42px', opacity: (isSaving || isUploadingImages) ? 0.6 : 1 }}
             >
               Cancel
             </button>
             <button
               type="submit"
+              disabled={isSaving || isUploadingImages}
               className="btn btn-primary"
-              style={{ padding: '10px 24px', minHeight: '42px' }}
+              style={{ padding: '10px 24px', minHeight: '42px', display: 'flex', alignItems: 'center', gap: '8px' }}
             >
-              {initialData ? 'Save Product Changes' : 'Publish Product Listing'}
+              {(isSaving || isUploadingImages) ? (
+                <>
+                  <Loader2 size={16} className="spin" />
+                  <span>{isUploadingImages ? 'Uploading Photos...' : 'Saving to Database...'}</span>
+                </>
+              ) : (
+                <span>{initialData ? 'Save Product Changes' : 'Publish Product Listing'}</span>
+              )}
             </button>
           </div>
         </form>

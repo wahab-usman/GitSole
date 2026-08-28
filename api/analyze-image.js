@@ -60,9 +60,7 @@ CRITICAL NO-HALLUCINATION RULES:
 8. Generate a clean, SEO-friendly, professional Product Title without marketing hype words (avoid "BEST", "AMAZING", "PREMIUM", "HOT SELLING").
 9. Keep descriptions concise, factual, and suitable for GitSole.
 
-Return ONLY a valid JSON object matching this exact structure:`
-      }
-    ];
+Return ONLY a valid JSON object matching this exact structure:
 {
   "brand": "Nike|Jordan|Adidas|New Balance|Puma|Asics|Reebok|Timberland|Vans|Converse|Yeezy|Other",
   "model": "Exact Model Name or Unknown",

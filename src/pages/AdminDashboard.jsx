@@ -51,7 +51,17 @@ const calcOrderTotal = (order) => {
 };
 
 export default function AdminDashboard() {
-  const { products, addProduct, updateProduct, deleteProduct, toggleSoldStatus, resetToDefault } = useProducts();
+  const {
+    products,
+    addProduct,
+    updateProduct,
+    deleteProduct,
+    toggleSoldStatus,
+    resetToDefault,
+    isCloudSynced: isProductCloudSynced,
+    lastProductSync,
+    syncProductsFromCloud
+  } = useProducts();
   const { isAdminLoggedIn, logout, credentials, updateCredentials } = useAdminAuth();
   const { orders, updateOrderStatus, deleteOrder, isCloudConnected, lastSyncedAt, syncWithCloud, addManualOrder } = useOrder();
   const navigate = useNavigate();
@@ -82,7 +92,7 @@ export default function AdminDashboard() {
 
   const handleManualSync = async () => {
     setIsSyncing(true);
-    await syncWithCloud();
+    await Promise.all([syncWithCloud(), syncProductsFromCloud(false)]);
     setTimeout(() => setIsSyncing(false), 500);
   };
 
@@ -156,17 +166,20 @@ export default function AdminDashboard() {
     setIsModalOpen(true);
   };
 
-  const handleFormSubmit = (productPayload) => {
+  const handleFormSubmit = async (productPayload) => {
     if (editingProduct) {
-      updateProduct(editingProduct.code, productPayload);
+      return await updateProduct(editingProduct.code, productPayload);
     } else {
-      addProduct(productPayload);
+      return await addProduct(productPayload);
     }
   };
 
-  const handleDelete = (code, model) => {
-    if (window.confirm(`Are you sure you want to delete listing "${code} - ${model}"?`)) {
-      deleteProduct(code);
+  const handleDelete = async (code, model) => {
+    if (window.confirm(`Are you sure you want to delete listing "${code} - ${model}" from database?`)) {
+      const res = await deleteProduct(code);
+      if (res && res.success === false) {
+        alert(res.error || 'Failed to delete product from database.');
+      }
     }
   };
 
@@ -203,7 +216,7 @@ export default function AdminDashboard() {
               <span style={{
                 fontFamily: 'var(--font-mono)',
                 fontSize: '11px',
-                color: isCloudConnected ? '#81C784' : '#E57373',
+                color: (isCloudConnected || isProductCloudSynced) ? '#81C784' : '#FFB74D',
                 backgroundColor: 'rgba(255,255,255,0.08)',
                 padding: '3px 10px',
                 borderRadius: '999px',
@@ -215,10 +228,10 @@ export default function AdminDashboard() {
                   width: '7px',
                   height: '7px',
                   borderRadius: '50%',
-                  backgroundColor: isCloudConnected ? '#66BB6A' : '#EF5350',
+                  backgroundColor: (isCloudConnected || isProductCloudSynced) ? '#66BB6A' : '#FFA726',
                   display: 'inline-block'
                 }} />
-                {isCloudConnected ? 'LIVE CLOUD SYNC ACTIVE' : 'OFFLINE MODE'}
+                {(isCloudConnected || isProductCloudSynced) ? 'CENTRAL DATABASE SYNCED' : 'CONNECTING TO CLOUD...'}
               </span>
             </div>
             <h1 style={{

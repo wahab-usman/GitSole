@@ -10,6 +10,25 @@ const DEFAULT_CREDS = {
   password: 'gitsole123'
 };
 
+/**
+ * Helper to generate Authorization headers for Admin backend requests
+ */
+export function getAdminAuthHeaders() {
+  try {
+    const isAuth = localStorage.getItem(ADMIN_STORAGE_KEY) === 'true';
+    if (!isAuth) return {};
+    const saved = localStorage.getItem(CREDS_STORAGE_KEY);
+    const creds = saved ? JSON.parse(saved) : DEFAULT_CREDS;
+    const token = btoa(`${creds.username || 'admin'}:${creds.password || 'gitsole123'}`);
+    return {
+      'Authorization': `Bearer ${token}`,
+      'x-admin-auth': token
+    };
+  } catch (e) {
+    return {};
+  }
+}
+
 export function AdminAuthProvider({ children }) {
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(() => {
     try {
@@ -66,7 +85,7 @@ export function AdminAuthProvider({ children }) {
   };
 
   return (
-    <AdminAuthContext.Provider value={{ isAdminLoggedIn, credentials, login, logout, updateCredentials }}>
+    <AdminAuthContext.Provider value={{ isAdminLoggedIn, credentials, login, logout, updateCredentials, getAdminAuthHeaders }}>
       {children}
     </AdminAuthContext.Provider>
   );
