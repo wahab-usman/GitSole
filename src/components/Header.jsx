@@ -36,16 +36,13 @@ export default function Header() {
 
   return (
     <header style={{ width: '100%', position: 'sticky', top: 0, zIndex: 1000 }}>
-      {/* Top Banner */}
-      <div style={{ width: '100%', backgroundColor: 'var(--color-ink)', overflow: 'hidden' }}>
-        <div className="mobile-only-topbar" style={{ padding: '7px 14px', textAlign: 'center', fontFamily: 'var(--font-mono)', fontSize: '9.5px', letterSpacing: '0.14em', color: 'var(--color-paper)', textTransform: 'uppercase' }}>
-          Free home delivery · all over pakistan
-        </div>
-        <div className="desktop-only-marquee" style={{ padding: '8px 0', overflow: 'hidden' }}>
-          <div className="animate-marquee">
-            {marqueeText}
-            {marqueeText}
-          </div>
+      {/* Top Running Announcement Ticker (Active on ALL screen sizes) */}
+      <div style={{ width: '100%', backgroundColor: 'var(--color-ink)', overflow: 'hidden', padding: '7px 0', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+        <div className="animate-marquee" style={{ display: 'flex', width: 'max-content', willChange: 'transform' }}>
+          {marqueeText}
+          {marqueeText}
+          {marqueeText}
+          {marqueeText}
         </div>
       </div>
 
@@ -276,14 +273,11 @@ export default function Header() {
           .desktop-logo { display: none !important; }
           .desktop-nav-links { display: none !important; }
           .desktop-search-form { display: none !important; }
-          .desktop-only-marquee { display: none !important; }
-          .mobile-only-topbar { display: block !important; }
           .mobile-only-btn { display: flex !important; }
           .mobile-centered-logo { display: block !important; }
           .mobile-search-icon { display: flex !important; }
         }
         @media (min-width: 1081px) {
-          .mobile-only-topbar { display: none !important; }
           .mobile-only-btn { display: none !important; }
           .mobile-centered-logo { display: none !important; }
           .mobile-search-icon { display: none !important; }
