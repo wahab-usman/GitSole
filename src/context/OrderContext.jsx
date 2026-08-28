@@ -46,7 +46,7 @@ export function buildTimelineForStatus(status, orderDate, isCOD = true) {
     {
       rank: 1,
       step: isCOD ? "Advance Received (PKR 300)" : "Payment Verification",
-      time: currentRank >= 1 ? (currentRank === 1 ? nowFormatted : "Verified") : "Within 30 mins",
+      time: currentRank >= 1 ? (currentRank === 1 ? nowFormatted : "Received") : "Within 30 mins",
       done: currentRank >= 1,
       desc: isCOD
         ? (currentRank >= 1 ? "PKR 300 advance received via JazzCash/EasyPaisa/Bank." : "Send PKR 300 advance to confirm order verification.")
@@ -54,25 +54,25 @@ export function buildTimelineForStatus(status, orderDate, isCOD = true) {
     },
     {
       rank: 2,
-      step: "Confirmed on WhatsApp",
-      time: currentRank >= 2 ? (currentRank === 2 ? nowFormatted : "Verified") : (currentRank >= 1 ? "In progress" : "Next"),
+      step: "Order Confirmed",
+      time: currentRank >= 2 ? (currentRank === 2 ? nowFormatted : "Confirmed") : (currentRank >= 1 ? "In progress" : "Next"),
       done: currentRank >= 2,
       desc: currentRank >= 2
-        ? "Address and sizing verified with customer on WhatsApp."
+        ? "Order verified with customer on WhatsApp and confirmed."
         : "Our team will message your WhatsApp number to verify address."
     },
     {
       rank: 3,
-      step: "Prepared & Inspected",
+      step: "Sanitized & Preparing",
       time: currentRank >= 3 ? (currentRank === 3 ? nowFormatted : "Ready") : (currentRank >= 2 ? "In progress" : "Next"),
       done: currentRank >= 3,
       desc: currentRank >= 3
-        ? "Pair cleaned, re-inspected against condition scores, and sanitized."
+        ? "Pair cleaned, re-inspected against condition scores, sanitized and packed."
         : "Shoes will be re-inspected, sanitized, and packaged."
     },
     {
       rank: 4,
-      step: "Dispatched with Courier",
+      step: "Dispatched & On The Way",
       time: currentRank >= 4 ? (currentRank === 4 ? nowFormatted : "In transit") : (currentRank >= 3 ? "1–2 Business Days" : "2–3 Business Days"),
       done: currentRank >= 4,
       desc: currentRank >= 4

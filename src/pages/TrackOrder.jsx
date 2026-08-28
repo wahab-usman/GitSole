@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { useOrder } from '../context/OrderContext';
+import { useOrder, buildTimelineForStatus } from '../context/OrderContext';
 import { formatPrice } from '../data/products';
 import { Search, Package, Check, Clock, Truck } from 'lucide-react';
 
@@ -50,6 +50,9 @@ export default function TrackOrder() {
     }
   };
 
+  const isCOD = activeOrder ? activeOrder.paymentMethod !== 'bank_transfer' : true;
+  const displayTimeline = activeOrder ? buildTimelineForStatus(activeOrder.status || 'placed', activeOrder.date, isCOD) : [];
+
   return (
     <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '40px 20px 80px', width: '100%' }}>
       {/* Title & Search Header */}
@@ -96,8 +99,8 @@ export default function TrackOrder() {
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', position: 'relative', paddingLeft: '8px' }}>
-              {activeOrder.timeline.map((step, idx) => {
-                const isLast = idx === activeOrder.timeline.length - 1;
+              {displayTimeline.map((step, idx) => {
+                const isLast = idx === displayTimeline.length - 1;
                 return (
                   <div key={idx} style={{ display: 'flex', gap: '20px', position: 'relative', paddingBottom: isLast ? '0' : '36px' }}>
                     {/* Connecting Line */}
