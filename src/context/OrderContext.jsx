@@ -5,6 +5,96 @@ const OrderContext = createContext();
 
 const STORAGE_ORDERS_KEY = 'gitsole_orders_cache_v2';
 
+/**
+ * Accurate stage-by-stage order timeline progression helper
+ */
+export function buildTimelineForStatus(status, orderDate, isCOD = true) {
+  const dateFormatted = orderDate
+    ? new Date(orderDate).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+    : 'Recently';
+  const nowFormatted = new Date().toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+
+  // Map each status to an integer stage rank
+  // 0: placed, 1: advance_paid, 2: confirmed, 3: preparing, 4: shipped, 5: delivered
+  const ranks = {
+    placed: 0,
+    advance_paid: 1,
+    confirmed: 2,
+    preparing: 3,
+    shipped: 4,
+    delivered: 5,
+    cancelled: -1
+  };
+
+  const currentRank = ranks[status] ?? 0;
+
+  if (status === 'cancelled') {
+    return [
+      { step: "Order Placed", time: dateFormatted, done: true, desc: "Order details received." },
+      { step: "Order Cancelled", time: nowFormatted, done: true, desc: "This order was cancelled." }
+    ];
+  }
+
+  const steps = [
+    {
+      rank: 0,
+      step: "Order Placed",
+      time: dateFormatted,
+      done: true,
+      desc: "Order details received via Gitsole storefront. 1-of-1 pair reserved."
+    },
+    {
+      rank: 1,
+      step: isCOD ? "Advance Received (PKR 300)" : "Payment Verification",
+      time: currentRank >= 1 ? (currentRank === 1 ? nowFormatted : "Verified") : "Within 30 mins",
+      done: currentRank >= 1,
+      desc: isCOD
+        ? (currentRank >= 1 ? "PKR 300 advance received via JazzCash/EasyPaisa/Bank." : "Send PKR 300 advance to confirm order verification.")
+        : (currentRank >= 1 ? "Full payment received and verified." : "Awaiting payment verification on WhatsApp.")
+    },
+    {
+      rank: 2,
+      step: "Confirmed on WhatsApp",
+      time: currentRank >= 2 ? (currentRank === 2 ? nowFormatted : "Verified") : (currentRank >= 1 ? "In progress" : "Next"),
+      done: currentRank >= 2,
+      desc: currentRank >= 2
+        ? "Address and sizing verified with customer on WhatsApp."
+        : "Our team will message your WhatsApp number to verify address."
+    },
+    {
+      rank: 3,
+      step: "Prepared & Inspected",
+      time: currentRank >= 3 ? (currentRank === 3 ? nowFormatted : "Ready") : (currentRank >= 2 ? "In progress" : "Next"),
+      done: currentRank >= 3,
+      desc: currentRank >= 3
+        ? "Pair cleaned, re-inspected against condition scores, and sanitized."
+        : "Shoes will be re-inspected, sanitized, and packaged."
+    },
+    {
+      rank: 4,
+      step: "Dispatched with Courier",
+      time: currentRank >= 4 ? (currentRank === 4 ? nowFormatted : "In transit") : (currentRank >= 3 ? "1–2 Business Days" : "2–3 Business Days"),
+      done: currentRank >= 4,
+      desc: currentRank >= 4
+        ? "Parcel handed over to Trax / TCS Express for nationwide dispatch."
+        : "Handover to express courier with SMS tracking."
+    },
+    {
+      rank: 5,
+      step: "Delivered to Doorstep",
+      time: currentRank >= 5 ? nowFormatted : (currentRank >= 4 ? "Estimated 24–48 hrs" : "2–4 Business Days"),
+      done: currentRank >= 5,
+      desc: currentRank >= 5
+        ? "Delivered to customer doorstep."
+        : isCOD
+          ? "Rider delivers to doorstep. Keep remaining cash ready."
+          : "Rider delivers parcel to your door."
+    }
+  ];
+
+  return steps.map(({ rank, ...rest }) => rest);
+}
+
 const INITIAL_ORDERS = [
   {
     id: "GS-12060",
@@ -226,9 +316,13 @@ export function OrderProvider({ children }) {
     const orderId = `GS-${Math.floor(10000 + Math.random() * 90000)}`;
     const trackingCode = `TRX-${Math.floor(100000 + Math.random() * 900000)}-PK`;
 
+    const orderDate = new Date().toISOString();
+    const isCOD = orderData.paymentMethod !== 'bank_transfer';
+    const initialTimeline = buildTimelineForStatus('placed', orderDate, isCOD);
+
     const newOrder = {
       id: orderId,
-      date: new Date().toISOString(),
+      date: orderDate,
       customer: orderData.customer,
       paymentMethod: orderData.paymentMethod || 'cod',
       items: orderData.items || [],
@@ -239,12 +333,7 @@ export function OrderProvider({ children }) {
       courier: "Trax / TCS Express",
       trackingNumber: trackingCode,
       status: "placed",
-      timeline: [
-        { step: "Order Placed", time: "Just now", done: true, desc: "Order details received. Stock reserved for your pair." },
-        { step: "Confirm on WhatsApp", time: "Within 30 mins", done: false, desc: "Our team will message your WhatsApp number to verify address." },
-        { step: "Prepared & Inspected", time: "Next", done: false, desc: "Shoes will be re-inspected, sanitized, and packaged." },
-        { step: "Dispatched & Delivered", time: "2–4 Business Days", done: false, desc: "Free home delivery across Pakistan." }
-      ]
+      timeline: initialTimeline
     };
 
     // 1. Optimistic local update
@@ -271,9 +360,13 @@ export function OrderProvider({ children }) {
     const orderId = manualOrder.id || `GS-${Math.floor(10000 + Math.random() * 90000)}`;
     const trackingCode = `TRX-${Math.floor(100000 + Math.random() * 900000)}-PK`;
 
+    const orderDate = new Date().toISOString();
+    const isCOD = manualOrder.paymentMethod !== 'bank_transfer';
+    const initialTimeline = buildTimelineForStatus('placed', orderDate, isCOD);
+
     const newOrder = {
       id: orderId,
-      date: new Date().toISOString(),
+      date: orderDate,
       customer: {
         name: manualOrder.customerName || 'Customer',
         whatsapp: manualOrder.whatsapp || '',
@@ -301,10 +394,7 @@ export function OrderProvider({ children }) {
       courier: "Trax / TCS Express",
       trackingNumber: trackingCode,
       status: "placed",
-      timeline: [
-        { step: "Order Placed", time: "Just now", done: true, desc: "Manually logged via Admin Panel." },
-        { step: "Confirm on WhatsApp", time: "Within 30 mins", done: true, desc: "Address confirmed on WhatsApp." }
-      ]
+      timeline: initialTimeline
     };
 
     setOrders(prev => [newOrder, ...prev.filter(o => o.id.toUpperCase() !== orderId.toUpperCase())]);
@@ -361,35 +451,8 @@ export function OrderProvider({ children }) {
     const cleanId = String(orderId).trim().toUpperCase();
 
     const existingOrder = orders.find(o => o.id.toUpperCase() === cleanId);
-    const existingTimeline = existingOrder?.timeline || [
-      { step: "Order Placed", time: "Just now", done: true, desc: "Order details received." }
-    ];
-
-    const statusLabels = {
-      placed: 'Order Placed',
-      advance_paid: 'Advance Received (PKR 300)',
-      confirmed: 'Confirmed on WhatsApp',
-      preparing: 'Prepared & Inspected',
-      shipped: 'Dispatched with Courier',
-      delivered: 'Delivered',
-      cancelled: 'Cancelled'
-    };
-
-    const now = new Date().toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-
-    // Mark previous steps as done and append new step
-    const updatedTimeline = existingTimeline.map(t => ({ ...t, done: true }));
-    const stepLabel = statusLabels[newStatus] || newStatus;
-    const stepExists = updatedTimeline.some(t => t.step.toLowerCase() === stepLabel.toLowerCase());
-
-    if (!stepExists) {
-      updatedTimeline.push({
-        step: stepLabel,
-        time: now,
-        done: true,
-        desc: `Status updated to "${stepLabel}".`
-      });
-    }
+    const isCOD = existingOrder?.paymentMethod !== 'bank_transfer';
+    const updatedTimeline = buildTimelineForStatus(newStatus, existingOrder?.date, isCOD);
 
     // 1. Optimistic local update
     setOrders(prev => prev.map(order => {
